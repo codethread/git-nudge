@@ -8,10 +8,10 @@ import equal from "fast-deep-equal";
 import { useEffect, useState } from "react";
 
 const GetMyMrs = graphql(`
-	query GetMyMrs {
+	query GetMyMrs($draft: Boolean!) {
 		currentUser {
 			name
-			authoredMergeRequests(draft: false, state: opened) {
+			authoredMergeRequests(draft: $draft, state: opened) {
 				count
 				nodes {
 					id
@@ -78,7 +78,7 @@ export function Dashboard() {
 	const { isPending, isFetching, error, data, refetch } = useQuery({
 		queryKey: ["me"],
 		refetchInterval: 60 * 1000,
-		queryFn: () => execute(config, GetMyMrs),
+		queryFn: () => execute(config, GetMyMrs, { draft: true }),
 	});
 
 	const [previousData, setPreviousData] = useState<NotificationData>();
@@ -124,13 +124,16 @@ export function Dashboard() {
 				hello {data.currentUser.name}
 				{isFetching && <span>...fetching</span>}
 			</p>
-			<button
-				onClick={() => {
-					notify("hello");
-				}}
-			>
-				Test notification
-			</button>
+			<div>
+				<button
+					onClick={() => {
+						notify("hello");
+					}}
+				>
+					Test notification
+				</button>
+				<button onClick={() => refetch()}>Test fetch</button>
+			</div>
 			<p>
 				you have{" "}
 				<a

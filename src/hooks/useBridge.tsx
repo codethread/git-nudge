@@ -32,7 +32,34 @@ async function createFakeBridge() {
 			return import.meta.env.VITE_FAKE_NETRC;
 		},
 		notify: async (msg: string) => {
-			window.alert(msg);
+			if (!("Notification" in window)) {
+				// Check if the browser supports notifications
+				alert("This browser does not support desktop notification");
+			} else if (Notification.permission === "granted") {
+				// Check whether notification permissions have already been granted;
+				// if so, create a notification
+				const notification = new Notification(msg, {
+					body: "body",
+					requireInteraction: true,
+					data: { foo: "bar" },
+				});
+				notification.onclick = (e) => {
+					// e.preventDefault();
+					// window.open("https://google.com", "_blank");
+					window.alert(JSON.stringify(notification.data));
+					notification.close();
+				};
+				// …
+			} else if (Notification.permission !== "denied") {
+				// We need to ask the user for permission
+				Notification.requestPermission().then((permission) => {
+					// If the user accepts, let's create a notification
+					if (permission === "granted") {
+						const notification = new Notification("Hi there!", {});
+						// …
+					}
+				});
+			}
 		},
 	};
 }
