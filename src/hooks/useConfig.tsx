@@ -1,7 +1,7 @@
 import netrc from "netrc";
-import React, { useState } from "react";
-import { z } from "zod";
-import { fromError } from "zod-validation-error";
+import React, {useState} from "react";
+import {z} from "zod";
+import {fromError} from "zod-validation-error";
 
 const NetrcSchema = z.record(
 	z.string(),
@@ -26,7 +26,7 @@ interface Props extends IChildren {
 	netrcStr: string;
 }
 
-export const ConfigProvider = ({ children, ...props }: Props) => {
+export const ConfigProvider = ({children, ...props}: Props) => {
 	const config = parseConfig(props);
 	const [chosen, setChosen] = useState<IConfig["gitlab"]>();
 
@@ -41,11 +41,11 @@ export const ConfigProvider = ({ children, ...props }: Props) => {
 						<p>
 							You have multiple machine configs, which will you use for gitlab?
 						</p>
-						{configs.map(([domain, { login, password }]) => (
+						{configs.map(([domain, {login, password}]) => (
 							<div key={domain}>
 								<button
 									onClick={() => {
-										setChosen({ user: login, domain, token: password });
+										setChosen({user: login, domain, token: password});
 									}}
 								>
 									{domain} {login}
@@ -57,7 +57,7 @@ export const ConfigProvider = ({ children, ...props }: Props) => {
 			}
 
 			return (
-				<configContext.Provider value={{ gitlab: chosen }}>
+				<configContext.Provider value={{gitlab: chosen}}>
 					{children}
 				</configContext.Provider>
 			);
@@ -66,7 +66,7 @@ export const ConfigProvider = ({ children, ...props }: Props) => {
 			const n = config.netrc;
 			return (
 				<configContext.Provider
-					value={{ gitlab: { domain: n.domain, token: n.pass, user: n.user } }}
+					value={{gitlab: {domain: n.domain, token: n.pass, user: n.user}}}
 				>
 					{children}
 				</configContext.Provider>
@@ -102,14 +102,14 @@ type ParsedConfig =
 			netrc: Netrc;
 	  };
 
-function parseConfig({ netrcStr }: Omit<Props, "children">): ParsedConfig {
-	const { data, error } = NetrcSchema.safeParse(netrc.parse(netrcStr));
+function parseConfig({netrcStr}: Omit<Props, "children">): ParsedConfig {
+	const {data, error} = NetrcSchema.safeParse(netrc.parse(netrcStr));
 	if (error) {
-		return { tag: "invalid", err: fromError(error).toString() };
+		return {tag: "invalid", err: fromError(error).toString()};
 	}
 	const machines = Object.entries(data);
 	if (machines.length === 1) {
-		const [[domain, { login, password }]] = machines;
+		const [[domain, {login, password}]] = machines;
 		return {
 			tag: "valid",
 			netrc: {

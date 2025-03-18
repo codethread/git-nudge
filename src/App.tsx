@@ -1,14 +1,13 @@
-import "./App.css";
-import { createBridge, BridgeProvider } from "./hooks/useBridge";
-import { ConfigProvider } from "./hooks/useConfig";
-import { Dashboard } from "./page/Dashboard";
-import { Setup } from "./page/Setup";
-import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import {createBridge, BridgeProvider} from "./hooks/useBridge";
+import {ConfigProvider} from "./hooks/useConfig";
+import {Dashboard} from "./page/Dashboard";
+import {Setup} from "./page/Setup";
+import {useQuery} from "@tanstack/react-query";
+import {useState} from "react";
 
 function App() {
 	const [badConfig, setBadConfig] = useState(false);
-	const { error, data, isPending, refetch } = useQuery({
+	const {error, data, isPending, refetch} = useQuery({
 		queryKey: ["contexts"],
 		retry: false,
 		queryFn: async () => {

@@ -8,7 +8,7 @@ interface Props extends IChildren {
 	bridge: IBridge;
 }
 
-export const BridgeProvider = ({ children, bridge }: Props) => {
+export const BridgeProvider = ({children, bridge}: Props) => {
 	return (
 		<bridgeContext.Provider value={bridge}>{children}</bridgeContext.Provider>
 	);
@@ -41,7 +41,7 @@ async function createFakeBridge() {
 				const notification = new Notification(msg, {
 					body: "body",
 					requireInteraction: true,
-					data: { foo: "bar" },
+					data: {foo: "bar"},
 				});
 				notification.onclick = (e) => {
 					// e.preventDefault();
@@ -64,8 +64,8 @@ async function createFakeBridge() {
 	};
 }
 async function createTauriBridge() {
-	const { invoke } = await import("@tauri-apps/api/core");
-	const { isPermissionGranted, requestPermission, sendNotification } =
+	const {invoke} = await import("@tauri-apps/api/core");
+	const {isPermissionGranted, requestPermission, sendNotification} =
 		await import("@tauri-apps/plugin-notification");
 
 	let permissionGranted = await isPermissionGranted();
@@ -80,7 +80,7 @@ async function createTauriBridge() {
 		notify: async (msg) => {
 			if (!permissionGranted)
 				throw new Error("You need to give notification permissions to the app");
-			sendNotification({ title: "Tauri", body: msg });
+			sendNotification({title: "Tauri", body: msg});
 		},
 	};
 	return api;

@@ -1,11 +1,12 @@
-import { graphql } from "../graphql";
-import { GetMyMrsQuery, PipelineStatusEnum } from "../graphql/graphql";
-import { useBridge } from "../hooks/useBridge";
-import { useConfig } from "../hooks/useConfig";
-import { execute } from "../utils/execute";
-import { useQuery } from "@tanstack/react-query";
+import {graphql} from "../graphql";
+import {GetMyMrsQuery, PipelineStatusEnum} from "../graphql/graphql";
+import {useBridge} from "../hooks/useBridge";
+import {useConfig} from "../hooks/useConfig";
+import {execute} from "../utils/execute";
+import {Button} from "@/components/ui/button";
+import {useQuery} from "@tanstack/react-query";
 import equal from "fast-deep-equal";
-import { useEffect, useState } from "react";
+import {useEffect, useState} from "react";
 
 const GetMyMrs = graphql(`
 	query GetMyMrs($draft: Boolean!) {
@@ -73,19 +74,19 @@ type NotificationDataMrs = NotificationData["mrs"];
 
 export function Dashboard() {
 	const config = useConfig();
-	const { notify } = useBridge();
+	const {notify} = useBridge();
 
-	const { isPending, isFetching, error, data, refetch } = useQuery({
+	const {isPending, isFetching, error, data, refetch} = useQuery({
 		queryKey: ["me"],
 		refetchInterval: 60 * 1000,
-		queryFn: () => execute(config, GetMyMrs, { draft: true }),
+		queryFn: () => execute(config, GetMyMrs, {draft: true}),
 	});
 
 	const [previousData, setPreviousData] = useState<NotificationData>();
 
 	useEffect(() => {
 		if (previousData && previousData.shouldNotify) {
-			setPreviousData({ ...previousData, shouldNotify: false });
+			setPreviousData({...previousData, shouldNotify: false});
 			notify("something changed!");
 		}
 	}, [previousData?.shouldNotify]);
@@ -98,7 +99,13 @@ export function Dashboard() {
 		return (
 			<div>
 				<p>{error.message}</p>
-				<button onClick={() => refetch()}>retry</button>
+				<Button
+					onClick={() => {
+						refetch();
+					}}
+				>
+					retry
+				</Button>
 			</div>
 		);
 	}
@@ -108,31 +115,37 @@ export function Dashboard() {
 			<div>
 				Your token did not seem to return a valid user, please check it hasn't
 				expired
-				<button onClick={() => refetch()}>retry</button>
+				<Button
+					onClick={() => {
+						refetch();
+					}}
+				>
+					retry
+				</Button>
 			</div>
 		);
 	}
 
 	const diff = getNotifictionData(data.currentUser.authoredMergeRequests);
 	if (!equal(diff, previousData?.mrs)) {
-		setPreviousData({ shouldNotify: !!previousData, mrs: diff });
+		setPreviousData({shouldNotify: !!previousData, mrs: diff});
 	}
 
 	return (
 		<div>
-			<p>
+			<h2 className="text-xl bg-background">
 				hello {data.currentUser.name}
 				{isFetching && <span>...fetching</span>}
-			</p>
+			</h2>
 			<div>
-				<button
+				<Button
 					onClick={() => {
 						notify("hello");
 					}}
 				>
 					Test notification
-				</button>
-				<button onClick={() => refetch()}>Test fetch</button>
+				</Button>
+				<Button onClick={() => refetch()}>Test fetch</Button>
 			</div>
 			<p>
 				you have{" "}
@@ -143,7 +156,7 @@ export function Dashboard() {
 					{data.currentUser?.authoredMergeRequests?.count} open MRs
 				</a>
 			</p>
-			<ul style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+			<ul style={{display: "flex", flexDirection: "column", gap: "8px"}}>
 				{data.currentUser.authoredMergeRequests?.nodes?.map((mr) => (
 					<li key={mr?.id}>
 						<div

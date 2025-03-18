@@ -1,5 +1,5 @@
-import type { TypedDocumentString } from "../graphql/graphql";
-import { IConfig } from "../hooks/useConfig";
+import type {TypedDocumentString} from "../graphql/graphql";
+import {IConfig} from "../hooks/useConfig";
 
 export async function execute<TResult, TVariables>(
 	conf: IConfig,

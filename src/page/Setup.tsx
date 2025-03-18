@@ -2,7 +2,7 @@ interface Props {
 	onRetry: () => void;
 }
 
-export function Setup({ onRetry }: Props) {
+export function Setup({onRetry}: Props) {
 	return (
 		<div>
 			<p>
