@@ -15,6 +15,7 @@ dist-ssr
 schema.graphql
 schema.json
 src/graphql
+src/playground.ts
 
 # Editor directories and files
 .vscode/*

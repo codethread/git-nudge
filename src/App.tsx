@@ -12,7 +12,7 @@ function App() {
 		retry: false,
 		queryFn: async () => {
 			const bridge = await createBridge();
-			const net = await bridge.readNetrc().catch((e) => {
+			const net = await bridge.readNetrc().catch((e: any) => {
 				setBadConfig(true);
 				throw new Error(e);
 			});

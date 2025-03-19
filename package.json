@@ -5,6 +5,7 @@
 	"type": "module",
 	"scripts": {
 		"dev": "vite",
+		"lint": "eslint .",
 		"build": "tsc && vite build",
 		"preview": "vite preview",
 		"tauri": "tauri",
@@ -39,17 +40,22 @@
 	},
 	"devDependencies": {
 		"@0no-co/graphqlsp": "^1.12.16",
+		"@eslint/compat": "^1.2.7",
+		"@eslint/js": "^9.22.0",
 		"@graphql-codegen/cli": "^5.0.5",
 		"@graphql-codegen/schema-ast": "^4.1.0",
 		"@graphql-codegen/typescript-react-query": "^6.1.0",
 		"@parcel/watcher": "^2.5.1",
 		"@tauri-apps/cli": "^2",
+		"@total-typescript/ts-reset": "^0.6.1",
 		"@trivago/prettier-plugin-sort-imports": "^5.2.2",
 		"@types/react": "^18.3.1",
 		"@types/react-dom": "^18.3.1",
 		"@vitejs/plugin-react": "^4.3.4",
+		"eslint": "^9.22.0",
 		"prettier": "^3.5.3",
-		"typescript": "~5.6.2",
+		"typescript": "~5.6.3",
+		"typescript-eslint": "^8.26.1",
 		"vite": "^6.0.3"
 	},
 	"volta": {
