@@ -1,9 +1,9 @@
-import App from "./App";
-import {ThemeProvider} from "./components/theme-provider";
-import {Alert, AlertDescription, AlertTitle} from "./components/ui/alert";
-import {QueryClient, QueryClientProvider} from "@tanstack/react-query";
-import {Terminal} from "lucide-react";
-import {ErrorBoundary, FallbackProps} from "react-error-boundary";
+import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
+import {Terminal} from 'lucide-react';
+import {ErrorBoundary, type FallbackProps} from 'react-error-boundary';
+import App from './App';
+import {ThemeProvider} from './components/theme-provider';
+import {Alert, AlertDescription, AlertTitle} from './components/ui/alert';
 
 const queryClient = new QueryClient();
 

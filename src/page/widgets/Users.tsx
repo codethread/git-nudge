@@ -7,13 +7,13 @@ import {
 	TableHead,
 	TableHeader,
 	TableRow,
-} from "@/components/ui/table";
-import {graphql} from "@/graphql";
-import {useConfig} from "@/hooks/useConfig";
-import {duration} from "@/lib/duration";
-import {execute} from "@/utils/execute";
-import {useInfiniteQuery} from "@tanstack/react-query";
-import {useEffect, useMemo} from "react";
+} from '@/components/ui/table';
+import {graphql} from '@/graphql';
+import {useConfig} from '@/hooks/useConfig';
+import {duration} from '@/lib/duration';
+import {execute} from '@/utils/execute';
+import {useInfiniteQuery} from '@tanstack/react-query';
+import {useEffect, useMemo} from 'react';
 
 // TODO: right now a blunt hammer, can offer more control if needed
 
@@ -39,11 +39,11 @@ const UsersQuery = graphql(`
 export const useUsersQuery = () => {
 	const config = useConfig();
 	const queryData = useInfiniteQuery({
-		staleTime: duration(1, "days"),
+		staleTime: duration(1, 'days'),
 		refetchOnMount: false,
 		refetchOnWindowFocus: false,
-		queryKey: ["usersAll"],
-		initialPageParam: "",
+		queryKey: ['usersAll'],
+		initialPageParam: '',
 		queryFn: ({pageParam}) => execute(config, UsersQuery, {cursor: pageParam}),
 		getNextPageParam: ({users}) =>
 			users?.pageInfo.hasNextPage ? users?.pageInfo?.endCursor : null,
@@ -58,15 +58,11 @@ export const useUsersQuery = () => {
 	return useMemo(() => {
 		const {error, data, isFetching} = queryData;
 		const count = data?.pages.at(0)?.users?.count ?? 0;
-		const fetched = data?.pages
-			.map((p) => p.users?.nodes?.length ?? 0)
-			.reduce((a, b) => a + b);
+		const fetched = data?.pages.map((p) => p.users?.nodes?.length ?? 0).reduce((a, b) => a + b);
 		const progress = fetched ? fetched / count : 0;
 		const allFetched = progress === 1;
 		const users =
-			data && allFetched
-				? data.pages.flatMap((p) => p.users?.nodes).filter(Boolean)
-				: [];
+			data && allFetched ? data.pages.flatMap((p) => p.users?.nodes).filter(Boolean) : [];
 		return {
 			error,
 			progress,
@@ -108,7 +104,7 @@ export function Users() {
 			<TableFooter>
 				<TableRow>
 					<TableCell colSpan={2}>Total</TableCell>
-					<TableCell>{isFetching ? "fetching..." : ""}</TableCell>
+					<TableCell>{isFetching ? 'fetching...' : ''}</TableCell>
 					<TableCell className="text-right">{users.length}</TableCell>
 				</TableRow>
 			</TableFooter>
