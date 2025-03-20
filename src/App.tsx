@@ -4,9 +4,10 @@ import {BridgeProvider, createBridge} from './hooks/useBridge';
 import {ConfigProvider} from './hooks/useConfig';
 import {throwError} from './lib/utils';
 import {Dashboard} from './page/Dashboard';
+import Layout from './page/Layout';
 import {Setup} from './page/Setup';
 
-function App() {
+function App({clearCache}: {clearCache: () => void}) {
 	const [badConfig, setBadConfig] = useState(false);
 	const {error, data, isPending, refetch} = useQuery({
 		queryKey: ['contexts'],
@@ -40,7 +41,9 @@ function App() {
 	return (
 		<BridgeProvider bridge={data.bridge}>
 			<ConfigProvider netrcStr={data.netrcStr}>
-				<Dashboard />
+				<Layout actions={{clearCache}}>
+					<Dashboard />
+				</Layout>
 			</ConfigProvider>
 		</BridgeProvider>
 	);
