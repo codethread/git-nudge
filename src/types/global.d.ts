@@ -13,10 +13,14 @@ type Prettify<T> = {
 } & {};
 
 /**
- * Removes 'null' from properties at all levels of a type. Intended to deal with graphql
+ * Swap graphql null to undefined because preset-client won't let me
  */
-type DeepNonNullable<T> = {
-	[K in keyof T]: T[K] extends object | null
-		? DeepNonNullable<NonNullable<T[K]>>
-		: NonNullable<T[K]>;
-};
+type MaybeNot<T> = T extends null
+	? undefined
+	: T extends Date
+		? T
+		: {
+				[K in keyof T]: T[K] extends (infer U)[]
+					? MaybeNot<U>[]
+					: MaybeNot<T[K]>;
+			};

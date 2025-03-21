@@ -37,7 +37,8 @@ function App({clearCache}: {clearCache: () => void}) {
 	}
 
 	if (isPending) {
-		return <div>...loading</div>;
+		return null;
+		// return <div>...loading</div>;
 	}
 
 	return (

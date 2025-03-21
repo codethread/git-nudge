@@ -6,7 +6,7 @@ export interface RequestConfig {
 	timeout: number;
 }
 
-export async function execu8te<TResult, TVariables>(
+export async function execute<TResult, TVariables>(
 	{token, domain, timeout}: RequestConfig,
 	query: TypedDocumentString<TResult, TVariables>,
 	...[variables]: TVariables extends Record<string, never> ? [] : [TVariables]
@@ -35,5 +35,5 @@ export async function execu8te<TResult, TVariables>(
 
 	// biome-ignore lint/suspicious/noExplicitAny: all code consumed through codegen
 	const json: any = await response.json();
-	return json.data as DeepNonNullable<TResult>;
+	return json.data as MaybeNot<TResult>;
 }

@@ -43,7 +43,9 @@ const UsersQuery = graphql(`
 	}
 `);
 
-export type User = NN<NN<NN<UsersQueryQuery["users"]>["nodes"]>[number]>;
+export type User = MaybeNot<
+	NN<NN<NN<UsersQueryQuery["users"]>["nodes"]>[number]>
+>;
 
 export const useUsersQuery = () => {
 	const reqConf = useConfigRequest();
@@ -94,16 +96,20 @@ interface UserProps {
 }
 
 export function User(props: UserProps) {
+	const {domain} = useConfigRequest();
+
 	const user = match(props)
 		.with({loading: true}, () => undefined)
 		.with({user: P.select()}, (_) => _)
 		.exhaustive();
 
+	const avatar = user?.avatarUrl?.replace(/^\//, `https://${domain}/`);
+
 	return (
 		<div className={cn("flex items-center space-x-4", props.className)}>
 			{user?.avatarUrl ? (
 				<Avatar className="h-10 w-10 rounded-full overflow-clip flex justify-center items-center outline hover:outline-2 hover:outline-pink-500 transition">
-					<AvatarImage src={user.avatarUrl ?? undefined} />
+					<AvatarImage src={avatar} />
 					<AvatarFallback className="text-xl">
 						{user.username.slice(0, 2)}
 					</AvatarFallback>

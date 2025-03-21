@@ -1,41 +1,110 @@
 import {User, useUsersQuery} from "./widgets/Users";
+import {Button} from "@/components/ui/button";
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
 import {Lead, Text} from "@/components/ui/text";
 import {graphql} from "@/graphql";
-import type {MeQuery} from "@/graphql/graphql";
 import {useConfigRequest} from "@/hooks/useConfig";
 import {execute} from "@/utils/execute";
 import {useQuery} from "@tanstack/react-query";
-import {useState, useEffect} from "react";
+import {useState, useEffect, useCallback} from "react";
 import {match, P} from "ts-pattern";
 
 export function Dashboard() {
+	const [ready, setReady] = useState<boolean[]>([]);
+	const allReady = ready.every(Boolean) && ready.length > 2;
+	const onSuccess = useCallback(() => setReady((s) => s.concat(true)), []);
 	return (
-		<div className="flex-1 w-[100%]">
-			<Lead className="my-12 text-center">
-				Welcome, getting things set up...
-			</Lead>
-			<div className="flex flex-wrap justify-center items-stretch gap-8">
-				<MyCard />
-				<UsersCard />
+		<div className="flex-1 w-[100%] ">
+			<div className="h-8 my-4 flex flex-col justify-center">
+				{allReady ? (
+					<div className="flex justify-center">
+						<Button variant="outline" className="animate-pulse">
+							Launch
+						</Button>
+					</div>
+				) : (
+					<Lead className=" animate-fade text-center">
+						Welcome, getting things set up...
+					</Lead>
+				)}
+			</div>
+			<div className=" flex flex-wrap justify-center items-stretch gap-8 ">
+				<MyCard onSuccess={onSuccess} />
+				<UsersCard onSuccess={onSuccess} />
+				<ReposCard onSuccess={onSuccess} />
 			</div>
 		</div>
 	);
 }
 
-function UsersCard() {
+interface ReadyProps {
+	onSuccess: () => void;
+}
+
+function ReposCard({onSuccess}: ReadyProps) {
+	const reqConf = useConfigRequest();
+	const {error, isSuccess, data} = useQuery({
+		refetchOnMount: false,
+		queryKey: ["me"],
+		queryFn: () => execute(reqConf, MyBioQuery),
+	});
+
+	useEffect(() => {
+		if (isSuccess) onSuccess();
+	}, [isSuccess, onSuccess]);
+
+	if (error) {
+		return <PreviewCard Heading="Oops" Content={error.message} />;
+	}
+	if (!isSuccess)
+		return (
+			<PreviewCard
+				Heading="Fetching contributions"
+				Content={<UsersPreview loading />}
+			/>
+		);
+
+	if (!data?.currentUser) {
+		return <div>No user?</div>;
+	}
+
+	return (
+		<PreviewCard
+			Heading="Contributions"
+			Content={
+				<MyLists
+					heading="Projects:"
+					length={10}
+					items={data.currentUser.contributedProjects?.nodes
+						?.filter(Boolean)
+						.map((n) => ({...n, url: n.webUrl}))}
+				/>
+			}
+		/>
+	);
+}
+
+function UsersCard({onSuccess}: ReadyProps) {
 	const {error, users, allFetched} = useUsersQuery();
+
+	useEffect(() => {
+		if (allFetched) onSuccess();
+	}, [allFetched, onSuccess]);
+
 	if (error) {
 		return <PreviewCard Heading="Oops" Content={error.message} />;
 	}
 	if (!allFetched)
 		return (
-			<PreviewCard Heading="Loading users" Content={<UsersPreview loading />} />
+			<PreviewCard
+				Heading="Loading colleagues"
+				Content={<UsersPreview loading />}
+			/>
 		);
 
 	return (
 		<PreviewCard
-			Heading="Users"
+			Heading="Colleagues"
 			Content={<UsersPreview loading={!allFetched} users={users} />}
 		/>
 	);
@@ -108,6 +177,7 @@ const MyBioQuery = graphql(`
 			projectMemberships(first: 3) {
 				nodes {
 					project {
+						id
 						name
 						webUrl
 					}
@@ -116,32 +186,41 @@ const MyBioQuery = graphql(`
 			groupMemberships {
 				nodes {
 					group {
+						id
 						name
+						webUrl
 					}
 				}
 			}
 			contributedProjects {
 				count
 				nodes {
+					id
 					name
+					webUrl
 				}
 			}
 		}
 	}
 `);
 
-export function MyCard() {
+export function MyCard({onSuccess}: ReadyProps) {
 	const reqConf = useConfigRequest();
-	const {error, isFetching, data} = useQuery({
+	const {error, isSuccess, data} = useQuery({
+		refetchOnMount: false,
 		queryKey: ["me"],
 		queryFn: () => execute(reqConf, MyBioQuery),
 	});
+
+	useEffect(() => {
+		if (isSuccess) onSuccess();
+	}, [isSuccess, onSuccess]);
 
 	if (error) {
 		return <PreviewCard Heading="Oops" Content={error.message} />;
 	}
 
-	if (isFetching)
+	if (!isSuccess)
 		return (
 			<PreviewCard Heading="Fetching Profile" Content={<User loading />} />
 		);
@@ -154,31 +233,62 @@ export function MyCard() {
 		<PreviewCard
 			Heading={`Welcome ${data.currentUser.username}`}
 			Content={
-				<div>
-					<User user={data.currentUser} />
+				<div className="flex flex-col gap-4">
+					<User user={{...data.currentUser, state: "active", bot: false}} />
+					<MyLists
+						heading="Groups:"
+						items={data.currentUser.groupMemberships?.nodes
+							?.map((g) => g?.group)
+							?.filter(Boolean)
+							.map((n) => ({...n, url: n.webUrl}))}
+					/>
+					<MyLists
+						heading="Projects:"
+						items={data.currentUser.projectMemberships?.nodes
+							?.map((n) => n?.project)
+							?.filter(Boolean)
+							.map((n) => ({...n, url: n.webUrl}))}
+					/>
 				</div>
 			}
 		/>
 	);
 }
 
-function MyData({
-	error,
-	data,
-	loading,
+function MyLists({
+	items = [],
+	heading,
+	length = 3,
 }: {
-	error?: string;
-	loading?: boolean;
-	data?: MeQuery;
+	length?: number;
+	heading: string;
+	items?: {id: string; name: string; url?: string}[];
 }) {
-	if (error) return <p>{error}</p>;
-	if (loading) return <User loading />;
-	return <div></div>;
+	return (
+		<div className="animate-fade-up">
+			<Text className="text-muted-foreground">
+				{heading} [{items.length}]
+			</Text>
+			<ul className="mx-4">
+				{items.slice(0, length).map((p) => (
+					<li key={p.id}>
+						{p.url ? (
+							<a href={p.url} target="_blank" rel="noreferrer">
+								<Text>{p.name}</Text>
+							</a>
+						) : (
+							<Text>p.name</Text>
+						)}
+					</li>
+				))}
+			</ul>
+		</div>
+	);
 }
 
 function PreviewCard({Heading, Content}: IChildrens<"Heading" | "Content">) {
 	return (
-		<Card>
+		<Card className="flex-1 basis-[250px] max-w-[350px]">
 			<CardHeader>
 				<CardTitle>
 					<Lead>{Heading}</Lead>

@@ -1,12 +1,12 @@
-import type {CodegenConfig} from '@graphql-codegen/cli';
+import type {CodegenConfig} from "@graphql-codegen/cli";
 
 const config: CodegenConfig = {
-	schema: './schema.json',
-	documents: ['src/**/*.tsx'],
+	schema: "./schema.json",
+	documents: ["src/**/*.tsx"],
 	ignoreNoDocuments: true,
 	generates: {
-		'./src/graphql/': {
-			preset: 'client',
+		"./src/graphql/": {
+			preset: "client",
 			presetConfig: {
 				fragmentMasking: false,
 			},
@@ -16,18 +16,19 @@ const config: CodegenConfig = {
 				enumsAsTypes: true,
 				arrayInputCoercion: false,
 				// avoidOptionals: true, // use non null type helper instead
-				documentMode: 'string',
+				documentMode: "string",
+			},
+			hooks: {
+				// TODO: not working?
+				afterOneFileWrite: ["prettier --write"],
 			},
 		},
-		'./schema.graphql': {
-			plugins: ['schema-ast'],
+		"./schema.graphql": {
+			plugins: ["schema-ast"],
 			config: {
 				includeDirectives: true,
 			},
 		},
-	},
-	hooks: {
-		afterOneFileWrite: ['prettierd --write'],
 	},
 };
 
