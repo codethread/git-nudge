@@ -18,10 +18,12 @@ function App({clearCache}: {clearCache: () => void}) {
 				setBadConfig(true);
 				throwError(e);
 			});
+			const storedConfig = await bridge.readStoredConfig();
 			if (badConfig) setBadConfig(false);
 			return {
 				bridge,
 				netrcStr: net,
+				storedConfig,
 			};
 		},
 	});
@@ -40,7 +42,7 @@ function App({clearCache}: {clearCache: () => void}) {
 
 	return (
 		<BridgeProvider bridge={data.bridge}>
-			<ConfigProvider netrcStr={data.netrcStr}>
+			<ConfigProvider netrcStr={data.netrcStr} initConfig={data.storedConfig}>
 				<Layout actions={{clearCache}}>
 					<Dashboard />
 				</Layout>

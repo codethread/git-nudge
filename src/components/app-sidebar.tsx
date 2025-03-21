@@ -9,9 +9,10 @@ import {
 	SidebarMenu,
 	SidebarMenuButton,
 	SidebarMenuItem,
+	SidebarTrigger,
 } from '@/components/ui/sidebar';
 import {useIsFetching} from '@tanstack/react-query';
-import {Home, Settings} from 'lucide-react';
+import {Gitlab, Home, Settings} from 'lucide-react';
 import {Button} from './ui/button';
 import {Lead} from './ui/text';
 
@@ -32,9 +33,12 @@ export function AppSidebar({actions}: {actions: any}) {
 	const fetchCount = useIsFetching();
 
 	return (
-		<Sidebar variant="floating">
+		<Sidebar variant="floating" collapsible="icon">
 			<SidebarHeader>
-				<Lead>Git Nudge</Lead>
+				<div className="flex justify-between">
+					<Lead className="group-data-[collapsible=icon]:hidden">Git Nudge</Lead>
+					<Gitlab />
+				</div>
 			</SidebarHeader>
 
 			<SidebarContent>
@@ -58,15 +62,19 @@ export function AppSidebar({actions}: {actions: any}) {
 			</SidebarContent>
 
 			<SidebarFooter>
-				{fetchCount}
-				<Button
-					variant="destructive"
-					onClick={() => {
-						actions.clearCache();
-					}}
-				>
-					Clear cache
-				</Button>
+				<div className="flex w-full gap-2 items-end">
+					{/* {fetchCount} */}
+					<Button
+						className="flex-1 group-data-[collapsible=icon]:hidden "
+						variant="destructive"
+						onClick={() => {
+							actions.clearCache();
+						}}
+					>
+						Clear cache
+					</Button>
+					<SidebarTrigger />
+				</div>
 			</SidebarFooter>
 		</Sidebar>
 	);

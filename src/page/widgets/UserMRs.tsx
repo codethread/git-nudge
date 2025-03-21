@@ -1,4 +1,1 @@
-interface Props {
-	user: User;
-}
-export function UserMRs(props: Props) {}
+export function UserMRs() {}

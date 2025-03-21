@@ -4,6 +4,8 @@ import {PersistQueryClientProvider} from '@tanstack/react-query-persist-client';
 import {Terminal} from 'lucide-react';
 import {useState} from 'react';
 import {ErrorBoundary, type FallbackProps} from 'react-error-boundary';
+import {ZodError} from 'zod';
+import {fromError} from 'zod-validation-error';
 import App from './App';
 import {ThemeProvider} from './components/theme-provider';
 import {Alert, AlertDescription, AlertTitle} from './components/ui/alert';
@@ -46,15 +48,29 @@ export function Providers() {
 }
 
 function ErrorComp({error}: FallbackProps) {
+	const info = parseError(error);
 	return (
 		<div className="m-6">
 			<Alert>
-				<Terminal className="h-4 w-4" />
-				<AlertTitle>Now then!</AlertTitle>
+				<AlertTitle className="text-red-400 flex items-end text-xl gap-4">
+					<Terminal className="stroke-red-400" />
+					Blimey!
+				</AlertTitle>
 				<AlertDescription className="my-4">
-					<pre className="overflow-x-scroll w-full">{error.stack}</pre>
+					<pre className="overflow-x-scroll w-full">{info}</pre>
 				</AlertDescription>
 			</Alert>
 		</div>
 	);
+}
+
+function parseError(e: unknown): string {
+	if (e instanceof ZodError) {
+		return fromError(e).toString();
+	}
+	if (e instanceof Error) {
+		return e?.stack || e.message;
+	}
+
+	return JSON.stringify(e);
 }

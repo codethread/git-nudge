@@ -5,7 +5,7 @@ import {useEffect, useState} from 'react';
 import {graphql} from '../graphql';
 import type {GetMyMrsQuery, PipelineStatusEnum} from '../graphql/graphql';
 import {useBridge} from '../hooks/useBridge';
-import {useConfig} from '../hooks/useConfig';
+import {useConfigMe, useConfigRequest} from '../hooks/useConfig';
 import {execute} from '../utils/execute';
 import {Users} from './widgets/Users';
 
@@ -74,13 +74,14 @@ type NotificationData = {
 type NotificationDataMrs = NotificationData['mrs'];
 
 export function Dashboard() {
-	const config = useConfig();
+	const reqConf = useConfigRequest();
+	const me = useConfigMe();
 	const {notify} = useBridge();
 
 	const {isPending, isFetching, error, data, refetch} = useQuery({
 		queryKey: ['me'],
 		refetchInterval: 60 * 1000,
-		queryFn: () => execute(config, GetMyMrs, {draft: true}),
+		queryFn: () => execute(reqConf, GetMyMrs, {draft: true}),
 	});
 
 	const [previousData, setPreviousData] = useState<NotificationData>();
@@ -151,7 +152,7 @@ export function Dashboard() {
 				you have{' '}
 				<a
 					target="_blank"
-					href={`https://${config.gitlab.domain}/dashboard/merge_requests?assignee_username=${config.gitlab.user}`}
+					href={`https://${reqConf.domain}/dashboard/merge_requests?assignee_username=${me.username}`}
 					rel="noreferrer"
 				>
 					{data.currentUser?.authoredMergeRequests?.count} open MRs

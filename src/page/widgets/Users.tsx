@@ -12,7 +12,7 @@ import {
 import {Text, TextSkeleton} from '@/components/ui/text';
 import {graphql} from '@/graphql';
 import type {UsersQueryQuery} from '@/graphql/graphql';
-import {useConfig} from '@/hooks/useConfig';
+import {useConfigRequest} from '@/hooks/useConfig';
 import {duration} from '@/lib/duration';
 import {cn} from '@/lib/utils';
 import {execute} from '@/utils/execute';
@@ -25,7 +25,7 @@ import {P, match} from 'ts-pattern';
 
 const UsersQuery = graphql(`
 	query UsersQuery($cursor: String) {
-		users(after: $cursor, first: 10) {
+		users(after: $cursor) {
 			count
 			pageInfo {
 				hasNextPage
@@ -46,14 +46,14 @@ const UsersQuery = graphql(`
 export type User = NN<NN<NN<UsersQueryQuery['users']>['nodes']>[number]>;
 
 export const useUsersQuery = () => {
-	const config = useConfig();
+	const reqConf = useConfigRequest();
 	const queryData = useInfiniteQuery({
 		staleTime: duration(1, 'days'),
 		refetchOnMount: false,
 		refetchOnWindowFocus: false,
 		queryKey: ['usersAll'],
 		initialPageParam: '',
-		queryFn: ({pageParam}) => execute(config, UsersQuery, {cursor: pageParam}),
+		queryFn: ({pageParam}) => execute(reqConf, UsersQuery, {cursor: pageParam}),
 		getNextPageParam: ({users}) =>
 			users?.pageInfo.hasNextPage ? users?.pageInfo?.endCursor : null,
 	});
@@ -89,51 +89,6 @@ interface UserProps {
 	user?: User;
 }
 
-export function UsersPreview(props: {users?: User[]; loading: boolean}) {
-	const loaded = match(props)
-		.with({users: [], loading: false}, () => 'empty' as const)
-		.with({loading: true}, () => 'loading' as const)
-		.with({users: P.nonNullable}, ({users}) => users)
-		.exhaustive();
-
-	const [fading, setFading] = useState(loaded === 'loading');
-	const [users, setUsers] = useState<(User | undefined)[]>(
-		Array.isArray(loaded) ? loaded : Array(3).fill(undefined),
-	);
-	const [index, setIndex] = useState(0);
-
-	useEffect(() => {
-		if (index === 3) {
-			setFading(false);
-		}
-		if (fading && Array.isArray(loaded)) {
-			setTimeout(
-				() => {
-					console.log({index});
-					setUsers((u) => {
-						u[index] = loaded[index];
-						return [...u];
-					});
-					setIndex((x) => x + 1);
-				},
-				index === 0 ? 0 : 500,
-			);
-		}
-	}, [index, loaded, fading]);
-
-	if (loaded === 'empty') return <Text>No users for this instance</Text>;
-
-	return (
-		<ul className="divide-y border-muted-foreground">
-			{users.slice(0, 3).map((user, i) => (
-				<li key={user ? user.username : i.toString()} className={user && 'animate-fade-up'}>
-					<User user={user} className="my-6" loading={false} />
-				</li>
-			))}
-		</ul>
-	);
-}
-
 export function User(props: UserProps) {
 	const user = match(props)
 		.with({loading: true}, () => undefined)
@@ -143,7 +98,7 @@ export function User(props: UserProps) {
 	return (
 		<div className={cn('flex items-center space-x-4', props.className)}>
 			{user?.avatarUrl ? (
-				<Avatar className="h-10 w-10 rounded-full overflow-clip flex justify-center items-center">
+				<Avatar className="h-10 w-10 rounded-full overflow-clip flex justify-center items-center outline hover:outline-2 hover:outline-pink-500 transition">
 					<AvatarImage src={user.avatarUrl ?? undefined} />
 					<AvatarFallback className="text-xl">{user.username.slice(0, 2)}</AvatarFallback>
 				</Avatar>

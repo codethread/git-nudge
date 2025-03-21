@@ -1,18 +1,24 @@
 import type {TypedDocumentString} from '../graphql/graphql';
-import type {IConfig} from '../hooks/useConfig';
+
+export interface RequestConfig {
+	domain: string;
+	token: string;
+	timeout: number;
+}
 
 export async function execute<TResult, TVariables>(
-	conf: IConfig,
+	{token, domain, timeout}: RequestConfig,
 	query: TypedDocumentString<TResult, TVariables>,
 	...[variables]: TVariables extends Record<string, never> ? [] : [TVariables]
 ) {
-	const response = await fetch(`https://${conf.gitlab.domain}/api/graphql`, {
+	const response = await fetch(`https://${domain}/api/graphql`, {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json',
 			Accept: 'application/graphql-response+json',
-			Authorization: `Bearer ${conf.gitlab.token}`,
+			Authorization: `Bearer ${token}`,
 		},
+		signal: AbortSignal.timeout(timeout),
 		body: JSON.stringify({
 			query,
 			variables,
@@ -27,6 +33,7 @@ export async function execute<TResult, TVariables>(
 		throw new Error('Network response was not ok');
 	}
 
-	const json = await response.json();
+	// biome-ignore lint/suspicious/noExplicitAny: all code consumed through codegen
+	const json: any = await response.json();
 	return json.data as TResult;
 }

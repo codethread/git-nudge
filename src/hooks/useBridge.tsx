@@ -1,4 +1,6 @@
+import {asyncStorage} from '@/lib/storage';
 import React from 'react';
+import type {IConfig} from './useConfig';
 
 export type IBridge = Awaited<ReturnType<typeof createFakeBridge>>;
 
@@ -26,6 +28,18 @@ async function createFakeBridge() {
 	return {
 		readNetrc: async () => {
 			return import.meta.env.VITE_FAKE_NETRC;
+		},
+		readStoredConfig: async () => {
+			try {
+				const stored = await asyncStorage.getItem('CONFIG');
+				return stored ? JSON.parse(stored) : undefined;
+			} catch (e) {
+				console.warn(e);
+				return undefined;
+			}
+		},
+		setStoredConfig: async (config: IConfig) => {
+			asyncStorage.setItem('CONFIG', JSON.stringify(config));
 		},
 		notify: async (msg: string) => {
 			if (!('Notification' in window)) {
