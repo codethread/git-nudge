@@ -1,36 +1,25 @@
-import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card';
-import {Lead, Text} from '@/components/ui/text';
-import {User, useUsersQuery} from './widgets/Users';
-import {graphql} from '@/graphql';
-import {useConfigRequest} from '@/hooks/useConfig';
-import {execute} from '@/utils/execute';
-import {useQuery} from '@tanstack/react-query';
-import {MeQuery} from '@/graphql/graphql';
-import {useState, useEffect} from 'react';
-import {match, P} from 'ts-pattern';
+import {User, useUsersQuery} from "./widgets/Users";
+import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
+import {Lead, Text} from "@/components/ui/text";
+import {graphql} from "@/graphql";
+import type {MeQuery} from "@/graphql/graphql";
+import {useConfigRequest} from "@/hooks/useConfig";
+import {execute} from "@/utils/execute";
+import {useQuery} from "@tanstack/react-query";
+import {useState, useEffect} from "react";
+import {match, P} from "ts-pattern";
 
 export function Dashboard() {
 	return (
 		<div className="flex-1 w-[100%]">
-			<Lead className="my-12 text-center">Welcome, getting things set up...</Lead>
+			<Lead className="my-12 text-center">
+				Welcome, getting things set up...
+			</Lead>
 			<div className="flex flex-wrap justify-center items-stretch gap-8">
 				<MyCard />
 				<UsersCard />
 			</div>
 		</div>
-	);
-}
-
-function PreviewCard({Heading, Content}: IChildrens<'Heading' | 'Content'>) {
-	return (
-		<Card>
-			<CardHeader>
-				<CardTitle>
-					<Lead>{Heading}</Lead>
-				</CardTitle>
-			</CardHeader>
-			<CardContent>{Content}</CardContent>
-		</Card>
 	);
 }
 
@@ -40,24 +29,31 @@ function UsersCard() {
 		return <PreviewCard Heading="Oops" Content={error.message} />;
 	}
 	if (!allFetched)
-		return <PreviewCard Heading="Loading users" Content={<UsersPreview loading />} />;
+		return (
+			<PreviewCard Heading="Loading users" Content={<UsersPreview loading />} />
+		);
 
 	return (
-		<PreviewCard Heading="Users" Content={<UsersPreview loading={!allFetched} users={users} />} />
+		<PreviewCard
+			Heading="Users"
+			Content={<UsersPreview loading={!allFetched} users={users} />}
+		/>
 	);
 }
 
 function UsersPreview(props: {users?: User[]; loading: boolean}) {
 	const listLength = 3;
 	const loaded = match(props)
-		.with({users: [], loading: false}, () => 'empty' as const)
-		.with({loading: true}, () => 'loading' as const)
+		.with({users: [], loading: false}, () => "empty" as const)
+		.with({loading: true}, () => "loading" as const)
 		.with({users: P.nonNullable}, ({users}) => users)
 		.exhaustive();
 
-	const [fading, setFading] = useState(loaded === 'loading');
+	const [fading, setFading] = useState(loaded === "loading");
 	const [users, setUsers] = useState<(User | undefined)[]>(
-		Array.isArray(loaded) ? loaded.slice(0, listLength) : Array(listLength).fill(undefined),
+		Array.isArray(loaded)
+			? loaded.slice(0, listLength)
+			: Array(listLength).fill(undefined),
 	);
 	const [index, setIndex] = useState(0);
 
@@ -79,12 +75,15 @@ function UsersPreview(props: {users?: User[]; loading: boolean}) {
 		}
 	}, [index, loaded, fading]);
 
-	if (loaded === 'empty') return <Text>No users for this instance</Text>;
+	if (loaded === "empty") return <Text>No users for this instance</Text>;
 
 	return (
 		<ul className="divide-y border-muted-foreground">
 			{users.slice(0, listLength).map((user, i) => (
-				<li key={user ? user.username : i.toString()} className={user && 'animate-fade-up'}>
+				<li
+					key={user ? user.username : i.toString()}
+					className={user && "animate-fade-up"}
+				>
 					<User user={user} className="my-6" loading={false} />
 				</li>
 			))}
@@ -100,65 +99,92 @@ function UsersPreview(props: {users?: User[]; loading: boolean}) {
 }
 
 const MyBioQuery = graphql(`
-query Me {
-	 currentUser {
-    name
-    username
-    webUrl
-    avatarUrl
-    projectMemberships(first: 3) {
-      nodes {
-        project {
-          name
-          webUrl
-        }
-      }
-    }
-    groupMemberships {
-      nodes {
-        group {
-          name
-        }
-      }
-    }
-    contributedProjects {
-      count
-      nodes {
-        name
-      }
-    }
-  }
-}
+	query Me {
+		currentUser {
+			name
+			username
+			webUrl
+			avatarUrl
+			projectMemberships(first: 3) {
+				nodes {
+					project {
+						name
+						webUrl
+					}
+				}
+			}
+			groupMemberships {
+				nodes {
+					group {
+						name
+					}
+				}
+			}
+			contributedProjects {
+				count
+				nodes {
+					name
+				}
+			}
+		}
+	}
 `);
 
 export function MyCard() {
 	const reqConf = useConfigRequest();
 	const {error, isFetching, data} = useQuery({
-		queryKey: ['me'],
+		queryKey: ["me"],
 		queryFn: () => execute(reqConf, MyBioQuery),
 	});
+
+	if (error) {
+		return <PreviewCard Heading="Oops" Content={error.message} />;
+	}
+
+	if (isFetching)
+		return (
+			<PreviewCard Heading="Fetching Profile" Content={<User loading />} />
+		);
+
+	if (!data?.currentUser) {
+		return <div>No user?</div>;
+	}
+
+	return (
+		<PreviewCard
+			Heading={`Welcome ${data.currentUser.username}`}
+			Content={
+				<div>
+					<User user={data.currentUser} />
+				</div>
+			}
+		/>
+	);
+}
+
+function MyData({
+	error,
+	data,
+	loading,
+}: {
+	error?: string;
+	loading?: boolean;
+	data?: MeQuery;
+}) {
+	if (error) return <p>{error}</p>;
+	if (loading) return <User loading />;
+	return <div></div>;
+}
+
+function PreviewCard({Heading, Content}: IChildrens<"Heading" | "Content">) {
 	return (
 		<Card>
 			<CardHeader>
 				<CardTitle>
-					<Lead>
-						{error
-							? 'Oops'
-							: isFetching
-								? 'Loading Profile'
-								: `Hi there ${data?.currentUser?.username}`}
-					</Lead>
+					<Lead>{Heading}</Lead>
 				</CardTitle>
 			</CardHeader>
-			<CardContent>
-				<MyData error={error?.message} loading={isFetching} data={data} />
-			</CardContent>
+			<CardContent>{Content}</CardContent>
 		</Card>
 	);
-}
-
-function MyData({error, data, loading}: {error?: string; loading?: boolean; data?: MeQuery}) {
-	if (error) return <p>{error}</p>;
-	if (loading) return <User loading />;
-	return <div></div>;
 }

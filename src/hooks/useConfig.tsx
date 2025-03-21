@@ -1,14 +1,14 @@
-import {Button} from '@/components/ui/button';
-import {duration} from '@/lib/duration';
-import type {RequestConfig} from '@/utils/execute';
-import netrc from 'netrc';
-import React, {useRef, useState} from 'react';
-import {P, match} from 'ts-pattern';
-import {z} from 'zod';
-import {fromError} from 'zod-validation-error';
-import {createStore, useStore} from 'zustand';
-import {combine} from 'zustand/middleware';
-import {useShallow} from 'zustand/react/shallow';
+import {Button} from "@/components/ui/button";
+import {duration} from "@/lib/duration";
+import type {RequestConfig} from "@/utils/execute";
+import netrc from "netrc";
+import React, {useRef, useState} from "react";
+import {P, match} from "ts-pattern";
+import {z} from "zod";
+import {fromError} from "zod-validation-error";
+import {createStore, useStore} from "zustand";
+import {combine} from "zustand/middleware";
+import {useShallow} from "zustand/react/shallow";
 
 const NetrcSchema = z.record(
 	z.string(),
@@ -25,15 +25,19 @@ const StorageConfigSchema = z
 			global: z
 				.object(
 					{
-						requestTimeoutMillis: z.number().gt(0).int().default(duration(5, 'secs')),
+						requestTimeoutMillis: z
+							.number()
+							.gt(0)
+							.int()
+							.default(duration(5, "secs")),
 					},
 					{
-						message: 'dev error, missing defaults',
+						message: "dev error, missing defaults",
 					},
 				)
 				.default({}),
 		},
-		{message: 'dev error, missing defaults'},
+		{message: "dev error, missing defaults"},
 	)
 	.default({});
 
@@ -58,7 +62,8 @@ type ConfigStore = ReturnType<typeof createConfigStore>;
 function createConfigStore(config: IConfig) {
 	return createStore(
 		combine(config, (set) => ({
-			setConfig: <Key extends keyof IConfig>(key: Key, value: IConfig[Key]) => set({[key]: value}),
+			setConfig: <Key extends keyof IConfig>(key: Key, value: IConfig[Key]) =>
+				set({[key]: value}),
 		})),
 	);
 }
@@ -66,18 +71,20 @@ function createConfigStore(config: IConfig) {
 export const ConfigProvider = ({children, netrcStr, initConfig}: Props) => {
 	const stored = StorageConfigSchema.parse(initConfig);
 	const config = parseNetrc(netrcStr);
-	const [chosen, setChosen] = useState<IConfig['gitlab']>();
+	const [chosen, setChosen] = useState<IConfig["gitlab"]>();
 
 	return match([config, chosen])
-		.with([{tag: 'invalid', err: P.select()}, P._], (err) => <p>{err}</p>)
-		.with([{tag: 'multiple'}, P.nullish], ([{netrc}]) => (
+		.with([{tag: "invalid", err: P.select()}, P._], (err) => <p>{err}</p>)
+		.with([{tag: "multiple"}, P.nullish], ([{netrc}]) => (
 			<ChooseNetrc onSelect={setChosen} netrc={netrc} />
 		))
-		.with([{tag: 'multiple'}, P.select(P.nonNullable)], (gitlab) => (
+		.with([{tag: "multiple"}, P.select(P.nonNullable)], (gitlab) => (
 			<Provider config={{...stored, gitlab}}>{children}</Provider>
 		))
-		.with([{tag: 'valid', netrc: P.select()}, P._], ({domain, pass, user}) => (
-			<Provider config={{...stored, gitlab: {domain, user, token: pass}}}>{children}</Provider>
+		.with([{tag: "valid", netrc: P.select()}, P._], ({domain, pass, user}) => (
+			<Provider config={{...stored, gitlab: {domain, user, token: pass}}}>
+				{children}
+			</Provider>
 		))
 		.exhaustive();
 };
@@ -85,7 +92,10 @@ export const ConfigProvider = ({children, netrcStr, initConfig}: Props) => {
 function ChooseNetrc({
 	netrc,
 	onSelect,
-}: {netrc: Netrc; onSelect: (conf: IConfig['gitlab']) => void}) {
+}: {
+	netrc: Netrc;
+	onSelect: (conf: IConfig["gitlab"]) => void;
+}) {
 	const configs = Object.entries(netrc);
 	return (
 		<div>
@@ -108,12 +118,14 @@ function ChooseNetrc({
 function Provider({children, config}: IChildren & {config: IConfig}) {
 	const store = useRef(createConfigStore(config)).current;
 
-	return <configContext.Provider value={store}>{children}</configContext.Provider>;
+	return (
+		<configContext.Provider value={store}>{children}</configContext.Provider>
+	);
 }
 
 function useConfigStore() {
 	const c = React.useContext(configContext);
-	if (!c) throw new Error('ah');
+	if (!c) throw new Error("ah");
 	return c;
 }
 
@@ -143,11 +155,11 @@ export const useConfigMe = () =>
 
 type ParsedConfig =
 	| {
-			tag: 'invalid';
+			tag: "invalid";
 			err: string;
 	  }
 	| {
-			tag: 'valid';
+			tag: "valid";
 			netrc: {
 				domain: string;
 				user: string;
@@ -155,20 +167,20 @@ type ParsedConfig =
 			};
 	  }
 	| {
-			tag: 'multiple';
+			tag: "multiple";
 			netrc: Netrc;
 	  };
 
 function parseNetrc(netrcStr: string): ParsedConfig {
 	const {data, error} = NetrcSchema.safeParse(netrc.parse(netrcStr));
 	if (error) {
-		return {tag: 'invalid', err: fromError(error).toString()};
+		return {tag: "invalid", err: fromError(error).toString()};
 	}
 	const machines = Object.entries(data);
 	if (machines.length === 1) {
 		const [[domain, {login, password}]] = machines;
 		return {
-			tag: 'valid',
+			tag: "valid",
 			netrc: {
 				domain,
 				user: login,
@@ -178,7 +190,7 @@ function parseNetrc(netrcStr: string): ParsedConfig {
 	}
 
 	return {
-		tag: 'multiple',
+		tag: "multiple",
 		netrc: data,
 	};
 }

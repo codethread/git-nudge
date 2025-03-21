@@ -1,4 +1,4 @@
-import type {AsyncStorage} from '@tanstack/react-query-persist-client';
+import type {AsyncStorage} from "@tanstack/react-query-persist-client";
 
 export const asyncStorage: AsyncStorage = {
 	/**

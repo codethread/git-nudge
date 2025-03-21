@@ -1,4 +1,4 @@
-import {Skeleton} from '@/components/ui/skeleton';
+import {Skeleton} from "@/components/ui/skeleton";
 import {
 	Table,
 	TableBody,
@@ -8,18 +8,18 @@ import {
 	TableHead,
 	TableHeader,
 	TableRow,
-} from '@/components/ui/table';
-import {Text, TextSkeleton} from '@/components/ui/text';
-import {graphql} from '@/graphql';
-import type {UsersQueryQuery} from '@/graphql/graphql';
-import {useConfigRequest} from '@/hooks/useConfig';
-import {duration} from '@/lib/duration';
-import {cn} from '@/lib/utils';
-import {execute} from '@/utils/execute';
-import {Avatar, AvatarFallback, AvatarImage} from '@radix-ui/react-avatar';
-import {useInfiniteQuery} from '@tanstack/react-query';
-import {useEffect, useMemo, useState} from 'react';
-import {P, match} from 'ts-pattern';
+} from "@/components/ui/table";
+import {Text, TextSkeleton} from "@/components/ui/text";
+import {graphql} from "@/graphql";
+import type {UsersQueryQuery} from "@/graphql/graphql";
+import {useConfigRequest} from "@/hooks/useConfig";
+import {duration} from "@/lib/duration";
+import {cn} from "@/lib/utils";
+import {execute} from "@/utils/execute";
+import {Avatar, AvatarFallback, AvatarImage} from "@radix-ui/react-avatar";
+import {useInfiniteQuery} from "@tanstack/react-query";
+import {useEffect, useMemo} from "react";
+import {P, match} from "ts-pattern";
 
 // TODO: right now a blunt hammer, can offer more control if needed
 
@@ -43,16 +43,16 @@ const UsersQuery = graphql(`
 	}
 `);
 
-export type User = NN<NN<NN<UsersQueryQuery['users']>['nodes']>[number]>;
+export type User = NN<NN<NN<UsersQueryQuery["users"]>["nodes"]>[number]>;
 
 export const useUsersQuery = () => {
 	const reqConf = useConfigRequest();
 	const queryData = useInfiniteQuery({
-		staleTime: duration(1, 'days'),
+		staleTime: duration(1, "days"),
 		refetchOnMount: false,
 		refetchOnWindowFocus: false,
-		queryKey: ['usersAll'],
-		initialPageParam: '',
+		queryKey: ["usersAll"],
+		initialPageParam: "",
 		queryFn: ({pageParam}) => execute(reqConf, UsersQuery, {cursor: pageParam}),
 		getNextPageParam: ({users}) =>
 			users?.pageInfo.hasNextPage ? users?.pageInfo?.endCursor : null,
@@ -67,18 +67,22 @@ export const useUsersQuery = () => {
 	return useMemo(() => {
 		const {error, data, isFetching} = queryData;
 		const count = data?.pages.at(0)?.users?.count ?? 0;
-		const fetched = data?.pages.map((p) => p.users?.nodes?.length ?? 0).reduce((a, b) => a + b);
+		const fetched = data?.pages
+			.map((p) => p.users?.nodes?.length ?? 0)
+			.reduce((a, b) => a + b);
 		const progress = fetched ? fetched / count : 0;
 		const allFetched = progress === 1;
 		const users =
-			data && allFetched ? data.pages.flatMap((p) => p.users?.nodes).filter(Boolean) : [];
+			data && allFetched
+				? data.pages.flatMap((p) => p.users?.nodes).filter(Boolean)
+				: [];
 		return {
 			error,
 			progress,
 			isFetching,
 			allFetched,
 			allUsers: users,
-			users: users.filter((u) => !u.bot && u.state === 'active'),
+			users: users.filter((u) => !u.bot && u.state === "active"),
 		};
 	}, [queryData]);
 };
@@ -96,11 +100,13 @@ export function User(props: UserProps) {
 		.exhaustive();
 
 	return (
-		<div className={cn('flex items-center space-x-4', props.className)}>
+		<div className={cn("flex items-center space-x-4", props.className)}>
 			{user?.avatarUrl ? (
 				<Avatar className="h-10 w-10 rounded-full overflow-clip flex justify-center items-center outline hover:outline-2 hover:outline-pink-500 transition">
 					<AvatarImage src={user.avatarUrl ?? undefined} />
-					<AvatarFallback className="text-xl">{user.username.slice(0, 2)}</AvatarFallback>
+					<AvatarFallback className="text-xl">
+						{user.username.slice(0, 2)}
+					</AvatarFallback>
 				</Avatar>
 			) : (
 				<Skeleton className="h-10 w-10 rounded-full" />
@@ -112,7 +118,7 @@ export function User(props: UserProps) {
 						<div className="flex">
 							<Text flush>
 								<span className="text-muted-foreground">{user.state}</span>
-								{user.username === user.name ? '' : ` ${user.username}`}
+								{user.username === user.name ? "" : ` ${user.username}`}
 							</Text>
 						</div>
 					</div>
@@ -165,7 +171,7 @@ export function Users() {
 			<TableFooter>
 				<TableRow>
 					<TableCell>Total</TableCell>
-					<TableCell>{isFetching ? 'fetching...' : ''}</TableCell>
+					<TableCell>{isFetching ? "fetching..." : ""}</TableCell>
 					<TableCell className="text-right">{users.length}</TableCell>
 				</TableRow>
 			</TableFooter>

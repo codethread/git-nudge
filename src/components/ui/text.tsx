@@ -1,19 +1,19 @@
-import {cn} from '@/lib/utils';
-import {type VariantProps, cva} from 'class-variance-authority';
-import {Skeleton} from './skeleton';
+import {Skeleton} from "./skeleton";
+import {cn} from "@/lib/utils";
+import {type VariantProps, cva} from "class-variance-authority";
 
-const textVariants = cva('', {
+const textVariants = cva("", {
 	variants: {
 		variant: {
-			default: '',
+			default: "",
 		},
 		flush: {
-			false: '[&:not(:first-child)]:mt-6 leading-7',
+			false: "[&:not(:first-child)]:mt-6 leading-7",
 			true: null,
 		},
 	},
 	defaultVariants: {
-		variant: 'default',
+		variant: "default",
 		flush: false,
 	},
 });
@@ -23,19 +23,23 @@ export function Text({
 	variant,
 	flush,
 	...props
-}: React.ComponentProps<'p'> & VariantProps<typeof textVariants>) {
-	return <p className={cn(textVariants({variant, className, flush}))} {...props} />;
+}: React.ComponentProps<"p"> & VariantProps<typeof textVariants>) {
+	return (
+		<p className={cn(textVariants({variant, className, flush}))} {...props} />
+	);
 }
 
-export function Lead({className, ...props}: React.ComponentProps<'p'>) {
-	return <p className={cn('text-xl text-muted-foreground', className)} {...props} />;
+export function Lead({className, ...props}: React.ComponentProps<"p">) {
+	return (
+		<p className={cn("text-xl text-muted-foreground", className)} {...props} />
+	);
 }
 
 export function TextSkeleton({className}: {className?: string}) {
 	// TODO: there must be a var for this
 	return (
 		<div className="h-[calc(var(--text-base)*1.5)] flex flex-col justify-center">
-			<Skeleton className={cn('h-(--text-base) w-[250px]', className)} />
+			<Skeleton className={cn("h-(--text-base) w-[250px]", className)} />
 		</div>
 	);
 }

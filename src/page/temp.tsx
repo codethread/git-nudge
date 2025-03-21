@@ -1,13 +1,13 @@
-import {Button} from '@/components/ui/button';
-import {useQuery} from '@tanstack/react-query';
-import equal from 'fast-deep-equal';
-import {useEffect, useState} from 'react';
-import {graphql} from '../graphql';
-import type {GetMyMrsQuery, PipelineStatusEnum} from '../graphql/graphql';
-import {useBridge} from '../hooks/useBridge';
-import {useConfigMe, useConfigRequest} from '../hooks/useConfig';
-import {execute} from '../utils/execute';
-import {Users} from './widgets/Users';
+import {graphql} from "../graphql";
+import type {GetMyMrsQuery, PipelineStatusEnum} from "../graphql/graphql";
+import {useBridge} from "../hooks/useBridge";
+import {useConfigMe, useConfigRequest} from "../hooks/useConfig";
+import {execute} from "../utils/execute";
+import {Users} from "./widgets/Users";
+import {Button} from "@/components/ui/button";
+import {useQuery} from "@tanstack/react-query";
+import equal from "fast-deep-equal";
+import {useEffect, useState} from "react";
 
 const GetMyMrs = graphql(`
 	query GetMyMrs($draft: Boolean!) {
@@ -71,7 +71,7 @@ type NotificationData = {
 		}
 	>;
 };
-type NotificationDataMrs = NotificationData['mrs'];
+type NotificationDataMrs = NotificationData["mrs"];
 
 export function Dashboard() {
 	const reqConf = useConfigRequest();
@@ -79,7 +79,7 @@ export function Dashboard() {
 	const {notify} = useBridge();
 
 	const {isPending, isFetching, error, data, refetch} = useQuery({
-		queryKey: ['me'],
+		queryKey: ["me"],
 		refetchInterval: 60 * 1000,
 		queryFn: () => execute(reqConf, GetMyMrs, {draft: true}),
 	});
@@ -89,7 +89,7 @@ export function Dashboard() {
 	useEffect(() => {
 		if (previousData?.shouldNotify) {
 			setPreviousData({...previousData, shouldNotify: false});
-			notify('something changed!');
+			notify("something changed!");
 		}
 	}, [previousData, notify]);
 
@@ -115,7 +115,8 @@ export function Dashboard() {
 	if (!data.currentUser?.authoredMergeRequests) {
 		return (
 			<div>
-				Your token did not seem to return a valid user, please check it hasn't expired
+				Your token did not seem to return a valid user, please check it hasn't
+				expired
 				<Button
 					onClick={() => {
 						refetch();
@@ -141,7 +142,7 @@ export function Dashboard() {
 			<div>
 				<Button
 					onClick={() => {
-						notify('hello');
+						notify("hello");
 					}}
 				>
 					Test notification
@@ -149,7 +150,7 @@ export function Dashboard() {
 				<Button onClick={() => refetch()}>Test fetch</Button>
 			</div>
 			<p>
-				you have{' '}
+				you have{" "}
 				<a
 					target="_blank"
 					href={`https://${reqConf.domain}/dashboard/merge_requests?assignee_username=${me.username}`}
@@ -158,14 +159,14 @@ export function Dashboard() {
 					{data.currentUser?.authoredMergeRequests?.count} open MRs
 				</a>
 			</p>
-			<ul style={{display: 'flex', flexDirection: 'column', gap: '8px'}}>
+			<ul style={{display: "flex", flexDirection: "column", gap: "8px"}}>
 				{data.currentUser.authoredMergeRequests?.nodes?.map((mr) => (
 					<li key={mr?.id}>
 						<div
 							style={{
-								border: 'solid thin coral',
-								borderRadius: '8px',
-								padding: '8px',
+								border: "solid thin coral",
+								borderRadius: "8px",
+								padding: "8px",
 							}}
 						>
 							<p>
@@ -179,12 +180,14 @@ export function Dashboard() {
 							{mr?.mergeable ? null : (
 								<ul>
 									{mr?.conflicts ? <li>❌ conflicts</li> : null}
-									{mr?.headPipeline?.status ? <li>Pipeline: {mr.headPipeline.status}</li> : null}
+									{mr?.headPipeline?.status ? (
+										<li>Pipeline: {mr.headPipeline.status}</li>
+									) : null}
 									{mr?.approved ? <li>√ approved</li> : null}
 									{mr?.approvalState.invalidApproversRules
 										?.filter((r) => !r.allowMergeWhenInvalid)
 										.map((r) => r.name)
-										.join(' ') ?? null}
+										.join(" ") ?? null}
 								</ul>
 							)}
 						</div>
@@ -197,7 +200,7 @@ export function Dashboard() {
 }
 
 function getNotifictionData(
-	mrs: NonNullable<GetMyMrsQuery['currentUser']>['authoredMergeRequests'],
+	mrs: NonNullable<GetMyMrsQuery["currentUser"]>["authoredMergeRequests"],
 ): NotificationDataMrs {
 	console.debug(mrs);
 	const ls: NotificationDataMrs = new Map();
@@ -206,8 +209,9 @@ function getNotifictionData(
 		if (!mr) continue;
 		ls.set(mr.id, {
 			approved: !!mr.approved,
-			pipeline: mr.headPipeline?.status || 'PENDING',
-			comments: mr.notes.nodes?.filter((n) => !n?.authorIsContributor).length ?? 0,
+			pipeline: mr.headPipeline?.status || "PENDING",
+			comments:
+				mr.notes.nodes?.filter((n) => !n?.authorIsContributor).length ?? 0,
 			conflicts: !!mr.conflicts,
 		});
 	}

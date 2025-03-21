@@ -1,4 +1,4 @@
-declare module 'netrc' {
+declare module "netrc" {
 	interface Netrc {
 		parse(s: string): unknown;
 	}

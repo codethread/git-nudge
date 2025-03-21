@@ -3,10 +3,10 @@
   "vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true },
   "files": { "ignoreUnknown": false, "ignore": [] },
   "formatter": {
-    "enabled": true,
-    "useEditorconfig": true,
-    "lineWidth": 100,
-    "bracketSpacing": false
+    "enabled": false // just using prettier for now until it formats nested gql
+    // "useEditorconfig": true,
+    // "lineWidth": 100,
+    // "bracketSpacing": false
   },
   "organizeImports": { "enabled": true },
   "linter": {

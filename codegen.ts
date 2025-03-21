@@ -7,27 +7,27 @@ const config: CodegenConfig = {
 	generates: {
 		'./src/graphql/': {
 			preset: 'client',
-			// plugins: ["typescript-react-query"],
 			presetConfig: {
 				fragmentMasking: false,
-				maybeValue: 'T | null | undefined',
 			},
 			config: {
 				useTypeImports: true,
 				skipTypename: true,
 				enumsAsTypes: true,
-				avoidOptionals: true,
+				arrayInputCoercion: false,
+				// avoidOptionals: true, // use non null type helper instead
 				documentMode: 'string',
-				maybeValue: 'T | null | undefined',
 			},
 		},
 		'./schema.graphql': {
 			plugins: ['schema-ast'],
 			config: {
 				includeDirectives: true,
-				maybeValue: 'T | null | undefined',
 			},
 		},
+	},
+	hooks: {
+		afterOneFileWrite: ['prettierd --write'],
 	},
 };
 
