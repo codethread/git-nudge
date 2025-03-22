@@ -4,7 +4,7 @@
 	"version": "0.1.0",
 	"type": "module",
 	"scripts": {
-		"gen": "graphql-codegen --config codegen.ts --watch",
+		"gen": "graphql-codegen --config scripts/codegen.ts --watch",
 		"dev": "vite",
 		"ts": "tsc --watch",
 		"lint": "biome lint --write src",
@@ -12,7 +12,7 @@
 		"build": "tsc && vite build",
 		"preview": "vite preview",
 		"tauri": "tauri",
-		"pregen": "./scripts/getSchema.sh"
+		"getSchema": "node --experimental-strip-types ./scripts/downloadSchema.ts"
 	},
 	"dependencies": {
 		"@graphql-typed-document-node/core": "^3.2.0",
@@ -61,8 +61,10 @@
 		"@types/react": "^18.3.1",
 		"@types/react-dom": "^18.3.1",
 		"@vitejs/plugin-react": "^4.3.4",
+		"minimist": "^1.2.8",
 		"prettier": "^3.5.3",
 		"typescript": "~5.6.3",
+		"unzipper": "^0.12.3",
 		"vite": "^6.0.3"
 	},
 	"volta": {

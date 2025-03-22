@@ -14,11 +14,11 @@ export function Dashboard() {
 	const allReady = ready.every(Boolean) && ready.length > 2;
 	const onSuccess = useCallback(() => setReady((s) => s.concat(true)), []);
 	return (
-		<div className="flex-1 w-[100%] ">
-			<div className="h-8 my-4 flex flex-col justify-center">
+		<div className="flex-1 w-[100%] @container ">
+			<div className="h-24 flex flex-col justify-center">
 				{allReady ? (
 					<div className="flex justify-center">
-						<Button variant="outline" className="animate-pulse">
+						<Button ping variant="outline">
 							Launch
 						</Button>
 					</div>
@@ -28,7 +28,9 @@ export function Dashboard() {
 					</Lead>
 				)}
 			</div>
-			<div className=" flex flex-wrap justify-center items-stretch gap-8 ">
+			{/* <div className=" flex flex-wrap justify-center items-stretch gap-sm @min-[800px]:gap-lg "> */}
+			<div className=" flex flex-wrap justify-center items-stretch gap-sm @min-5xl:gap-lg ">
+				{/* <div className=" flex flex-wrap justify-center items-stretch gap-lg @6xl:gap-sm "> */}
 				<MyCard onSuccess={onSuccess} />
 				<UsersCard onSuccess={onSuccess} />
 				<ReposCard onSuccess={onSuccess} />
@@ -153,7 +155,7 @@ function UsersPreview(props: {users?: User[]; loading: boolean}) {
 					key={user ? user.username : i.toString()}
 					className={user && "animate-fade-up"}
 				>
-					<User user={user} className="my-6" loading={false} />
+					<User user={user} className="my-md" loading={false} />
 				</li>
 			))}
 			{props.users && !fading && props.users.length > listLength && (
@@ -233,7 +235,7 @@ export function MyCard({onSuccess}: ReadyProps) {
 		<PreviewCard
 			Heading={`Welcome ${data.currentUser.username}`}
 			Content={
-				<div className="flex flex-col gap-4">
+				<div className="flex flex-col gap-sm">
 					<User user={{...data.currentUser, state: "active", bot: false}} />
 					<MyLists
 						heading="Groups:"
@@ -269,7 +271,7 @@ function MyLists({
 			<Text className="text-muted-foreground">
 				{heading} [{items.length}]
 			</Text>
-			<ul className="mx-4">
+			<ul className="mx-sm">
 				{items.slice(0, length).map((p) => (
 					<li key={p.id}>
 						{p.url ? (

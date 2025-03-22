@@ -11,7 +11,8 @@ export default function Layout({
 	return (
 		<SidebarProvider>
 			<AppSidebar actions={actions} />
-			<main className="w-full max-w-6xl mx-auto">{children}</main>
+			{/* pr-2 to match sidebar */}
+			<main className="w-full max-w-6xl mx-auto pr-2">{children}</main>
 		</SidebarProvider>
 	);
 }

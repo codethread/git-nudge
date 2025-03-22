@@ -8,7 +8,7 @@ const textVariants = cva("", {
 			default: "",
 		},
 		flush: {
-			false: "[&:not(:first-child)]:mt-6 leading-7",
+			false: "[&:not(:first-child)]:mt-md leading-6",
 			true: null,
 		},
 	},

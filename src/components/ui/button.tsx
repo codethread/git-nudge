@@ -39,19 +39,29 @@ function Button({
 	variant,
 	size,
 	asChild = false,
+	ping,
 	...props
 }: React.ComponentProps<"button"> &
 	VariantProps<typeof buttonVariants> & {
 		asChild?: boolean;
+		ping?: boolean;
 	}) {
 	const Comp = asChild ? Slot : "button";
 
 	return (
-		<Comp
-			data-slot="button"
-			className={cn(buttonVariants({variant, size, className}))}
-			{...props}
-		/>
+		<span className="relative inline-flex">
+			<Comp
+				data-slot="button"
+				className={cn(buttonVariants({variant, size, className}))}
+				{...props}
+			/>
+			{ping ? (
+				<span className="relative flex size-2 -top-1 right-1">
+					<span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent-foreground opacity-75" />
+					<span className="relative inline-flex size-2 rounded-full bg-accent-foreground" />
+				</span>
+			) : null}
+		</span>
 	);
 }
 

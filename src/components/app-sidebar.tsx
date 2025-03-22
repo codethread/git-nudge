@@ -64,7 +64,7 @@ export function AppSidebar({actions}: {actions: any}) {
 			</SidebarContent>
 
 			<SidebarFooter>
-				<div className="flex w-full gap-2 items-end">
+				<div className="flex w-full gap-sm items-end">
 					{/* {fetchCount} */}
 					<Button
 						className="flex-1 group-data-[collapsible=icon]:hidden "

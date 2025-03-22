@@ -28,7 +28,7 @@ export function Providers() {
 	const [buster, setBuster] = useState(__HASH__);
 	return (
 		<ThemeProvider>
-			<div className="bg-background text-foreground flex justify-center m-6">
+			<div className="bg-background text-foreground flex justify-center">
 				<ErrorBoundary FallbackComponent={ErrorComp}>
 					<PersistQueryClientProvider
 						client={queryClient}
@@ -50,13 +50,13 @@ export function Providers() {
 function ErrorComp({error}: FallbackProps) {
 	const info = parseError(error);
 	return (
-		<div className="m-6">
+		<div className="m-md">
 			<Alert>
-				<AlertTitle className="text-red-400 flex items-end text-xl gap-4">
+				<AlertTitle className="text-red-400 flex items-end text-xl gap-sm">
 					<Terminal className="stroke-red-400" />
 					Blimey!
 				</AlertTitle>
-				<AlertDescription className="my-4">
+				<AlertDescription className="my-sm">
 					<pre className="overflow-x-scroll w-full">{info}</pre>
 				</AlertDescription>
 			</Alert>

@@ -1,7 +1,13 @@
 import type {CodegenConfig} from "@graphql-codegen/cli";
+import fs from "node:fs";
+
+if (!fs.existsSync("src/graphql/schema.json")) {
+	console.log("No schema, run `pnpm getSchema --help`");
+	process.exit(1);
+}
 
 const config: CodegenConfig = {
-	schema: "./schema.json",
+	schema: "./src/graphql/schema.json",
 	documents: ["src/**/*.tsx"],
 	ignoreNoDocuments: true,
 	generates: {
@@ -23,7 +29,7 @@ const config: CodegenConfig = {
 				afterOneFileWrite: ["prettier --write"],
 			},
 		},
-		"./schema.graphql": {
+		"./src/graphql/schema.graphql": {
 			plugins: ["schema-ast"],
 			config: {
 				includeDirectives: true,
