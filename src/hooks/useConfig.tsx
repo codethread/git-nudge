@@ -176,6 +176,7 @@ function parseNetrc(netrcStr: string): ParsedConfig {
 	if (error) {
 		return {tag: "invalid", err: fromError(error).toString()};
 	}
+	console.log('codethread', data)
 	const machines = Object.entries(data);
 	if (machines.length === 1) {
 		const [[domain, {login, password}]] = machines;

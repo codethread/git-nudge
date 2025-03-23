@@ -31,7 +31,10 @@ export async function createBridge() {
 async function createFakeBridge() {
 	return {
 		readNetrc: async () => {
-			return import.meta.env.VITE_FAKE_NETRC;
+			const netrc = import.meta.env.VITE_FAKE_NETRC;
+			if (!netrc) {
+				throw new Error('no netrc')
+			}
 		},
 		readStoredConfig: async () => {
 			try {
