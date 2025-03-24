@@ -1,4 +1,4 @@
-import {Skeleton} from "@/components/ui/skeleton";
+import {Skeleton} from "@/components/ui/skeleton"
 import {
 	Table,
 	TableBody,
@@ -8,21 +8,20 @@ import {
 	TableHead,
 	TableHeader,
 	TableRow,
-} from "@/components/ui/table";
-import {Text, TextSkeleton} from "@/components/ui/text";
-import {graphql} from "@/graphql";
-import type {UsersQueryQuery} from "@/graphql/graphql";
-import {useConfigRequest} from "@/hooks/useConfig";
-import {duration} from "@/lib/duration";
-import {cn} from "@/lib/utils";
-import {execute} from "@/utils/execute";
-import {Avatar, AvatarFallback, AvatarImage} from "@radix-ui/react-avatar";
-import {useInfiniteQuery} from "@tanstack/react-query";
-import {useEffect, useMemo} from "react";
-import {P, match} from "ts-pattern";
+} from "@/components/ui/table"
+import {Text, TextSkeleton} from "@/components/ui/text"
+import {graphql} from "@/graphql"
+import type {UsersQueryQuery} from "@/graphql/graphql"
+import {useConfigRequest} from "@/hooks/useConfig"
+import {useFetcher} from "@/hooks/useFetcher"
+import {duration} from "@/lib/duration"
+import {cn} from "@/lib/utils"
+import {Avatar, AvatarFallback, AvatarImage} from "@radix-ui/react-avatar"
+import {useInfiniteQuery} from "@tanstack/react-query"
+import {useEffect, useMemo} from "react"
+import {P, match} from "ts-pattern"
 
 // TODO: right now a blunt hammer, can offer more control if needed
-
 const UsersQuery = graphql(`
 	query UsersQuery($cursor: String) {
 		users(after: $cursor) {
@@ -41,43 +40,43 @@ const UsersQuery = graphql(`
 			}
 		}
 	}
-`);
+`)
 
 export type User = MaybeNot<
 	NN<NN<NN<UsersQueryQuery["users"]>["nodes"]>[number]>
->;
+>
 
 export const useUsersQuery = () => {
-	const reqConf = useConfigRequest();
+	const fetcher = useFetcher()
 	const queryData = useInfiniteQuery({
 		staleTime: duration(1, "days"),
 		refetchOnMount: false,
 		refetchOnWindowFocus: false,
 		queryKey: ["usersAll"],
 		initialPageParam: "",
-		queryFn: ({pageParam}) => execute(reqConf, UsersQuery, {cursor: pageParam}),
+		queryFn: ({pageParam}) => fetcher(UsersQuery, {cursor: pageParam}),
 		getNextPageParam: ({users}) =>
 			users?.pageInfo.hasNextPage ? users?.pageInfo?.endCursor : null,
-	});
+	})
 
 	useEffect(() => {
 		if (queryData.hasNextPage) {
-			queryData.fetchNextPage();
+			queryData.fetchNextPage()
 		}
-	}, [queryData]);
+	}, [queryData])
 
 	return useMemo(() => {
-		const {error, data, isFetching} = queryData;
-		const count = data?.pages.at(0)?.users?.count ?? 0;
+		const {error, data, isFetching} = queryData
+		const count = data?.pages.at(0)?.users?.count ?? 0
 		const fetched = data?.pages
 			.map((p) => p.users?.nodes?.length ?? 0)
-			.reduce((a, b) => a + b);
-		const progress = fetched ? fetched / count : 0;
-		const allFetched = progress === 1;
+			.reduce((a, b) => a + b)
+		const progress = fetched ? fetched / count : 0
+		const allFetched = progress === 1
 		const users =
 			data && allFetched
 				? data.pages.flatMap((p) => p.users?.nodes).filter(Boolean)
-				: [];
+				: []
 		return {
 			error,
 			progress,
@@ -85,25 +84,25 @@ export const useUsersQuery = () => {
 			allFetched,
 			allUsers: users,
 			users: users.filter((u) => !u.bot && u.state === "active"),
-		};
-	}, [queryData]);
-};
+		}
+	}, [queryData])
+}
 
 interface UserProps {
-	className?: string;
-	loading?: boolean;
-	user?: User;
+	className?: string
+	loading?: boolean
+	user?: User
 }
 
 export function User(props: UserProps) {
-	const {domain} = useConfigRequest();
+	const {domain} = useConfigRequest()
 
 	const user = match(props)
 		.with({loading: true}, () => undefined)
 		.with({user: P.select()}, (_) => _)
-		.exhaustive();
+		.exhaustive()
 
-	const avatar = user?.avatarUrl?.replace(/^\//, `https://${domain}/`);
+	const avatar = user?.avatarUrl?.replace(/^\//, `https://${domain}/`)
 
 	return (
 		<div className={cn("flex items-center space-x-4", props.className)}>
@@ -136,14 +135,14 @@ export function User(props: UserProps) {
 				)}
 			</div>
 		</div>
-	);
+	)
 }
 
 export function Users() {
-	const {isFetching, error, users} = useUsersQuery();
+	const {isFetching, error, users} = useUsersQuery()
 
 	if (error) {
-		return <div>{error.message}</div>;
+		return <div>{error.message}</div>
 	}
 
 	return (
@@ -182,5 +181,5 @@ export function Users() {
 				</TableRow>
 			</TableFooter>
 		</Table>
-	);
+	)
 }

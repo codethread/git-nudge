@@ -1,9 +1,9 @@
-import type {CodegenConfig} from "@graphql-codegen/cli";
-import fs from "node:fs";
+import type {CodegenConfig} from "@graphql-codegen/cli"
+import fs from "node:fs"
 
 if (!fs.existsSync("src/graphql/schema.json")) {
-	console.log("No schema, run `pnpm getSchema --help`");
-	process.exit(1);
+	console.log("No schema, run `pnpm getSchema --help`")
+	process.exit(1)
 }
 
 const config: CodegenConfig = {
@@ -36,6 +36,6 @@ const config: CodegenConfig = {
 			},
 		},
 	},
-};
+}
 
-export default config;
+export default config

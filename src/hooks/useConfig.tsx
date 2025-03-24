@@ -1,14 +1,14 @@
-import {Button} from "@/components/ui/button";
-import {duration} from "@/lib/duration";
-import type {RequestConfig} from "@/utils/execute";
-import netrc from "netrc";
-import React, {useRef, useState} from "react";
-import {P, match} from "ts-pattern";
-import {z} from "zod";
-import {fromError} from "zod-validation-error";
-import {createStore, useStore} from "zustand";
-import {combine} from "zustand/middleware";
-import {useShallow} from "zustand/react/shallow";
+import {Button} from "@/components/ui/button"
+import {duration} from "@/lib/duration"
+import type {RequestConfig} from "@/utils/execute"
+import netrc from "netrc"
+import React, {useRef, useState} from "react"
+import {P, match} from "ts-pattern"
+import {z} from "zod"
+import {fromError} from "zod-validation-error"
+import {createStore, useStore} from "zustand"
+import {combine} from "zustand/middleware"
+import {useShallow} from "zustand/react/shallow"
 
 const NetrcSchema = z.record(
 	z.string(),
@@ -16,8 +16,10 @@ const NetrcSchema = z.record(
 		login: z.string(),
 		password: z.string(),
 	}),
-);
-type Netrc = z.TypeOf<typeof NetrcSchema>;
+	{message: "unable to parse Netrc"},
+)
+
+type Netrc = z.TypeOf<typeof NetrcSchema>
 
 const StorageConfigSchema = z
 	.object(
@@ -39,39 +41,39 @@ const StorageConfigSchema = z
 		},
 		{message: "dev error, missing defaults"},
 	)
-	.default({});
+	.default({})
 
-type StorageConfig = z.TypeOf<typeof StorageConfigSchema>;
+type StorageConfig = z.TypeOf<typeof StorageConfigSchema>
 
 export interface IConfig extends StorageConfig {
 	gitlab: {
-		domain: string;
-		user: string;
-		token: string;
-	};
+		domain: string
+		user: string
+		token: string
+	}
 }
 
-const configContext = React.createContext<null | ConfigStore>(null);
+const configContext = React.createContext<null | ConfigStore>(null)
 
 interface Props extends IChildren {
-	netrcStr: string;
-	initConfig: unknown;
+	netrcStr: string
+	initConfig: unknown
 }
 
-type ConfigStore = ReturnType<typeof createConfigStore>;
+type ConfigStore = ReturnType<typeof createConfigStore>
 function createConfigStore(config: IConfig) {
 	return createStore(
 		combine(config, (set) => ({
 			setConfig: <Key extends keyof IConfig>(key: Key, value: IConfig[Key]) =>
 				set({[key]: value}),
 		})),
-	);
+	)
 }
 
 export const ConfigProvider = ({children, netrcStr, initConfig}: Props) => {
-	const stored = StorageConfigSchema.parse(initConfig);
-	const config = parseNetrc(netrcStr);
-	const [chosen, setChosen] = useState<IConfig["gitlab"]>();
+	const stored = StorageConfigSchema.parse(initConfig)
+	const config = parseNetrc(netrcStr)
+	const [chosen, setChosen] = useState<IConfig["gitlab"]>()
 
 	return match([config, chosen])
 		.with([{tag: "invalid", err: P.select()}, P._], (err) => <p>{err}</p>)
@@ -86,17 +88,17 @@ export const ConfigProvider = ({children, netrcStr, initConfig}: Props) => {
 				{children}
 			</Provider>
 		))
-		.exhaustive();
-};
+		.exhaustive()
+}
 
 function ChooseNetrc({
 	netrc,
 	onSelect,
 }: {
-	netrc: Netrc;
-	onSelect: (conf: IConfig["gitlab"]) => void;
+	netrc: Netrc
+	onSelect: (conf: IConfig["gitlab"]) => void
 }) {
-	const configs = Object.entries(netrc);
+	const configs = Object.entries(netrc)
 	return (
 		<div>
 			<p>You have multiple machine configs, which will you use for gitlab?</p>
@@ -104,7 +106,7 @@ function ChooseNetrc({
 				<div key={domain}>
 					<Button
 						onClick={() => {
-							onSelect({user: login, domain, token: password});
+							onSelect({user: login, domain, token: password})
 						}}
 					>
 						{domain} {login}
@@ -112,30 +114,30 @@ function ChooseNetrc({
 				</div>
 			))}
 		</div>
-	);
+	)
 }
 
 function Provider({children, config}: IChildren & {config: IConfig}) {
-	const store = useRef(createConfigStore(config)).current;
+	const store = useRef(createConfigStore(config)).current
 
 	return (
 		<configContext.Provider value={store}>{children}</configContext.Provider>
-	);
+	)
 }
 
 function useConfigStore() {
-	const c = React.useContext(configContext);
-	if (!c) throw new Error("ah");
-	return c;
+	const c = React.useContext(configContext)
+	if (!c) throw new Error("ah")
+	return c
 }
 
 export function useConfigSetter() {
-	const store = useConfigStore();
-	return useStore(store, (s) => s.setConfig);
+	const store = useConfigStore()
+	return useStore(store, (s) => s.setConfig)
 }
 
 export function useConfigRequest() {
-	const store = useConfigStore();
+	const store = useConfigStore()
 	return useStore(
 		store,
 		useShallow(
@@ -145,41 +147,46 @@ export function useConfigRequest() {
 				timeout: s.global.requestTimeoutMillis,
 			}),
 		),
-	);
+	)
 }
 export const useConfigMe = () =>
 	useStore(
 		useConfigStore(),
 		useShallow((s) => ({username: s.gitlab.user})),
-	);
+	)
 
 type ParsedConfig =
 	| {
-			tag: "invalid";
-			err: string;
+			tag: "invalid"
+			err: string
 	  }
 	| {
-			tag: "valid";
+			tag: "valid"
 			netrc: {
-				domain: string;
-				user: string;
-				pass: string;
-			};
+				domain: string
+				user: string
+				pass: string
+			}
 	  }
 	| {
-			tag: "multiple";
-			netrc: Netrc;
-	  };
+			tag: "multiple"
+			netrc: Netrc
+	  }
 
 function parseNetrc(netrcStr: string): ParsedConfig {
-	const {data, error} = NetrcSchema.safeParse(netrc.parse(netrcStr));
-	if (error) {
-		return {tag: "invalid", err: fromError(error).toString()};
+	let net: unknown = null
+	try {
+		net = netrc.parse(netrcStr)
+	} catch (e) {
+		console.error(e)
 	}
-	console.log('codethread', data)
-	const machines = Object.entries(data);
+	const {data, error} = NetrcSchema.safeParse(net)
+	if (error) {
+		return {tag: "invalid", err: fromError(error).toString()}
+	}
+	const machines = Object.entries(data)
 	if (machines.length === 1) {
-		const [[domain, {login, password}]] = machines;
+		const [[domain, {login, password}]] = machines
 		return {
 			tag: "valid",
 			netrc: {
@@ -187,11 +194,11 @@ function parseNetrc(netrcStr: string): ParsedConfig {
 				user: login,
 				pass: password,
 			},
-		};
+		}
 	}
 
 	return {
 		tag: "multiple",
 		netrc: data,
-	};
+	}
 }

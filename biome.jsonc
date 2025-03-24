@@ -1,28 +1,46 @@
 {
-  "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
-  "vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true },
-  "files": { "ignoreUnknown": false, "ignore": [] },
-  "formatter": {
-    "enabled": false // just using prettier for now until it formats nested gql
+	"$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
+	"vcs": {
+		"enabled": true,
+		"clientKind": "git",
+		"useIgnoreFile": true
+	},
+	"files": {
+		"ignoreUnknown": false,
+		"ignore": []
+	},
+	"formatter": {
+		"enabled": false // just using prettier for now until it formats nested gql
     // "useEditorconfig": true,
-    // "lineWidth": 100,
-    // "bracketSpacing": false
-  },
-  "organizeImports": { "enabled": true },
-  "linter": {
-    "enabled": true,
-    "rules": {
-      "recommended": true,
-      "correctness": {
-        "noUnusedImports": "error"
-      }
-    }
-  },
-  "javascript": {
-    "formatter": {
-      "bracketSameLine": false,
-      "quoteStyle": "single",
-      "bracketSpacing": false
-    }
-  }
+		// "lineWidth": 100,
+		// "bracketSpacing": false
+	},
+	"organizeImports": {
+		"enabled": true
+	},
+	"linter": {
+		"enabled": true,
+		"rules": {
+			"recommended": true,
+			"correctness": {
+				"noUnusedImports": "error"
+			},
+			"nursery": {
+				"noEnum": "error",
+				"noTemplateCurlyInString": "error",
+				"useComponentExportOnlyModules": "error" // react-fast-refresh
+			},
+			"performance": {
+				"noBarrelFile": "error",
+				"noReExportAll": "error"
+			}
+		}
+	},
+	"javascript": {
+		"formatter": {
+			"bracketSameLine": false,
+			"quoteStyle": "single",
+			"bracketSpacing": false
+		}
+	}
 }

@@ -1,13 +1,13 @@
-import {graphql} from "../graphql";
-import type {GetMyMrsQuery, PipelineStatusEnum} from "../graphql/graphql";
-import {useBridge} from "../hooks/useBridge";
-import {useConfigMe, useConfigRequest} from "../hooks/useConfig";
-import {execute} from "../utils/execute";
-import {Users} from "./widgets/Users";
-import {Button} from "@/components/ui/button";
-import {useQuery} from "@tanstack/react-query";
-import equal from "fast-deep-equal";
-import {useEffect, useState} from "react";
+import {graphql} from "../graphql"
+import type {GetMyMrsQuery, PipelineStatusEnum} from "../graphql/graphql"
+import {useBridge} from "../hooks/useBridge"
+import {useConfigMe, useConfigRequest} from "../hooks/useConfig"
+import {Users} from "./widgets/Users"
+import {Button} from "@/components/ui/button"
+import {useFetcher} from "@/hooks/useFetcher"
+import {useQuery} from "@tanstack/react-query"
+import equal from "fast-deep-equal"
+import {useEffect, useState} from "react"
 
 const GetMyMrs = graphql(`
 	query GetMyMrs($draft: Boolean!) {
@@ -57,44 +57,45 @@ const GetMyMrs = graphql(`
 			}
 		}
 	}
-`);
+`)
 
 type NotificationData = {
-	shouldNotify: boolean;
+	shouldNotify: boolean
 	mrs: Map<
 		string,
 		{
-			pipeline: PipelineStatusEnum;
-			approved: boolean;
-			conflicts: boolean;
-			comments: number;
+			pipeline: PipelineStatusEnum
+			approved: boolean
+			conflicts: boolean
+			comments: number
 		}
-	>;
-};
-type NotificationDataMrs = NotificationData["mrs"];
+	>
+}
+type NotificationDataMrs = NotificationData["mrs"]
 
 export function Dashboard() {
-	const reqConf = useConfigRequest();
-	const me = useConfigMe();
-	const {notify} = useBridge();
+	const {domain} = useConfigRequest()
+	const fetcher = useFetcher()
+	const me = useConfigMe()
+	const {notify} = useBridge()
 
 	const {isPending, isFetching, error, data, refetch} = useQuery({
 		queryKey: ["me"],
 		refetchInterval: 60 * 1000,
-		queryFn: () => execute(reqConf, GetMyMrs, {draft: true}),
-	});
+		queryFn: () => fetcher(GetMyMrs, {draft: true}),
+	})
 
-	const [previousData, setPreviousData] = useState<NotificationData>();
+	const [previousData, setPreviousData] = useState<NotificationData>()
 
 	useEffect(() => {
 		if (previousData?.shouldNotify) {
-			setPreviousData({...previousData, shouldNotify: false});
-			notify("something changed!");
+			setPreviousData({...previousData, shouldNotify: false})
+			notify("something changed!")
 		}
-	}, [previousData, notify]);
+	}, [previousData, notify])
 
 	if (isPending) {
-		return <div>...loading</div>;
+		return <div>...loading</div>
 	}
 
 	if (error) {
@@ -103,13 +104,13 @@ export function Dashboard() {
 				<p>{error.message}</p>
 				<Button
 					onClick={() => {
-						refetch();
+						refetch()
 					}}
 				>
 					retry
 				</Button>
 			</div>
-		);
+		)
 	}
 
 	if (!data.currentUser?.authoredMergeRequests) {
@@ -119,18 +120,18 @@ export function Dashboard() {
 				expired
 				<Button
 					onClick={() => {
-						refetch();
+						refetch()
 					}}
 				>
 					retry
 				</Button>
 			</div>
-		);
+		)
 	}
 
-	const diff = getNotifictionData(data.currentUser.authoredMergeRequests);
+	const diff = getNotifictionData(data.currentUser.authoredMergeRequests)
 	if (!equal(diff, previousData?.mrs)) {
-		setPreviousData({shouldNotify: !!previousData, mrs: diff});
+		setPreviousData({shouldNotify: !!previousData, mrs: diff})
 	}
 
 	return (
@@ -142,7 +143,7 @@ export function Dashboard() {
 			<div>
 				<Button
 					onClick={() => {
-						notify("hello");
+						notify("hello")
 					}}
 				>
 					Test notification
@@ -153,7 +154,7 @@ export function Dashboard() {
 				you have{" "}
 				<a
 					target="_blank"
-					href={`https://${reqConf.domain}/dashboard/merge_requests?assignee_username=${me.username}`}
+					href={`https://${domain}/dashboard/merge_requests?assignee_username=${me.username}`}
 					rel="noreferrer"
 				>
 					{data.currentUser?.authoredMergeRequests?.count} open MRs
@@ -196,24 +197,24 @@ export function Dashboard() {
 			</ul>
 			<Users />
 		</div>
-	);
+	)
 }
 
 function getNotifictionData(
 	mrs: NonNullable<GetMyMrsQuery["currentUser"]>["authoredMergeRequests"],
 ): NotificationDataMrs {
-	console.debug(mrs);
-	const ls: NotificationDataMrs = new Map();
-	if (!mrs?.nodes) return new Map();
+	console.debug(mrs)
+	const ls: NotificationDataMrs = new Map()
+	if (!mrs?.nodes) return new Map()
 	for (const mr of mrs.nodes) {
-		if (!mr) continue;
+		if (!mr) continue
 		ls.set(mr.id, {
 			approved: !!mr.approved,
 			pipeline: mr.headPipeline?.status || "PENDING",
 			comments:
 				mr.notes.nodes?.filter((n) => !n?.authorIsContributor).length ?? 0,
 			conflicts: !!mr.conflicts,
-		});
+		})
 	}
-	return ls;
+	return ls
 }

@@ -75,6 +75,15 @@ export function AppSidebar({actions}: {actions: any}) {
 					>
 						Clear cache
 					</Button>
+					<Button
+						className="flex-1 group-data-[collapsible=icon]:hidden "
+						variant="ghost"
+						onClick={() => {
+							actions.toggleFetcher();
+						}}
+					>
+						Toggle Fetcher
+					</Button>
 					<SidebarTrigger />
 				</div>
 			</SidebarFooter>
