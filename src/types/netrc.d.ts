@@ -1,7 +1,7 @@
 declare module "netrc" {
 	interface Netrc {
-		parse(s: string): unknown;
+		parse(s: string): unknown
 	}
-	const netrc: Netrc;
-	export default netrc;
+	const netrc: Netrc
+	export default netrc
 }

@@ -136,7 +136,7 @@ export function Dashboard() {
 
 	return (
 		<div>
-			<h2 className="text-xl bg-background">
+			<h2 className="bg-background text-xl">
 				hello {data.currentUser.name}
 				{isFetching && <span>...fetching</span>}
 			</h2>

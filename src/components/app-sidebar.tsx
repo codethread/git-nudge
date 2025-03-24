@@ -1,5 +1,5 @@
-import {Button} from "./ui/button";
-import {Lead} from "./ui/text";
+import {Button} from "./ui/button"
+import {Lead} from "./ui/text"
 import {
 	Sidebar,
 	SidebarContent,
@@ -12,9 +12,9 @@ import {
 	SidebarMenuButton,
 	SidebarMenuItem,
 	SidebarTrigger,
-} from "@/components/ui/sidebar";
-import {useIsFetching} from "@tanstack/react-query";
-import {Gitlab, Home, Settings} from "lucide-react";
+} from "@/components/ui/sidebar"
+import {useIsFetching} from "@tanstack/react-query"
+import {Gitlab, Home, Settings} from "lucide-react"
 
 const items = [
 	{
@@ -27,10 +27,10 @@ const items = [
 		url: "#",
 		icon: Settings,
 	},
-];
+]
 
 export function AppSidebar({actions}: {actions: any}) {
-	const fetchCount = useIsFetching();
+	const fetchCount = useIsFetching()
 
 	return (
 		<Sidebar variant="floating" collapsible="icon">
@@ -64,22 +64,22 @@ export function AppSidebar({actions}: {actions: any}) {
 			</SidebarContent>
 
 			<SidebarFooter>
-				<div className="flex w-full gap-sm items-end">
+				<div className="gap-sm flex w-full items-end">
 					{/* {fetchCount} */}
 					<Button
-						className="flex-1 group-data-[collapsible=icon]:hidden "
+						className="flex-1 group-data-[collapsible=icon]:hidden"
 						variant="destructive"
 						onClick={() => {
-							actions.clearCache();
+							actions.clearCache()
 						}}
 					>
 						Clear cache
 					</Button>
 					<Button
-						className="flex-1 group-data-[collapsible=icon]:hidden "
+						className="flex-1 group-data-[collapsible=icon]:hidden"
 						variant="ghost"
 						onClick={() => {
-							actions.toggleFetcher();
+							actions.toggleFetcher()
 						}}
 					>
 						Toggle Fetcher
@@ -88,5 +88,5 @@ export function AppSidebar({actions}: {actions: any}) {
 				</div>
 			</SidebarFooter>
 		</Sidebar>
-	);
+	)
 }

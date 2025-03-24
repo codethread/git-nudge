@@ -1,7 +1,7 @@
-import {Button} from "@/components/ui/button";
+import {Button} from "@/components/ui/button"
 
 interface Props {
-	onRetry: () => void;
+	onRetry: () => void
 }
 
 export function Setup({onRetry}: Props) {
@@ -30,5 +30,5 @@ export function Setup({onRetry}: Props) {
 			</p>
 			<Button onClick={() => onRetry()}>retry</Button>
 		</div>
-	);
+	)
 }

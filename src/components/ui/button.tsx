@@ -1,7 +1,7 @@
-import {cn} from "@/lib/utils";
-import {Slot} from "@radix-ui/react-slot";
-import {type VariantProps, cva} from "class-variance-authority";
-import type * as React from "react";
+import {cn} from "@/lib/utils"
+import {Slot} from "@radix-ui/react-slot"
+import {type VariantProps, cva} from "class-variance-authority"
+import type * as React from "react"
 
 const buttonVariants = cva(
 	"cursor-pointer inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
@@ -32,7 +32,7 @@ const buttonVariants = cva(
 			size: "default",
 		},
 	},
-);
+)
 
 function Button({
 	className,
@@ -43,10 +43,10 @@ function Button({
 	...props
 }: React.ComponentProps<"button"> &
 	VariantProps<typeof buttonVariants> & {
-		asChild?: boolean;
-		ping?: boolean;
+		asChild?: boolean
+		ping?: boolean
 	}) {
-	const Comp = asChild ? Slot : "button";
+	const Comp = asChild ? Slot : "button"
 
 	return (
 		<span className="relative inline-flex">
@@ -56,13 +56,13 @@ function Button({
 				{...props}
 			/>
 			{ping ? (
-				<span className="relative flex size-2 -top-1 right-1">
-					<span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent-foreground opacity-75" />
-					<span className="relative inline-flex size-2 rounded-full bg-accent-foreground" />
+				<span className="relative -top-1 right-1 flex size-2">
+					<span className="bg-accent-foreground absolute inline-flex h-full w-full animate-ping rounded-full opacity-75" />
+					<span className="bg-accent-foreground relative inline-flex size-2 rounded-full" />
 				</span>
 			) : null}
 		</span>
-	);
+	)
 }
 
-export {Button, buttonVariants};
+export {Button, buttonVariants}

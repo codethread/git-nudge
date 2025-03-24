@@ -3,8 +3,8 @@ const units = {
 	mins: 1000 * 60,
 	hours: 1000 * 60 * 60,
 	days: 1000 * 60 * 60 * 24,
-} as const;
+} as const
 
 export function duration(amount: number, unit: keyof typeof units) {
-	return units[unit] * amount;
+	return units[unit] * amount
 }

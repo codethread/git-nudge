@@ -1,6 +1,6 @@
-import {Skeleton} from "./skeleton";
-import {cn} from "@/lib/utils";
-import {type VariantProps, cva} from "class-variance-authority";
+import {Skeleton} from "./skeleton"
+import {cn} from "@/lib/utils"
+import {type VariantProps, cva} from "class-variance-authority"
 
 const textVariants = cva("", {
 	variants: {
@@ -16,7 +16,7 @@ const textVariants = cva("", {
 		variant: "default",
 		flush: false,
 	},
-});
+})
 
 export function Text({
 	className,
@@ -26,20 +26,20 @@ export function Text({
 }: React.ComponentProps<"p"> & VariantProps<typeof textVariants>) {
 	return (
 		<p className={cn(textVariants({variant, className, flush}))} {...props} />
-	);
+	)
 }
 
 export function Lead({className, ...props}: React.ComponentProps<"p">) {
 	return (
-		<p className={cn("text-xl text-muted-foreground", className)} {...props} />
-	);
+		<p className={cn("text-muted-foreground text-xl", className)} {...props} />
+	)
 }
 
 export function TextSkeleton({className}: {className?: string}) {
 	// TODO: there must be a var for this
 	return (
-		<div className="h-[calc(var(--text-base)*1.5)] flex flex-col justify-center">
+		<div className="flex h-[calc(var(--text-base)*1.5)] flex-col justify-center">
 			<Skeleton className={cn("h-(--text-base) w-[250px]", className)} />
 		</div>
-	);
+	)
 }
