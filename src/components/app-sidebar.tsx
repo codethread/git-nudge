@@ -29,7 +29,14 @@ const items = [
 	},
 ]
 
-export function AppSidebar({actions}: {actions: any}) {
+export interface SidebarProps {
+	actions: {
+		clearCache: () => void
+		toggleFetcher: () => void
+	}
+}
+
+export function AppSidebar({actions}: SidebarProps) {
 	const fetchCount = useIsFetching()
 
 	return (

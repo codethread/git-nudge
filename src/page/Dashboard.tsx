@@ -1,10 +1,10 @@
-import {User, useUsersQuery} from "./widgets/Users"
+import {User} from "./widgets/Users"
 import {Button} from "@/components/ui/button"
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card"
 import {Lead, Text} from "@/components/ui/text"
 import {graphql} from "@/graphql"
-import {useConfigRequest} from "@/hooks/useConfig"
-import {useFetcher} from "@/hooks/useFetcher"
+import {useFetcher} from "@/hooks/fetcher/useFetcher"
+import {type IUser, useUsersQuery} from "@/hooks/useUsers"
 import {useQuery} from "@tanstack/react-query"
 import {useState, useEffect, useCallback} from "react"
 import {match, P} from "ts-pattern"
@@ -112,7 +112,7 @@ function UsersCard({onSuccess}: ReadyProps) {
 	)
 }
 
-function UsersPreview(props: {users?: User[]; loading: boolean}) {
+function UsersPreview(props: {users?: IUser[]; loading: boolean}) {
 	const listLength = 3
 	const loaded = match(props)
 		.with({users: [], loading: false}, () => "empty" as const)
@@ -121,7 +121,7 @@ function UsersPreview(props: {users?: User[]; loading: boolean}) {
 		.exhaustive()
 
 	const [fading, setFading] = useState(loaded === "loading")
-	const [users, setUsers] = useState<(User | undefined)[]>(
+	const [users, setUsers] = useState<(IUser | undefined)[]>(
 		Array.isArray(loaded)
 			? loaded.slice(0, listLength)
 			: Array(listLength).fill(undefined),
@@ -170,7 +170,7 @@ function UsersPreview(props: {users?: User[]; loading: boolean}) {
 }
 
 const MyBioQuery = graphql(`
-	query Me {
+	query GetMe {
 		currentUser {
 			name
 			username

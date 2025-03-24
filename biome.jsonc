@@ -28,7 +28,7 @@
 			"nursery": {
 				"noEnum": "error",
 				"noTemplateCurlyInString": "error",
-				"useComponentExportOnlyModules": "error" // react-fast-refresh
+				"useComponentExportOnlyModules": "error" // react-fast-refresh https://www.gatsbyjs.com/docs/reference/local-development/fast-refresh/#how-it-works
 			},
 			"performance": {
 				"noBarrelFile": "error",

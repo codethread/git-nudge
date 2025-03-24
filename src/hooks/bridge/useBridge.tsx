@@ -1,20 +1,10 @@
-import type {IConfig} from "./useConfig"
+import type {IConfig} from "../config/useConfig"
 import {asyncStorage} from "@/lib/storage"
 import React from "react"
 
 export type IBridge = Awaited<ReturnType<typeof createFakeBridge>>
 
-const bridgeContext = React.createContext<null | IBridge>(null)
-
-interface Props extends IChildren {
-	bridge: IBridge
-}
-
-export const BridgeProvider = ({children, bridge}: Props) => {
-	return (
-		<bridgeContext.Provider value={bridge}>{children}</bridgeContext.Provider>
-	)
-}
+export const bridgeContext = React.createContext<null | IBridge>(null)
 
 export const useBridge = () => {
 	const b = React.useContext(bridgeContext)
@@ -81,6 +71,7 @@ async function createFakeBridge() {
 		},
 	}
 }
+
 async function createTauriBridge() {
 	const {invoke} = await import("@tauri-apps/api/core")
 	const {isPermissionGranted, requestPermission, sendNotification} =
@@ -94,6 +85,19 @@ async function createTauriBridge() {
 	}
 
 	const api: IBridge = {
+		readStoredConfig: async () => {
+			// TODO: could be persisted to disk
+			try {
+				const stored = await asyncStorage.getItem("CONFIG")
+				return stored ? JSON.parse(stored) : undefined
+			} catch (e) {
+				console.warn(e)
+				return undefined
+			}
+		},
+		setStoredConfig: async (config: IConfig) => {
+			asyncStorage.setItem("CONFIG", JSON.stringify(config))
+		},
 		readNetrc: () => invoke("read_netrc"),
 		notify: async (msg) => {
 			if (!permissionGranted)

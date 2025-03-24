@@ -1,11 +1,11 @@
-import {AppSidebar} from "@/components/app-sidebar"
+import {AppSidebar, type SidebarProps} from "@/components/app-sidebar"
 import {SidebarProvider} from "@/components/ui/sidebar"
 
 export default function Layout({
 	children,
 	actions,
 }: {
-	actions: any
+	actions: SidebarProps["actions"]
 	children: React.ReactNode
 }) {
 	return (

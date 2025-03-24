@@ -8,7 +8,7 @@ if (!fs.existsSync("src/graphql/schema.json")) {
 
 const config: CodegenConfig = {
 	schema: "./src/graphql/schema.json",
-	documents: ["src/**/*.tsx"],
+	documents: ["src/{hooks,page}/**/*.{ts,tsx}"],
 	ignoreNoDocuments: true,
 	generates: {
 		"./src/graphql/": {

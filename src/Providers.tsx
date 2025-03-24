@@ -1,6 +1,6 @@
 import App from "./App"
-import {ThemeProvider} from "./components/theme-provider"
 import {Alert, AlertDescription, AlertTitle} from "./components/ui/alert"
+import {ThemeProvider} from "./hooks/theme/theme-provider"
 import {duration} from "./lib/duration"
 import {asyncStorage} from "./lib/storage"
 import {createAsyncStoragePersister} from "@tanstack/query-async-storage-persister"

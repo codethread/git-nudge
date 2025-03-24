@@ -1,18 +1,9 @@
-import {useConfigRequest} from "./useConfig"
-import type {Fetcher} from "@/lib/fetcher/web"
+import {fetcherContext} from "./useFetcher"
+import {useConfigRequest} from "@/hooks/config/useConfig"
 import {useQuery} from "@tanstack/react-query"
-import React from "react"
-
-const Context = React.createContext<null | Fetcher>(null)
 
 interface Props extends IChildren {
 	withFakeFetcher?: boolean
-}
-
-export function useFetcher() {
-	const f = React.useContext(Context)
-	if (!f) throw new Error("useFetcher must be used inside FetcherProvider")
-	return f
 }
 
 export function FetcherProvider({children, withFakeFetcher}: Props) {
@@ -34,5 +25,7 @@ export function FetcherProvider({children, withFakeFetcher}: Props) {
 	if (isFetching) return null
 	if (!isSuccess) throw new Error("FetcherProvider failed")
 
-	return <Context.Provider value={data}>{children}</Context.Provider>
+	return (
+		<fetcherContext.Provider value={data}>{children}</fetcherContext.Provider>
+	)
 }
