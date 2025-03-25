@@ -1,52 +1,32 @@
+import {mocks, storeInit} from "./mocks"
 import type {Fetcher} from "./web"
-import type {CurrentUser, UserCore, Scalars} from "@/graphql/graphql"
-import {faker} from "@faker-js/faker"
-import {addMocksToSchema, relayStylePaginationMock} from "@graphql-tools/mock"
+import {
+	addMocksToSchema,
+	createMockStore,
+	relayStylePaginationMock,
+} from "@graphql-tools/mock"
 import {makeExecutableSchema} from "@graphql-tools/schema"
 import {graphql, buildClientSchema} from "graphql"
 
-// all any type anyway
-// import type { Scalars } from '../src/graphql/graphql'
-
-type Mock<T> = {[K in keyof T]: () => Partial<T[K]>}
-type Mocks<T> = {[K in keyof T]: () => Partial<Mock<T[K]>>}
-type ScalarsMap = {[K in keyof Scalars]: () => Scalars[K]["output"]}
-
-const scalars: Partial<ScalarsMap> = {
-	UserID: () => faker.string.uuid(),
-}
-
-const objects: Mocks<{
-	UserCore: UserCore
-	CurrentUser: CurrentUser
-}> = {
-	UserCore: () => ({
-		avatarUrl: () => "https://placecats.com/300/300",
-		webUrl: () => "https://gitlab.com",
-	}),
-	CurrentUser: () => {
-		const name = faker.person.fullName()
-		return {
-			username: () => name.replaceAll(" ", ".").toLowerCase(),
-			name: () => name,
-			avatarUrl: () => "https://placecats.com/200/200",
-		}
-	},
-}
-
-const mocks = {...scalars, ...objects}
-
 export async function createFetcher(): Promise<Fetcher> {
-	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+	// biome-ignore lint/suspicious/noExplicitAny: codegen
 	const {default: schemaJson}: any = await import("../../graphql/schema.json")
-	const schema = addMocksToSchema({
-		schema: makeExecutableSchema({
-			typeDefs: buildClientSchema(schemaJson.data),
-		}),
+
+	const schema = makeExecutableSchema({
+		typeDefs: buildClientSchema(schemaJson.data),
+	})
+
+	const store = createMockStore({schema, mocks})
+
+	storeInit(store)
+
+	const mockedSchema = addMocksToSchema({
+		schema,
+		store,
 		mocks,
 		resolvers: (store) => ({
 			Query: {
-				users: relayStylePaginationMock(store),
+				users: paginated(relayStylePaginationMock(store)),
 			},
 			CurrentUser: {
 				projectMemberships: relayStylePaginationMock(store),
@@ -57,17 +37,39 @@ export async function createFetcher(): Promise<Fetcher> {
 	})
 	return async (query, ...[variables]) => {
 		const variableValues = variables ?? {}
-		const source = query.toString()
+		const source = query.toString().trim()
 		const {data} = await graphql({
-			schema,
+			schema: mockedSchema,
 			variableValues,
 			source,
 		})
-		console.groupCollapsed("🚀 GRAPHQL", data)
-		console.log({query, variableValues})
+
+		const queryLine = source.slice(0, source.indexOf("\n", 1))
+		console.groupCollapsed(`🚀 GRAPHQL ${queryLine}`)
+		console.groupCollapsed("query")
+		console.log(source)
+		console.groupEnd()
+		console.log("vars", variableValues)
 		console.log(data)
 		console.groupEnd()
+
 		// biome-ignore lint/suspicious/noExplicitAny: codegen
 		return data as any
 	}
+}
+
+type Resolver = ReturnType<typeof relayStylePaginationMock>
+/**
+ * GitLab doesn't quite follow relay, so we adapt
+ */
+function paginated(fn: Resolver) {
+	const cb: Resolver = (...args) => {
+		const page = fn(...args)
+		return {
+			...page,
+			count: page.totalCount,
+			nodes: page.edges.map((e: {node: string}) => e.node),
+		}
+	}
+	return cb
 }

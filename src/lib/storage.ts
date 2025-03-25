@@ -5,6 +5,7 @@ export const asyncStorage: AsyncStorage = {
 	 * Fetches `key` value.
 	 */
 	async getItem(key) {
+		return undefined
 		return window.localStorage.getItem(key)
 	},
 

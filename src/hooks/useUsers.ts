@@ -8,13 +8,14 @@ import {useEffect, useMemo} from "react"
 // TODO: right now a blunt hammer, can offer more control if needed
 const UsersQuery = graphql(`
 	query GetUsers($cursor: String) {
-		users(after: $cursor) {
+		users(first: 100, after: $cursor) {
 			count
 			pageInfo {
 				hasNextPage
 				endCursor
 			}
 			nodes {
+				id
 				avatarUrl
 				state
 				name
@@ -44,6 +45,13 @@ export const useUsersQuery = () => {
 	})
 
 	useEffect(() => {
+		const page = queryData.data?.pages.at(0)?.users
+		console.log("pageInfo")
+		console.log(page?.pageInfo)
+		console.log("count")
+		console.log(page?.count)
+		console.log("nodes")
+		page?.nodes?.forEach((e) => console.log(e))
 		if (queryData.hasNextPage) {
 			queryData.fetchNextPage()
 		}
