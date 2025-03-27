@@ -1,4 +1,5 @@
 import {fetcherContext} from "./useFetcher"
+import {Loader, LoaderPage} from "@/components/loader"
 import type {RequestConfig} from "@/lib/fetcher/web"
 import {useQuery} from "@tanstack/react-query"
 
@@ -17,12 +18,13 @@ export function FetcherProvider({children, withFake, reqConf}: Props) {
 			const {createFetcher} = await (withFake
 				? import("@/lib/fetcher/fake")
 				: import("@/lib/fetcher/web"))
+			// await new Promise(() => {})
 			return createFetcher(c)
 		},
 	})
 
 	if (error) throw error
-	if (isPending) return null
+	if (isPending) return <LoaderPage />
 	if (!isSuccess) throw new Error("FetcherProvider failed")
 
 	return (

@@ -1,11 +1,13 @@
-import {Loader} from "@/components/loader"
+import {Loader, LoaderPage} from "@/components/loader"
 import {Button} from "@/components/ui/button"
+import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card"
+import {Lead} from "@/components/ui/text"
 import {useBridge} from "@/hooks/bridge/useBridge"
-import {
-	useAppConfigAction,
-} from "@/hooks/config/useConfig"
+import {useAppConfigAction} from "@/hooks/config/useConfig"
 import {parseNetrc, type Netrc} from "@/lib/netrc"
+import {Content} from "@radix-ui/react-dialog"
 import {useQuery} from "@tanstack/react-query"
+import {Heading} from "lucide-react"
 import {match, P} from "ts-pattern"
 
 export function Login() {
@@ -28,7 +30,7 @@ export function Login() {
 		},
 	})
 
-	if (!data || isFetching) return <Loader />
+	if (!data || isFetching) return <LoaderPage />
 
 	return match(data)
 		.with({tag: "invalid", err: P.select()}, (err) => <p>{err}</p>)
@@ -38,30 +40,50 @@ export function Login() {
 }
 
 function NoNetrc({onRetry}: {onRetry: () => void}) {
+	const {toggleFakeLab} = useAppConfigAction()
 	return (
-		<div>
-			<p>
-				Could not laod <span>~/.netrc</span> file. Please create one in the
-				format:
-			</p>
-			<pre>
-				{[
-					"machine <domain> # e.g git.mycompany.io",
-					"login <gitlab username>",
-					"password <token>",
-				].join("\n")}
-			</pre>
-			<p>
-				Where <span>{"<token>"}</span> is a gitlab access{" "}
-				<a
-					href="https://docs.gitlab.com/user/profile/personal_access_tokens/"
-					target="_blank"
-					rel="noreferrer"
-				>
-					token
-				</a>
-			</p>
-			<Button onClick={() => onRetry()}>retry</Button>
+		<div className="flex flex-1 justify-center">
+			<div className="flex flex-col">
+				<Lead className="mb-lg">Missing netrc</Lead>
+				<div className="gap-md flex flex-col">
+					<p>
+						Could not load{" "}
+						<span className="bg-secondary rounded-sm p-1">~/.netrc</span> file.
+						Please create one in the format:
+					</p>
+					<pre className="bg-secondary p-sm rounded-sm text-wrap">
+						{[
+							"machine <domain> # e.g git.mycompany.io",
+							"login <gitlab username>",
+							"password <token>",
+						].join("\n")}
+					</pre>
+					<p>
+						Where <span>{"<token>"}</span> is a gitlab access{" "}
+						<a
+							href="https://docs.gitlab.com/user/profile/personal_access_tokens/"
+							target="_blank"
+							rel="noreferrer"
+						>
+							token
+						</a>
+					</p>
+					<div className="flex justify-around">
+						<div className="gap-md flex">
+							<Button className="min-w-[150px]" onClick={() => onRetry()}>
+								Retry
+							</Button>
+							<Button
+								variant="outline"
+								className="min-w-[150px]"
+								onClick={toggleFakeLab}
+							>
+								Use FakeLab
+							</Button>
+						</div>
+					</div>
+				</div>
+			</div>
 		</div>
 	)
 }

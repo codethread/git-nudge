@@ -1,4 +1,4 @@
-import {AppSidebar, } from "@/components/app-sidebar"
+import {AppSidebar} from "@/components/app-sidebar"
 import {SidebarProvider} from "@/components/ui/sidebar"
 
 export default function Layout({children}: {children: React.ReactNode}) {
@@ -6,7 +6,7 @@ export default function Layout({children}: {children: React.ReactNode}) {
 		<SidebarProvider>
 			<AppSidebar />
 			{/* pr-2 to match sidebar */}
-			<main className="mx-auto w-full max-w-6xl pr-2">{children}</main>
+			<main className="mx-auto w-full max-w-6xl pt-2 pr-2">{children}</main>
 		</SidebarProvider>
 	)
 }

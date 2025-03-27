@@ -176,11 +176,11 @@ export function createConfigStore(appConfigStore: IAppConfigStore) {
 				isFakeLab: conf.fakeLab,
 			}))
 			.with({fakeLab: true}, () => ({
+				isFakeLab: true,
 				gitlab: {
-					domain: "",
+					domain: "fakelab.io",
 					user: "test.user",
 				},
-				isFakeLab: conf.fakeLab,
 			}))
 			.with({gitlab: {state: "init"}}, () => {
 				// could make a static check by syncing state rather than deriving, will see how it goes

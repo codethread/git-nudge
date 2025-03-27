@@ -15,30 +15,28 @@ export function Dashboard() {
 	const allReady = ready.every(Boolean) && ready.length > 2
 	const onSuccess = useCallback(() => setReady((s) => s.concat(true)), [])
 	return (
-		<Layout>
-			<div className="@container w-[100%] flex-1">
-				<div className="flex h-24 flex-col justify-center">
-					{allReady ? (
-						<div className="flex justify-center">
-							<Button ping variant="outline">
-								Launch
-							</Button>
-						</div>
-					) : (
-						<Lead className="animate-fade text-center">
-							Welcome, getting things set up...
-						</Lead>
-					)}
-				</div>
-				{/* <div className=" flex flex-wrap justify-center items-stretch gap-sm @min-[800px]:gap-lg "> */}
-				<div className="gap-sm @min-5xl:gap-lg flex flex-wrap items-stretch justify-center">
-					{/* <div className=" flex flex-wrap justify-center items-stretch gap-lg @6xl:gap-sm "> */}
-					<MyCard onSuccess={onSuccess} />
-					<UsersCard onSuccess={onSuccess} />
-					<ReposCard onSuccess={onSuccess} />
-				</div>
+		<div className="@container w-[100%] flex-1">
+			<div className="flex h-24 flex-col justify-center">
+				{allReady ? (
+					<div className="flex justify-center">
+						<Button ping variant="outline">
+							Launch
+						</Button>
+					</div>
+				) : (
+					<Lead className="animate-fade text-center">
+						Welcome, getting things set up...
+					</Lead>
+				)}
 			</div>
-		</Layout>
+			{/* <div className=" flex flex-wrap justify-center items-stretch gap-sm @min-[800px]:gap-lg "> */}
+			<div className="gap-sm @min-5xl:gap-lg flex flex-wrap items-stretch justify-center">
+				{/* <div className=" flex flex-wrap justify-center items-stretch gap-lg @6xl:gap-sm "> */}
+				<MyCard onSuccess={onSuccess} />
+				<UsersCard onSuccess={onSuccess} />
+				<ReposCard onSuccess={onSuccess} />
+			</div>
+		</div>
 	)
 }
 

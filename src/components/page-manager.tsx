@@ -15,11 +15,7 @@ export function PageManager() {
 	const timeout = useAppConfigSelector((s) => s.global.requestTimeoutMillis)
 
 	return match({isFakeLab, gitlabConf})
-		.with({isFakeLab: false, gitlabConf: {state: "init"}}, () => (
-			<Layout>
-				<Login />
-			</Layout>
-		))
+		.with({isFakeLab: false, gitlabConf: {state: "init"}}, () => <Login />)
 		.with(
 			{isFakeLab: false, gitlabConf: {state: "ready"}},
 			({gitlabConf: {domain, token}}) => (

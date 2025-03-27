@@ -1,4 +1,4 @@
-import {Loader} from "@/components/loader"
+import {Loader, LoaderPage} from "@/components/loader"
 import {PageManager} from "@/components/page-manager"
 import {Alert, AlertTitle, AlertDescription} from "@/components/ui/alert"
 import {
@@ -16,6 +16,7 @@ import {
 } from "@/hooks/config/useConfig"
 import {asyncStorage} from "@/lib/storage"
 import {parseError} from "@/lib/utils"
+import Layout from "@/page/Layout"
 import {createAsyncStoragePersister} from "@tanstack/query-async-storage-persister"
 import {QueryClient} from "@tanstack/react-query"
 import {PersistQueryClientProvider} from "@tanstack/react-query-persist-client"
@@ -47,7 +48,7 @@ export function App() {
 	}, [])
 
 	if (!bridge || !config) {
-		return <Loader />
+		return <LoaderPage />
 	}
 
 	return (
@@ -55,7 +56,9 @@ export function App() {
 			<bridgeContext.Provider value={bridge}>
 				<appConfigContext.Provider value={config}>
 					<ReactQueryProvider>
-						<PageManager />
+						<Layout>
+							<PageManager />
+						</Layout>
 					</ReactQueryProvider>
 				</appConfigContext.Provider>
 			</bridgeContext.Provider>
@@ -73,9 +76,10 @@ function ReactQueryProvider({children}: IChildren) {
 	const client = useRef<QueryClient>()
 
 	if (!client.current) {
-		client.current = new QueryClient({defaultOptions: queryOptions})
-		logger.debug("create queryClient", client.current)
-		registerCallback("clearCache", client.current.clear)
+		const c = new QueryClient({defaultOptions: queryOptions})
+		client.current = c
+		logger.debug("create queryClient", c)
+		registerCallback("clearCache", () => c.clear())
 	}
 
 	useEffect(() => {

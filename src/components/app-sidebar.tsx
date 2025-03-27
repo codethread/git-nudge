@@ -1,5 +1,5 @@
-import {Button} from "./ui/button"
 import {Lead} from "./ui/text"
+import {Gitlab} from "@/components/icons/Gitlab"
 import {
 	Sidebar,
 	SidebarContent,
@@ -13,8 +13,13 @@ import {
 	SidebarMenuItem,
 	SidebarTrigger,
 } from "@/components/ui/sidebar"
-import {useAppConfigAction} from "@/hooks/config/useConfig"
-import {Gitlab, Home, Settings} from "lucide-react"
+import {
+	useAppConfigAction,
+	useAppConfigSelector,
+} from "@/hooks/config/useConfig"
+import {useTheme} from "@/hooks/theme/useTheme"
+import {pick} from "@/lib/utils"
+import {Delete, Home, Settings, Trash, Trash2} from "lucide-react"
 
 const items = [
 	{
@@ -30,7 +35,27 @@ const items = [
 ]
 
 export function AppSidebar() {
+	const isFake = useAppConfigSelector((s) => s.fakeLab)
+	const viewer = useAppConfigSelector((s) =>
+		s.gitlab.state === "ready" ? pick(s.gitlab, ["user", "domain"]) : undefined,
+	)
 	const {clearClientCache, toggleFakeLab} = useAppConfigAction()
+
+	const actions = [
+		{
+			title: "Clear Cache",
+			action: clearClientCache,
+			icon: Trash2,
+		},
+		{
+			title: isFake ? "Use GitLab" : "Use FakeLab",
+			action: toggleFakeLab,
+			icon: () => (
+				<Gitlab stroke="" color={isFake ? "#e24329" : "var(--foreground)"} />
+			),
+		},
+	]
+
 	return (
 		<Sidebar variant="floating" collapsible="icon">
 			<SidebarHeader>
@@ -38,7 +63,6 @@ export function AppSidebar() {
 					<Lead className="group-data-[collapsible=icon]:hidden">
 						Git Nudge
 					</Lead>
-					<Gitlab />
 				</div>
 			</SidebarHeader>
 
@@ -63,28 +87,30 @@ export function AppSidebar() {
 			</SidebarContent>
 
 			<SidebarFooter>
-				<div className="gap-sm flex w-full items-end">
-					{/* {fetchCount} */}
-					<Button
-						className="flex-1 group-data-[collapsible=icon]:hidden"
-						variant="destructive"
-						onClick={() => {
-							clearClientCache()
-						}}
-					>
-						Clear cache
-					</Button>
-					<Button
-						className="flex-1 group-data-[collapsible=icon]:hidden"
-						variant="ghost"
-						onClick={() => {
-							toggleFakeLab()
-						}}
-					>
-						Toggle FakeLab
-					</Button>
-					<SidebarTrigger />
-				</div>
+				<SidebarGroup>
+					<SidebarGroupLabel>Actions</SidebarGroupLabel>
+					<SidebarGroupContent>
+						<SidebarMenu>
+							{actions.map((item) => (
+								<SidebarMenuItem key={item.title}>
+									<SidebarMenuButton
+										asChild
+										className="cursor-pointer"
+										onClick={item.action}
+									>
+										<div>
+											<item.icon />
+											<span>{item.title}</span>
+										</div>
+									</SidebarMenuButton>
+								</SidebarMenuItem>
+							))}
+						</SidebarMenu>
+					</SidebarGroupContent>
+				</SidebarGroup>
+				<SidebarTrigger />
+				{/* <div className="gap-sm flex w-full items-end"> */}
+				{/* </div> */}
 			</SidebarFooter>
 		</Sidebar>
 	)
