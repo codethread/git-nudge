@@ -33,6 +33,9 @@
 			"performance": {
 				"noBarrelFile": "error",
 				"noReExportAll": "error"
+			},
+			"complexity": {
+				"noForEach": "off"
 			}
 		}
 	},

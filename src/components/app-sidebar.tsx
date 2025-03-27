@@ -13,7 +13,7 @@ import {
 	SidebarMenuItem,
 	SidebarTrigger,
 } from "@/components/ui/sidebar"
-import {useIsFetching} from "@tanstack/react-query"
+import {useAppConfigAction} from "@/hooks/config/useConfig"
 import {Gitlab, Home, Settings} from "lucide-react"
 
 const items = [
@@ -29,16 +29,8 @@ const items = [
 	},
 ]
 
-export interface SidebarProps {
-	actions: {
-		clearCache: () => void
-		toggleFetcher: () => void
-	}
-}
-
-export function AppSidebar({actions}: SidebarProps) {
-	const fetchCount = useIsFetching()
-
+export function AppSidebar() {
+	const {clearClientCache, toggleFakeLab} = useAppConfigAction()
 	return (
 		<Sidebar variant="floating" collapsible="icon">
 			<SidebarHeader>
@@ -77,7 +69,7 @@ export function AppSidebar({actions}: SidebarProps) {
 						className="flex-1 group-data-[collapsible=icon]:hidden"
 						variant="destructive"
 						onClick={() => {
-							actions.clearCache()
+							clearClientCache()
 						}}
 					>
 						Clear cache
@@ -86,10 +78,10 @@ export function AppSidebar({actions}: SidebarProps) {
 						className="flex-1 group-data-[collapsible=icon]:hidden"
 						variant="ghost"
 						onClick={() => {
-							actions.toggleFetcher()
+							toggleFakeLab()
 						}}
 					>
-						Toggle Fetcher
+						Toggle FakeLab
 					</Button>
 					<SidebarTrigger />
 				</div>

@@ -1,18 +1,18 @@
 import {fetcherContext} from "./useFetcher"
-import {useConfigRequest} from "@/hooks/config/useConfig"
+import type {RequestConfig} from "@/lib/fetcher/web"
 import {useQuery} from "@tanstack/react-query"
 
 interface Props extends IChildren {
-	withFakeFetcher?: boolean
+	withFake?: boolean
+	reqConf: RequestConfig
 }
 
-export function FetcherProvider({children, withFakeFetcher}: Props) {
-	const conf = useConfigRequest()
-	const {data, error, isFetching, isSuccess} = useQuery({
-		retry: 0,
+export function FetcherProvider({children, withFake, reqConf}: Props) {
+	const {data, error, isPending, isSuccess} = useQuery({
+		retry: withFake ? 0 : 3,
 		refetchOnMount: false,
 		refetchInterval: Number.POSITIVE_INFINITY,
-		queryKey: ["fetcher", withFakeFetcher, conf] as const,
+		queryKey: ["fetcher", withFake, reqConf] as const,
 		queryFn: async ({queryKey: [_, withFake, c]}) => {
 			const {createFetcher} = await (withFake
 				? import("@/lib/fetcher/fake")
@@ -22,7 +22,7 @@ export function FetcherProvider({children, withFakeFetcher}: Props) {
 	})
 
 	if (error) throw error
-	if (isFetching) return null
+	if (isPending) return null
 	if (!isSuccess) throw new Error("FetcherProvider failed")
 
 	return (

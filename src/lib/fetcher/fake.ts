@@ -1,9 +1,10 @@
 import {mocks, storeInit} from "./mocks"
 import type {Fetcher} from "./web"
+import type {UserCoreConnection} from "@/graphql/graphql"
 import {
 	addMocksToSchema,
-	createMockStore,
 	relayStylePaginationMock,
+	type RelayPaginationParams,
 } from "@graphql-tools/mock"
 import {makeExecutableSchema} from "@graphql-tools/schema"
 import {graphql, buildClientSchema} from "graphql"
@@ -16,19 +17,37 @@ export async function createFetcher(): Promise<Fetcher> {
 		typeDefs: buildClientSchema(schemaJson.data),
 	})
 
-	const store = createMockStore({schema, mocks})
-
-	storeInit(store)
+	const st = await storeInit()
 
 	const mockedSchema = addMocksToSchema({
 		schema,
-		store,
+		// store,
 		mocks,
 		resolvers: (store) => ({
 			Query: {
-				users: paginated(relayStylePaginationMock(store)),
+				users: (_: null, params: RelayPaginationParams): UserCoreConnection => {
+					const {after, first} = params
+
+					if (params.last || params.before) throw new Error("no mock setup")
+
+					const allUsers = st.getUsers()
+					const users = allUsers.slice(Number.parseInt(after || "0", 10), first)
+					const lastUser = users.at(-1)
+
+					return {
+						count: allUsers.length,
+						// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+						nodes: users as any,
+						pageInfo: {
+							hasNextPage: lastUser?.id < allUsers.length,
+							endCursor: lastUser?.id || after,
+							hasPreviousPage: false, // not using
+						},
+					}
+				},
 			},
 			CurrentUser: {
+				...mapToResolver(st.getUser("1") || {}),
 				projectMemberships: relayStylePaginationMock(store),
 				groupMemberships: relayStylePaginationMock(store),
 				contributedProjects: relayStylePaginationMock(store),
@@ -72,4 +91,10 @@ function paginated(fn: Resolver) {
 		}
 	}
 	return cb
+}
+
+function mapToResolver<A extends object>(obj: A) {
+	return Object.fromEntries(
+		Object.entries(obj).map(([k, v]) => [k, () => v]),
+	) as {[Key in keyof A]: () => A[Key]}
 }

@@ -5,6 +5,7 @@ import {Lead, Text} from "@/components/ui/text"
 import {graphql} from "@/graphql"
 import {useFetcher} from "@/hooks/fetcher/useFetcher"
 import {type IUser, useUsersQuery} from "@/hooks/useUsers"
+import Layout from "@/page/Layout"
 import {useQuery} from "@tanstack/react-query"
 import {useState, useEffect, useCallback} from "react"
 import {match, P} from "ts-pattern"
@@ -14,28 +15,30 @@ export function Dashboard() {
 	const allReady = ready.every(Boolean) && ready.length > 2
 	const onSuccess = useCallback(() => setReady((s) => s.concat(true)), [])
 	return (
-		<div className="@container w-[100%] flex-1">
-			<div className="flex h-24 flex-col justify-center">
-				{allReady ? (
-					<div className="flex justify-center">
-						<Button ping variant="outline">
-							Launch
-						</Button>
-					</div>
-				) : (
-					<Lead className="animate-fade text-center">
-						Welcome, getting things set up...
-					</Lead>
-				)}
+		<Layout>
+			<div className="@container w-[100%] flex-1">
+				<div className="flex h-24 flex-col justify-center">
+					{allReady ? (
+						<div className="flex justify-center">
+							<Button ping variant="outline">
+								Launch
+							</Button>
+						</div>
+					) : (
+						<Lead className="animate-fade text-center">
+							Welcome, getting things set up...
+						</Lead>
+					)}
+				</div>
+				{/* <div className=" flex flex-wrap justify-center items-stretch gap-sm @min-[800px]:gap-lg "> */}
+				<div className="gap-sm @min-5xl:gap-lg flex flex-wrap items-stretch justify-center">
+					{/* <div className=" flex flex-wrap justify-center items-stretch gap-lg @6xl:gap-sm "> */}
+					<MyCard onSuccess={onSuccess} />
+					<UsersCard onSuccess={onSuccess} />
+					<ReposCard onSuccess={onSuccess} />
+				</div>
 			</div>
-			{/* <div className=" flex flex-wrap justify-center items-stretch gap-sm @min-[800px]:gap-lg "> */}
-			<div className="gap-sm @min-5xl:gap-lg flex flex-wrap items-stretch justify-center">
-				{/* <div className=" flex flex-wrap justify-center items-stretch gap-lg @6xl:gap-sm "> */}
-				<MyCard onSuccess={onSuccess} />
-				<UsersCard onSuccess={onSuccess} />
-				<ReposCard onSuccess={onSuccess} />
-			</div>
-		</div>
+		</Layout>
 	)
 }
 
@@ -172,6 +175,7 @@ function UsersPreview(props: {users?: IUser[]; loading: boolean}) {
 const MyBioQuery = graphql(`
 	query GetMe {
 		currentUser {
+			id
 			name
 			username
 			webUrl

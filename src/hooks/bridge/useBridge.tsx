@@ -1,6 +1,39 @@
-import type {IConfig} from "../config/useConfig"
+import {duration} from "@/lib/duration"
+import {slimLogger} from "@/lib/logger"
 import {asyncStorage} from "@/lib/storage"
+import {parseError, pick} from "@/lib/utils"
 import React from "react"
+import {z} from "zod"
+
+const STORAGE_KEY = "STORAGE_KEY"
+/**
+ * Subset of config that can be persisted
+ *
+ * NOTE: keep subset small and derive client config
+ */
+const storageConfigSchema = z
+	.object(
+		{
+			global: z
+				.object(
+					{
+						requestTimeoutMillis: z
+							.number()
+							.int()
+							.gt(0)
+							.default(duration(5, "secs")),
+					},
+					{
+						message: "dev error, missing defaults",
+					},
+				)
+				.default({}),
+		},
+		{message: "dev error, missing defaults"},
+	)
+	.default({})
+
+export type IStorageConfig = z.TypeOf<typeof storageConfigSchema>
 
 export type IBridge = Awaited<ReturnType<typeof createFakeBridge>>
 
@@ -18,92 +51,106 @@ export async function createBridge() {
 		: createFakeBridge()
 }
 
+interface Notifier {
+	notify: (msg: string) => Promise<void>
+}
+
 async function createFakeBridge() {
-	return {
-		readNetrc: async () => {
-			const netrc = import.meta.env.VITE_FAKE_NETRC
-			if (!netrc) {
-				throw new Error("no netrc")
+	const notify: Notifier["notify"] = async (msg: string) => {
+		if (!("Notification" in window)) {
+			// Check if the browser supports notifications
+			alert("This browser does not support desktop notification")
+		} else if (Notification.permission === "granted") {
+			// Check whether notification permissions have already been granted;
+			// if so, create a notification
+			const notification = new Notification(msg, {
+				body: "body",
+				requireInteraction: true,
+				data: {foo: "bar"},
+			})
+			notification.onclick = (e) => {
+				// e.preventDefault();
+				// window.open("https://google.com", "_blank");
+				window.alert(JSON.stringify(notification.data))
+				notification.close()
 			}
-			return netrc as string
-		},
-		readStoredConfig: async () => {
-			try {
-				const stored = await asyncStorage.getItem("CONFIG")
-				return stored ? JSON.parse(stored) : undefined
-			} catch (e) {
-				console.warn(e)
-				return undefined
-			}
-		},
-		setStoredConfig: async (config: IConfig) => {
-			asyncStorage.setItem("CONFIG", JSON.stringify(config))
-		},
-		notify: async (msg: string) => {
-			if (!("Notification" in window)) {
-				// Check if the browser supports notifications
-				alert("This browser does not support desktop notification")
-			} else if (Notification.permission === "granted") {
-				// Check whether notification permissions have already been granted;
-				// if so, create a notification
-				const notification = new Notification(msg, {
-					body: "body",
-					requireInteraction: true,
-					data: {foo: "bar"},
-				})
-				notification.onclick = (e) => {
-					// e.preventDefault();
-					// window.open("https://google.com", "_blank");
-					window.alert(JSON.stringify(notification.data))
-					notification.close()
+			// …
+		} else if (Notification.permission !== "denied") {
+			// We need to ask the user for permission
+			Notification.requestPermission().then((permission) => {
+				// If the user accepts, let's create a notification
+				if (permission === "granted") {
+					const notification = new Notification("Hi there!", {})
+					// …
 				}
-				// …
-			} else if (Notification.permission !== "denied") {
-				// We need to ask the user for permission
-				Notification.requestPermission().then((permission) => {
-					// If the user accepts, let's create a notification
-					if (permission === "granted") {
-						const notification = new Notification("Hi there!", {})
-						// …
-					}
-				})
-			}
-		},
+			})
+		}
+	}
+
+	const storedConfig = await readStoredConfig({notify})
+	return {
+		storedConfig,
+		setStoredConfig,
+		readNetrc: async () => __FAKE_NETRC__,
+		notify,
+		logger: slimLogger,
 	}
 }
 
 async function createTauriBridge() {
 	const {invoke} = await import("@tauri-apps/api/core")
-	const {isPermissionGranted, requestPermission, sendNotification} =
-		await import("@tauri-apps/plugin-notification")
 
-	let permissionGranted = await isPermissionGranted()
+	const notify: Notifier["notify"] = async (msg) => {
+		const {isPermissionGranted, requestPermission, sendNotification} =
+			await import("@tauri-apps/plugin-notification")
 
-	if (!permissionGranted) {
-		const permission = await requestPermission()
-		permissionGranted = permission === "granted"
+		let permissionGranted = await isPermissionGranted()
+
+		if (!permissionGranted) {
+			const permission = await requestPermission()
+			permissionGranted = permission === "granted"
+		}
+
+		if (!permissionGranted)
+			throw new Error("You need to give notification permissions to the app")
+		sendNotification({title: "Tauri", body: msg})
 	}
+
+	const storedConfig = await readStoredConfig({notify})
 
 	const api: IBridge = {
-		readStoredConfig: async () => {
-			// TODO: could be persisted to disk
-			try {
-				const stored = await asyncStorage.getItem("CONFIG")
-				return stored ? JSON.parse(stored) : undefined
-			} catch (e) {
-				console.warn(e)
-				return undefined
-			}
-		},
-		setStoredConfig: async (config: IConfig) => {
-			asyncStorage.setItem("CONFIG", JSON.stringify(config))
-		},
-		readNetrc: () => invoke("read_netrc"),
-		notify: async (msg) => {
-			if (!permissionGranted)
-				throw new Error("You need to give notification permissions to the app")
-			sendNotification({title: "Tauri", body: msg})
-		},
+		storedConfig,
+		setStoredConfig,
+		readNetrc: () =>
+			invoke("read_netrc")
+				.then((n) => z.string().parse(n))
+				.catch((e) => {
+					slimLogger.error("error reading netrc from tauri", parseError(e))
+					return undefined
+				}),
+		notify,
+		logger: slimLogger,
 	}
 	return api
+}
+
+/** for now local storage is fine */
+async function readStoredConfig({notify}: Notifier) {
+	const stored = await asyncStorage.getItem("CONFIG")
+	try {
+		return storageConfigSchema.parse(JSON.parse(stored ?? "{}"))
+	} catch (e) {
+		notify("Error reading config, data reset")
+		slimLogger.warn("Invalid config")
+		slimLogger.info({stored, errorMsg: parseError(e), error: e})
+
+		asyncStorage.removeItem(STORAGE_KEY)
+		// default config should be set for all values
+		return storageConfigSchema.parse({})
+	}
+}
+async function setStoredConfig(config: IStorageConfig) {
+	// validate on store
+	storageConfigSchema.parse(config)
+	asyncStorage.setItem("CONFIG", JSON.stringify(config))
 }

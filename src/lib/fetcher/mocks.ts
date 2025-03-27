@@ -1,6 +1,5 @@
 import type {CurrentUser, UserCore, Scalars} from "@/graphql/graphql"
 import {faker} from "@faker-js/faker"
-import type {IMockStore, Ref} from "@graphql-tools/mock"
 
 type Mock<T> = {[K in keyof T]: () => Partial<T[K]>}
 type Mocks<T> = {[K in keyof T]: () => Partial<Mock<T[K]>>}
@@ -22,25 +21,27 @@ const objects: Mocks<{
 		avatarUrl: () => "https://placecats.com/300/300",
 		webUrl: () => "https://gitlab.com",
 	}),
-	// CurrentUser: () => {
-	// 	const name = faker.person.fullName()
-	// 	return {
-	// 		username: () => name.replaceAll(" ", ".").toLowerCase(),
-	// 		name: () => name,
-	// 		avatarUrl: () => "https://placecats.com/200/200",
-	// 	}
-	// },
+	CurrentUser: () => ({
+		avatarUrl: () => "https://placecats.com/200/200",
+		webUrl: () => "https://gitlab.com",
+	}),
 }
 
 export const mocks = {...scalars, ...objects}
 
-class GitlabStore {
-	constructor(public store: IMockStore) {}
+type UserBase = Partial<UserCore | CurrentUser>
 
+class GitlabStore {
+	private users = [] as UserBase[]
+	/** keeping id as index makes pagination easier */
 	private userIdx = 0
 
-	getUser(id: number) {
-		return this.store.get("UserCore", id.toString())
+	getUser(id: string) {
+		return this.users.find((user) => user.id === id)
+	}
+
+	getUsers() {
+		return this.users
 	}
 
 	addUsers(users: Partial<UserCore>[]) {
@@ -51,55 +52,34 @@ class GitlabStore {
 
 	addUser(user?: Partial<UserCore>) {
 		const name = user?.name ?? faker.person.fullName()
-		const _user: Partial<UserCore> = {
-			...user,
+		const id = ++this.userIdx // increment then return
+		this.users.push({
+			id: id.toString(),
 			name,
+			avatarUrl: `https://placecats.com/300/300?t=${id}`,
 			username: name.replaceAll(" ", ".").toLowerCase(),
-		}
-		const id = (this.userIdx++).toString()
-
-		this.store.set("UserCore", id, _user)
-		this.addListEdge(
-			this.store.get("Query", "ROOT", "users") as Ref,
-			this.store.get("UserCore", id) as Ref,
-		)
-	}
-
-	/**
-	 * could not get my head around edging, full credit:
-	 * - https://github.com/woocoos/adminx-ui/blob/20155c0e42e7aa61c5d6d22f6e54040fca008658/mock/graphql/adminx/store.ts#L29C29-L29C70
-	 * - https://github.com/woocoos/msgcenter/blob/ce64a08fb56ada9cdb6cd03a289166a64f26c66a/web/mock/graphql/msgsrv/server.ts#L2
-	 */
-	private addListEdge(ref: Ref, addData: Ref) {
-		const store = this.store
-		const typeNameEdge = `${addData.$ref.typeName}Edge`
-		const edgeKey = `${addData.$ref.key}`
-
-		store.set(typeNameEdge, edgeKey, "node", addData)
-
-		const edgesRef = store.get(ref, "edges") as Ref[]
-		edgesRef.push(store.get(typeNameEdge, edgeKey) as Ref)
-
-		store.set(ref, "edges", edgesRef)
-		store.set(ref, "count", edgesRef.length)
-
-		return addData
+			...user,
+		})
 	}
 
 	listUsers() {
-		return this.store.get("Query", "ROOT", "users")
+		return this.users
 	}
 }
 
 // @refresh reset
-export const storeInit = (store: IMockStore) => {
-	const st = new GitlabStore(store)
+export const storeInit = async () => {
+	const st = new GitlabStore()
 	st.addUser({name: "Billy Bob", state: "active", bot: false})
-	st.addUsers(Array(5))
+	st.addUsers(
+		Array(5)
+			.fill(null)
+			.map(() => ({state: "active"})),
+	)
 
-	store.set("Query", "ROOT", {
-		currentUser: st.getUser(0),
-	})
+	// store.set("Query", "ROOT", {
+	// 	currentUser: st.getUser(0),
+	// })
 
-	window._store = st
+	return st
 }

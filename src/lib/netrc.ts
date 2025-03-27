@@ -14,7 +14,9 @@ const NetrcSchema = z.record(
 
 export type Netrc = z.TypeOf<typeof NetrcSchema>
 
-export function parseNetrc(netrcStr: string): ParsedConfig {
+export function parseNetrc(netrcStr?: string): ParsedConfig {
+	if (!netrcStr) return {tag: "missing"}
+
 	let net: unknown = null
 	try {
 		net = netrc.parse(netrcStr)
@@ -40,6 +42,7 @@ export function parseNetrc(netrcStr: string): ParsedConfig {
 }
 
 type ParsedConfig =
+	| {tag: "missing"}
 	| {
 			tag: "invalid"
 			err: string

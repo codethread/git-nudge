@@ -10,7 +10,7 @@ import {
 	TableRow,
 } from "@/components/ui/table"
 import {Text, TextSkeleton} from "@/components/ui/text"
-import {useConfigRequest} from "@/hooks/config/useConfig"
+import {useConfigSelector} from "@/hooks/config/useConfig"
 import {type IUser, useUsersQuery} from "@/hooks/useUsers"
 import {cn} from "@/lib/utils"
 import {Avatar, AvatarFallback, AvatarImage} from "@radix-ui/react-avatar"
@@ -23,7 +23,7 @@ interface UserProps {
 }
 
 export function User(props: UserProps) {
-	const {domain} = useConfigRequest()
+	const domain = useConfigSelector((s) => s.gitlab.domain)
 
 	const user = match(props)
 		.with({loading: true}, () => undefined)

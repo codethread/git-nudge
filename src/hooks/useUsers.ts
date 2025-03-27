@@ -45,13 +45,6 @@ export const useUsersQuery = () => {
 	})
 
 	useEffect(() => {
-		const page = queryData.data?.pages.at(0)?.users
-		console.log("pageInfo")
-		console.log(page?.pageInfo)
-		console.log("count")
-		console.log(page?.count)
-		console.log("nodes")
-		page?.nodes?.forEach((e) => console.log(e))
 		if (queryData.hasNextPage) {
 			queryData.fetchNextPage()
 		}
