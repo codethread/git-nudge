@@ -86,30 +86,26 @@ export function AppSidebar() {
 			</SidebarContent>
 
 			<SidebarFooter>
-				<SidebarGroup>
-					<SidebarGroupLabel>Actions</SidebarGroupLabel>
-					<SidebarGroupContent>
-						<SidebarMenu>
-							{actions.map((item) => (
-								<SidebarMenuItem key={item.title}>
-									<SidebarMenuButton
-										asChild
-										className="cursor-pointer"
-										onClick={item.action}
-									>
-										<div>
-											<item.icon />
-											<span>{item.title}</span>
-										</div>
-									</SidebarMenuButton>
-								</SidebarMenuItem>
-							))}
-						</SidebarMenu>
-					</SidebarGroupContent>
-				</SidebarGroup>
+				<SidebarGroupLabel>Actions</SidebarGroupLabel>
+				<SidebarGroupContent>
+					<SidebarMenu>
+						{actions.map((item) => (
+							<SidebarMenuItem key={item.title}>
+								<SidebarMenuButton
+									asChild
+									className="cursor-pointer"
+									onClick={item.action}
+								>
+									<div>
+										<item.icon />
+										<span>{item.title}</span>
+									</div>
+								</SidebarMenuButton>
+							</SidebarMenuItem>
+						))}
+					</SidebarMenu>
+				</SidebarGroupContent>
 				<SidebarTrigger />
-				{/* <div className="gap-sm flex w-full items-end"> */}
-				{/* </div> */}
 			</SidebarFooter>
 		</Sidebar>
 	)
