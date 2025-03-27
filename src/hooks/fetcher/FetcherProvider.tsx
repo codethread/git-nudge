@@ -1,5 +1,5 @@
 import {fetcherContext} from "./useFetcher"
-import {Loader, LoaderPage} from "@/components/loader"
+import {LoaderPage} from "@/components/ui/Loader"
 import type {RequestConfig} from "@/lib/fetcher/web"
 import {useQuery} from "@tanstack/react-query"
 

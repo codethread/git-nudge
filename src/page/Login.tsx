@@ -1,13 +1,10 @@
-import {Loader, LoaderPage} from "@/components/loader"
+import {LoaderPage} from "@/components/ui/Loader"
 import {Button} from "@/components/ui/button"
-import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card"
 import {Lead} from "@/components/ui/text"
-import {useBridge} from "@/hooks/bridge/useBridge"
-import {useAppConfigAction} from "@/hooks/config/useConfig"
+import {useAppConfigAction} from "@/hooks/config/useAppConfig"
+import {useBridge} from "@/hooks/useBridge"
 import {parseNetrc, type Netrc} from "@/lib/netrc"
-import {Content} from "@radix-ui/react-dialog"
 import {useQuery} from "@tanstack/react-query"
-import {Heading} from "lucide-react"
 import {match, P} from "ts-pattern"
 
 export function Login() {

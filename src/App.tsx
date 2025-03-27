@@ -1,28 +1,14 @@
-import {Loader, LoaderPage} from "@/components/loader"
-import {PageManager} from "@/components/page-manager"
-import {Alert, AlertTitle, AlertDescription} from "@/components/ui/alert"
-import {
-	bridgeContext,
-	createBridge,
-	useBridge,
-	type IBridge,
-} from "@/hooks/bridge/useBridge"
+import {PageManager} from "@/components/PageManager"
+import {ReactQueryProvider} from "@/components/QueryProvider"
+import {LoaderPage} from "@/components/ui/Loader"
 import {
 	appConfigContext,
 	createAppConfigStore,
-	useAppConfigAction,
-	useAppConfigSelector,
 	type IAppConfigStore,
-} from "@/hooks/config/useConfig"
-import {asyncStorage} from "@/lib/storage"
-import {parseError} from "@/lib/utils"
+} from "@/hooks/config/useAppConfig"
+import {bridgeContext, createBridge, type IBridge} from "@/hooks/useBridge"
 import Layout from "@/page/Layout"
-import {createAsyncStoragePersister} from "@tanstack/query-async-storage-persister"
-import {QueryClient} from "@tanstack/react-query"
-import {PersistQueryClientProvider} from "@tanstack/react-query-persist-client"
-import {Terminal} from "lucide-react"
-import {useEffect, useMemo, useRef, useState} from "react"
-import {ErrorBoundary, type FallbackProps} from "react-error-boundary"
+import {useEffect, useState} from "react"
 
 const search = window.location.search
 
@@ -52,75 +38,14 @@ export function App() {
 	}
 
 	return (
-		<ErrorBoundary FallbackComponent={ErrorComp}>
-			<bridgeContext.Provider value={bridge}>
-				<appConfigContext.Provider value={config}>
-					<ReactQueryProvider>
-						<Layout>
-							<PageManager />
-						</Layout>
-					</ReactQueryProvider>
-				</appConfigContext.Provider>
-			</bridgeContext.Provider>
-		</ErrorBoundary>
-	)
-}
-
-function ReactQueryProvider({children}: IChildren) {
-	const {logger} = useBridge()
-	const isFakeLab = useAppConfigSelector((s) => s.fakeLab)
-	const persistHash = useAppConfigSelector((s) => s.query.persistHash)
-	const queryOptions = useAppConfigSelector((s) => s.query.options)
-	const {registerCallback} = useAppConfigAction()
-
-	const client = useRef<QueryClient>()
-
-	if (!client.current) {
-		const c = new QueryClient({defaultOptions: queryOptions})
-		client.current = c
-		logger.debug("create queryClient", c)
-		registerCallback("clearCache", () => c.clear())
-	}
-
-	useEffect(() => {
-		client.current?.setDefaultOptions(queryOptions)
-	}, [queryOptions])
-
-	const asyncStoragePersister = useMemo(
-		() =>
-			createAsyncStoragePersister({
-				storage: asyncStorage,
-				key: isFakeLab ? "FAKE_QUERY" : "REACT_QUERY",
-			}),
-		[isFakeLab],
-	)
-
-	return (
-		<PersistQueryClientProvider
-			client={client.current}
-			persistOptions={{
-				persister: asyncStoragePersister,
-				buster: persistHash,
-			}}
-		>
-			{children}
-		</PersistQueryClientProvider>
-	)
-}
-
-function ErrorComp({error}: FallbackProps) {
-	const info = parseError(error)
-	return (
-		<div className="m-md">
-			<Alert>
-				<AlertTitle className="gap-sm flex items-end text-xl text-red-400">
-					<Terminal className="stroke-red-400" />
-					Blimey!
-				</AlertTitle>
-				<AlertDescription className="my-sm">
-					<pre className="w-full overflow-x-scroll">{info}</pre>
-				</AlertDescription>
-			</Alert>
-		</div>
+		<bridgeContext.Provider value={bridge}>
+			<appConfigContext.Provider value={config}>
+				<ReactQueryProvider>
+					<Layout>
+						<PageManager />
+					</Layout>
+				</ReactQueryProvider>
+			</appConfigContext.Provider>
+		</bridgeContext.Provider>
 	)
 }

@@ -1,8 +1,5 @@
-import {
-	configContext,
-	createConfigStore,
-	type IAppConfigStore,
-} from "@/hooks/config/useConfig"
+import type {IAppConfigStore} from "@/hooks/config/useAppConfig"
+import {configContext, createConfigStore} from "@/hooks/config/useConfig"
 import {useRef} from "react"
 
 export function ConfigProvider({

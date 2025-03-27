@@ -5,7 +5,6 @@ import {Lead, Text} from "@/components/ui/text"
 import {graphql} from "@/graphql"
 import {useFetcher} from "@/hooks/fetcher/useFetcher"
 import {type IUser, useUsersQuery} from "@/hooks/useUsers"
-import Layout from "@/page/Layout"
 import {useQuery} from "@tanstack/react-query"
 import {useState, useEffect, useCallback} from "react"
 import {match, P} from "ts-pattern"
@@ -113,7 +112,7 @@ function UsersCard({onSuccess}: ReadyProps) {
 	)
 }
 
-function UsersPreview(props: {users?: IUser[]; loading: boolean}) {
+function UsersPreview(props: {loading: boolean; users?: IUser[]}) {
 	const listLength = 3
 	const loaded = match(props)
 		.with({users: [], loading: false}, () => "empty" as const)

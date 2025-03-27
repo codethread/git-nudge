@@ -16,10 +16,9 @@ import {
 import {
 	useAppConfigAction,
 	useAppConfigSelector,
-} from "@/hooks/config/useConfig"
-import {useTheme} from "@/hooks/theme/useTheme"
+} from "@/hooks/config/useAppConfig"
 import {pick} from "@/lib/utils"
-import {Delete, Home, Settings, Trash, Trash2} from "lucide-react"
+import {Home, Settings, Trash2} from "lucide-react"
 
 const items = [
 	{

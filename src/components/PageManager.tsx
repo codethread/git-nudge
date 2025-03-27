@@ -1,9 +1,11 @@
 import {ConfigProvider} from "@/hooks/config/ConfigProvider"
-import {useAppConfigSelector, useAppConfigStore} from "@/hooks/config/useConfig"
+import {
+	useAppConfigSelector,
+	useAppConfigStore,
+} from "@/hooks/config/useAppConfig"
 import {FetcherProvider} from "@/hooks/fetcher/FetcherProvider"
 import {useNav} from "@/hooks/useNav"
 import {Dashboard} from "@/page/Dashboard"
-import Layout from "@/page/Layout"
 import {Login} from "@/page/Login"
 import {match} from "ts-pattern"
 
