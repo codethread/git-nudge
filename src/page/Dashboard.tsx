@@ -123,6 +123,7 @@ function UsersPreview(props: {loading: boolean; users?: IUser[]}) {
 	const users: (IUser | undefined)[] = (
 		props.users || Array(listLength).fill(undefined)
 	).slice(0, listLength)
+	console.log("codethread", props)
 
 	return (
 		<ul className="border-muted-foreground divide-y">
@@ -134,10 +135,10 @@ function UsersPreview(props: {loading: boolean; users?: IUser[]}) {
 					<User user={user} className="my-md" loading={!user} />
 				</li>
 			))}
-			{!props.loading && users.length > listLength && (
+			{(props?.users?.length || 0) > listLength && (
 				<li className="animate-fade-up mt-6">
 					<Text className="text-muted-foreground text-right">
-						and {users.length - listLength} others
+						and {props?.users?.length - listLength} others
 					</Text>
 				</li>
 			)}

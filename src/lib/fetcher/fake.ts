@@ -47,7 +47,7 @@ const objects: Mocks<{
 		webUrl: () => "https://gitlab.com",
 	}),
 	Project: () => ({
-		name: () => faker.commerce.product(),
+		name: () => faker.commerce.productName(),
 	}),
 	Group: () => ({
 		name: () => faker.commerce.department(),
