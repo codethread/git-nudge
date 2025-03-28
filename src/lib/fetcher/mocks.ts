@@ -1,4 +1,5 @@
 import type {CurrentUser, UserCore, Scalars} from "@/graphql/graphql"
+import {fakeTrue, getFakeUserFactory} from "@/lib/fetcher/fakers"
 import {faker} from "@faker-js/faker"
 
 type Mock<T> = {[K in keyof T]: () => Partial<T[K]>}
@@ -35,6 +36,7 @@ class GitlabStore {
 	private users = [] as UserBase[]
 	/** keeping id as index makes pagination easier */
 	private userIdx = 0
+	private getFakeUser = getFakeUserFactory()
 
 	getUser(id: string) {
 		return this.users.find((user) => user.id === id)
@@ -51,13 +53,18 @@ class GitlabStore {
 	}
 
 	addUser(user?: Partial<UserCore>) {
-		const name = user?.name ?? faker.person.fullName()
 		const id = ++this.userIdx // increment then return
+		const fixtureUser = this.getFakeUser()
+		const name = user?.name ?? fixtureUser?.name ?? faker.person.fullName()
+
 		this.users.push({
-			id: id.toString(),
-			name,
 			avatarUrl: `https://placecats.com/300/300?t=${id}`,
+			...fixtureUser,
+			name,
+			id: id.toString(),
 			username: name.replaceAll(" ", ".").toLowerCase(),
+			bot: fakeTrue(90),
+			active: fakeTrue(80),
 			...user,
 		})
 	}
@@ -67,10 +74,9 @@ class GitlabStore {
 	}
 }
 
-// @refresh reset
 export const storeInit = async () => {
 	const st = new GitlabStore()
-	st.addUser({name: "Billy Bob", state: "active", bot: false})
+	st.addUser({state: "active", bot: false})
 	st.addUsers(
 		Array(5)
 			.fill(null)

@@ -2,6 +2,7 @@ import {fetcherContext} from "./useFetcher"
 import {LoaderPage} from "@/components/ui/Loader"
 import type {RequestConfig} from "@/lib/fetcher/web"
 import {useQuery} from "@tanstack/react-query"
+import {useMemo} from "react"
 
 interface Props extends IChildren {
 	withFake?: boolean
@@ -9,11 +10,14 @@ interface Props extends IChildren {
 }
 
 export function FetcherProvider({children, withFake, reqConf}: Props) {
+	// if using fakes, we want to rebuild the fetcher in order to rebuild the fake database
+	const fakeKey = useMemo(() => (withFake ? Math.random() : false), [withFake])
+
 	const {data, error, isPending, isSuccess} = useQuery({
 		retry: withFake ? 0 : 3,
 		refetchOnMount: false,
 		refetchInterval: Number.POSITIVE_INFINITY,
-		queryKey: ["fetcher", withFake, reqConf] as const,
+		queryKey: ["fetcher", fakeKey, reqConf] as const,
 		queryFn: async ({queryKey: [_, withFake, c]}) => {
 			const {createFetcher} = await (withFake
 				? import("@/lib/fetcher/fake")

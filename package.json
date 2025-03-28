@@ -6,7 +6,7 @@
 	"scripts": {
 		"gen": "graphql-codegen --config scripts/codegen.ts --watch",
 		"dev": "vite",
-		"fake": "node --watch --experimental-strip-types --no-warnings ./scripts/server.ts",
+		"fake": "node --experimental-strip-types --no-warnings --watch ./scripts/getFakeCharacters.ts",
 		"ts": "tsc --watch",
 		"lint": "biome lint --write src",
 		"format": "prettier --write \"src/**/*.{ts,tsx}\" --ignore-path .gitignore",
