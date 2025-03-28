@@ -4,7 +4,7 @@
 	"version": "0.1.0",
 	"type": "module",
 	"scripts": {
-		"gen": "graphql-codegen --config scripts/codegen.ts --watch",
+		"gen": "graphql-codegen --config scripts/codegen.ts",
 		"dev": "vite",
 		"fake": "node --experimental-strip-types --no-warnings --watch ./scripts/getFakeCharacters.ts",
 		"ts": "tsc --watch",

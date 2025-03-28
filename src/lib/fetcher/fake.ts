@@ -2,16 +2,19 @@ import {fakeDBInit} from "./fakes/db"
 import type {Fetcher} from "./web"
 import type {
 	CurrentUser,
+	Group,
+	Project,
 	Scalars,
 	UserCore,
 	UserCoreConnection,
 } from "@/graphql/graphql"
 import schemaJson from "@/graphql/schema.json"
 import {wait} from "@/lib/duration"
+import {fakeInt} from "@/lib/fetcher/fakes/fakers"
 import {faker} from "@faker-js/faker"
 import {
 	addMocksToSchema,
-	relayStylePaginationMock,
+	type relayStylePaginationMock,
 	type RelayPaginationParams,
 } from "@graphql-tools/mock"
 import {makeExecutableSchema} from "@graphql-tools/schema"
@@ -32,6 +35,8 @@ const scalars: Partial<ScalarsMap> = {
 const objects: Mocks<{
 	UserCore: UserCore
 	CurrentUser: CurrentUser
+	Project: Project
+	Group: Group
 }> = {
 	UserCore: () => ({
 		avatarUrl: () => "https://placecats.com/300/300",
@@ -40,6 +45,12 @@ const objects: Mocks<{
 	CurrentUser: () => ({
 		avatarUrl: () => "https://placecats.com/200/200",
 		webUrl: () => "https://gitlab.com",
+	}),
+	Project: () => ({
+		name: () => faker.commerce.product(),
+	}),
+	Group: () => ({
+		name: () => faker.commerce.department(),
 	}),
 }
 
@@ -81,9 +92,9 @@ export async function createFetcher(): Promise<Fetcher> {
 			},
 			CurrentUser: {
 				...mapToResolver(db.getUsers().findLast((u) => u.active) || {}),
-				projectMemberships: relayStylePaginationMock(store),
-				groupMemberships: relayStylePaginationMock(store),
-				contributedProjects: relayStylePaginationMock(store),
+				projectMemberships: paginated(fakeInt(0, 3)),
+				groupMemberships: paginated(fakeInt(1, 8)),
+				contributedProjects: paginated(fakeInt(4, 9)),
 			},
 		}),
 	})
@@ -111,19 +122,34 @@ export async function createFetcher(): Promise<Fetcher> {
 }
 
 type Resolver = ReturnType<typeof relayStylePaginationMock>
-/**
- * GitLab doesn't quite follow relay, so we adapt
- */
-function paginated(fn: Resolver) {
-	const cb: Resolver = (...args) => {
-		const page = fn(...args)
+
+function paginated(count: number): Resolver {
+	return (_, params) => {
+		const DEFAULT_PAGE_SIZE = 100 // for GitLab
+		const EMPTY_NODE = {} // tells mocking system to create all missing properties
+		const {after, first} = params
+
+		if (params.last || params.before) throw new Error("no mock setup")
+
+		const list = [...new Array(count)].map((_, i) => i + 1)
+		const idx = Number.parseInt(after || "0", 10)
+		const slice = list.slice(idx, (first || DEFAULT_PAGE_SIZE) + idx)
+		const lastIdx = slice.at(-1)
+
 		return {
-			...page,
-			count: page.totalCount,
-			nodes: page.edges.map((e: {node: string}) => e.node),
+			count,
+			nodes: slice.map((_) => EMPTY_NODE),
+			edges: slice.map((i) => ({
+				cursor: i,
+				node: EMPTY_NODE,
+			})),
+			pageInfo: {
+				hasNextPage: lastIdx && lastIdx < count,
+				endCursor: lastIdx || after,
+				hasPreviousPage: false, // not using
+			},
 		}
 	}
-	return cb
 }
 
 function mapToResolver<A extends object>(obj: A) {

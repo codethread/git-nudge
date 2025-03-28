@@ -1,6 +1,9 @@
 import fixture from "./fixtureData.json"
 import {faker} from "@faker-js/faker"
 
+export function fakeInt(min: number, max?: number) {
+	return faker.number.int({min, max: max ?? min * 3})
+}
 export function getFakeUserFactory() {
 	const unseen = fixture.users.map((_, i) => i)
 	shuffle(unseen)

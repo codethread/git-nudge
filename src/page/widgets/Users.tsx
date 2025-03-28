@@ -35,7 +35,7 @@ export function User(props: UserProps) {
 	return (
 		<div className={cn("flex items-center space-x-4", props.className)}>
 			{user?.avatarUrl ? (
-				<Avatar className="hover:outline-accent-foreground h-10 w-10 outline transition hover:outline-2">
+				<Avatar className="hover:outline-accent-foreground h-10 w-10 outline outline-offset-1 transition hover:outline-2">
 					<AvatarImage src={avatar} />
 					<AvatarFallback className="text-xl">
 						{user.username.slice(0, 2)}

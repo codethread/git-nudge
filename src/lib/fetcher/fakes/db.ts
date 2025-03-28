@@ -1,4 +1,4 @@
-import type {CurrentUser, UserCore, } from "@/graphql/graphql"
+import type {CurrentUser, UserCore} from "@/graphql/graphql"
 import {fakeTrue, getFakeUserFactory} from "@/lib/fetcher/fakes/fakers"
 import {faker} from "@faker-js/faker"
 

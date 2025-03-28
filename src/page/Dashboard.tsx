@@ -75,6 +75,7 @@ function ReposCard({onSuccess}: ReadyProps) {
 				<MyLists
 					heading="Projects:"
 					length={10}
+					total={data.currentUser.contributedProjects?.count}
 					items={data.currentUser.contributedProjects?.nodes
 						?.filter(Boolean)
 						.map((n) => ({...n, url: n.webUrl}))}
@@ -152,7 +153,7 @@ const MyBioQuery = graphql(`
 			username
 			webUrl
 			avatarUrl
-			projectMemberships(first: 3) {
+			projectMemberships(first: 100) {
 				nodes {
 					project {
 						id
@@ -161,7 +162,7 @@ const MyBioQuery = graphql(`
 					}
 				}
 			}
-			groupMemberships(first: 3) {
+			groupMemberships(first: 100) {
 				nodes {
 					group {
 						id
@@ -170,7 +171,7 @@ const MyBioQuery = graphql(`
 					}
 				}
 			}
-			contributedProjects(first: 3) {
+			contributedProjects(first: 100) {
 				count
 				nodes {
 					id
@@ -205,6 +206,9 @@ export function MyCard({onSuccess}: ReadyProps) {
 		return <div>No user?</div>
 	}
 
+	const groups = data.currentUser.groupMemberships?.nodes
+	const projects = data.currentUser.projectMemberships?.nodes
+
 	return (
 		<PreviewCard
 			Heading={
@@ -220,14 +224,18 @@ export function MyCard({onSuccess}: ReadyProps) {
 					<User user={{...data.currentUser, state: "active", bot: false}} />
 					<MyLists
 						heading="Groups:"
-						items={data.currentUser.groupMemberships?.nodes
+						total={groups?.length}
+						length={Math.min(groups?.length ?? 0, 2)}
+						items={groups
 							?.map((g) => g?.group)
 							?.filter(Boolean)
 							.map((n) => ({...n, url: n.webUrl}))}
 					/>
 					<MyLists
 						heading="Projects:"
-						items={data.currentUser.projectMemberships?.nodes
+						length={Math.min(projects?.length ?? 0, 3)}
+						total={projects?.length}
+						items={projects
 							?.map((n) => n?.project)
 							?.filter(Boolean)
 							.map((n) => ({...n, url: n.webUrl}))}
@@ -239,18 +247,22 @@ export function MyCard({onSuccess}: ReadyProps) {
 }
 
 function MyLists({
+	total,
 	items = [],
 	heading,
-	length = 3,
+	length,
 }: {
-	length?: number
 	heading: string
+	length: number
+	total?: number
 	items?: {id: string; name: string; url?: string}[]
 }) {
+	if (length === 0) return null
+
 	return (
 		<div className="animate-fade-up">
 			<Text className="text-muted-foreground">
-				{heading} [{items.length}]
+				{heading} [{total}]
 			</Text>
 			<ul className="mx-sm">
 				{items.slice(0, length).map((p) => (
@@ -271,7 +283,7 @@ function MyLists({
 
 function PreviewCard({Heading, Content}: IChildrens<"Heading" | "Content">) {
 	return (
-		<Card className="max-w-[350px] flex-1 basis-[250px]">
+		<Card className="max-w-[350px] flex-1 basis-[280px]">
 			<CardHeader>
 				<CardTitle>
 					<Lead>{Heading}</Lead>
