@@ -1,3 +1,4 @@
+import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar"
 import {Skeleton} from "@/components/ui/skeleton"
 import {
 	Table,
@@ -13,7 +14,6 @@ import {Text, TextSkeleton} from "@/components/ui/text"
 import {useConfigSelector} from "@/hooks/config/useConfig"
 import {type IUser, useUsersQuery} from "@/hooks/useUsers"
 import {cn} from "@/lib/utils"
-import {Avatar, AvatarFallback, AvatarImage} from "@radix-ui/react-avatar"
 import {P, match} from "ts-pattern"
 
 interface UserProps {
@@ -35,7 +35,7 @@ export function User(props: UserProps) {
 	return (
 		<div className={cn("flex items-center space-x-4", props.className)}>
 			{user?.avatarUrl ? (
-				<Avatar className="flex h-10 w-10 items-center justify-center overflow-clip rounded-full outline transition hover:outline-2 hover:outline-pink-500">
+				<Avatar className="hover:outline-accent-foreground h-10 w-10 outline transition hover:outline-2">
 					<AvatarImage src={avatar} />
 					<AvatarFallback className="text-xl">
 						{user.username.slice(0, 2)}
@@ -44,24 +44,22 @@ export function User(props: UserProps) {
 			) : (
 				<Skeleton className="h-10 w-10 rounded-full" />
 			)}
-			<div className="space-y-2">
-				{user ? (
-					<div>
-						<Text flush>{user.name}</Text>
-						<div className="flex">
-							<Text flush>
-								<span className="text-muted-foreground">{user.state}</span>
-								{user.username === user.name ? "" : ` ${user.username}`}
-							</Text>
-						</div>
+			{user ? (
+				<div>
+					<Text flush>{user.name}</Text>
+					<div className="flex">
+						<Text flush>
+							<span className="text-muted-foreground">{user.state}</span>
+							{user.username === user.name ? "" : ` ${user.username}`}
+						</Text>
 					</div>
-				) : (
-					<div>
-						<TextSkeleton className="w-[100px]" />
-						<TextSkeleton className="w-[100px]" />
-					</div>
-				)}
-			</div>
+				</div>
+			) : (
+				<div>
+					<TextSkeleton className="w-[100px]" />
+					<TextSkeleton className="w-[100px]" />
+				</div>
+			)}
 		</div>
 	)
 }

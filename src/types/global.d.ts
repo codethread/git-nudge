@@ -26,3 +26,10 @@ type MaybeNot<T> = T extends null
 					? MaybeNot<U>[]
 					: MaybeNot<T[K]>
 			}
+
+/**
+ * any alias for code generated via tooling, i.e expected to be correct for development
+ *
+ * biome-ignore lint/suspicious/noExplicitAny: needs must
+ */
+type ANY_GEN = any

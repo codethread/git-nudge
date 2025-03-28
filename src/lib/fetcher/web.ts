@@ -35,8 +35,7 @@ export async function createFetcher({token, domain, timeout}: RequestConfig) {
 			throw new Error("Network response was not ok")
 		}
 
-		// biome-ignore lint/suspicious/noExplicitAny: all code consumed through codegen
-		const json: any = await response.json()
+		const json: ANY_GEN = await response.json()
 		return json.data
 	}
 }

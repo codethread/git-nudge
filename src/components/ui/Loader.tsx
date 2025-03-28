@@ -1,7 +1,7 @@
 import {cn} from "@/lib/utils"
 import {cva, type VariantProps} from "class-variance-authority"
 
-const loaderVariants = cva("text-foreground mr-3 -ml-1 animate-spin", {
+const loaderVariants = cva("text-foreground mr-3 -ml-1 animate-spin ", {
 	variants: {
 		variant: {
 			default: "size-5",
@@ -21,7 +21,9 @@ export function Loader({
 	return (
 		<span
 			className={
-				variant === "page" ? "flex h-svh items-center justify-center" : ""
+				variant === "page"
+					? "animate-fade flex h-svh items-center justify-center"
+					: ""
 			}
 		>
 			<svg

@@ -1,13 +1,13 @@
 import {User} from "./widgets/Users"
 import {Button} from "@/components/ui/button"
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card"
+import {Progress} from "@/components/ui/progress"
 import {Lead, Text} from "@/components/ui/text"
 import {graphql} from "@/graphql"
 import {useFetcher} from "@/hooks/fetcher/useFetcher"
 import {type IUser, useUsersQuery} from "@/hooks/useUsers"
 import {useQuery} from "@tanstack/react-query"
 import {useState, useEffect, useCallback} from "react"
-import {match, P} from "ts-pattern"
 
 export function Dashboard() {
 	const [ready, setReady] = useState<boolean[]>([])
@@ -28,9 +28,7 @@ export function Dashboard() {
 					</Lead>
 				)}
 			</div>
-			{/* <div className=" flex flex-wrap justify-center items-stretch gap-sm @min-[800px]:gap-lg "> */}
 			<div className="gap-sm @min-5xl:gap-lg flex flex-wrap items-stretch justify-center">
-				{/* <div className=" flex flex-wrap justify-center items-stretch gap-lg @6xl:gap-sm "> */}
 				<MyCard onSuccess={onSuccess} />
 				<UsersCard onSuccess={onSuccess} />
 				<ReposCard onSuccess={onSuccess} />
@@ -87,7 +85,7 @@ function ReposCard({onSuccess}: ReadyProps) {
 }
 
 function UsersCard({onSuccess}: ReadyProps) {
-	const {error, users, allFetched} = useUsersQuery()
+	const {error, users, allFetched, progress} = useUsersQuery()
 
 	useEffect(() => {
 		if (allFetched) onSuccess()
@@ -99,7 +97,14 @@ function UsersCard({onSuccess}: ReadyProps) {
 	if (!allFetched)
 		return (
 			<PreviewCard
-				Heading="Loading colleagues"
+				Heading={
+					<span className="gap-sm flex items-baseline text-nowrap">
+						Loading colleagues
+						<span className="@container flex-1">
+							<Progress className="@max-[40px]:hidden" value={progress} />
+						</span>
+					</span>
+				}
 				Content={<UsersPreview loading />}
 			/>
 		)
@@ -114,54 +119,24 @@ function UsersCard({onSuccess}: ReadyProps) {
 
 function UsersPreview(props: {loading: boolean; users?: IUser[]}) {
 	const listLength = 3
-	const loaded = match(props)
-		.with({users: [], loading: false}, () => "empty" as const)
-		.with({loading: true}, () => "loading" as const)
-		.with({users: P.nonNullable}, ({users}) => users)
-		.exhaustive()
-
-	const [fading, setFading] = useState(loaded === "loading")
-	const [users, setUsers] = useState<(IUser | undefined)[]>(
-		Array.isArray(loaded)
-			? loaded.slice(0, listLength)
-			: Array(listLength).fill(undefined),
-	)
-	const [index, setIndex] = useState(0)
-
-	useEffect(() => {
-		if (index === listLength) {
-			setFading(false)
-		}
-		if (fading && Array.isArray(loaded)) {
-			setTimeout(
-				() => {
-					setUsers((u) => {
-						u[index] = loaded[index]
-						return [...u]
-					})
-					setIndex((x) => x + 1)
-				},
-				index === 0 ? 0 : 500,
-			)
-		}
-	}, [index, loaded, fading])
-
-	if (loaded === "empty") return <Text>No users for this instance</Text>
+	const users: (IUser | undefined)[] = (
+		props.users || Array(listLength).fill(undefined)
+	).slice(0, listLength)
 
 	return (
 		<ul className="border-muted-foreground divide-y">
-			{users.slice(0, listLength).map((user, i) => (
+			{users.map((user, i) => (
 				<li
 					key={user ? user.username : i.toString()}
 					className={user && "animate-fade-up"}
 				>
-					<User user={user} className="my-md" loading={false} />
+					<User user={user} className="my-md" loading={!user} />
 				</li>
 			))}
-			{props.users && !fading && props.users.length > listLength && (
+			{!props.loading && users.length > listLength && (
 				<li className="animate-fade-up mt-6">
 					<Text className="text-muted-foreground text-right">
-						and {props.users.length - listLength} others
+						and {users.length - listLength} others
 					</Text>
 				</li>
 			)}
@@ -232,7 +207,14 @@ export function MyCard({onSuccess}: ReadyProps) {
 
 	return (
 		<PreviewCard
-			Heading={`Welcome ${data.currentUser.username}`}
+			Heading={
+				<span>
+					Welcome{" "}
+					<span className="text-accent-foreground text-nowrap">
+						{data.currentUser.name || data.currentUser.username}
+					</span>
+				</span>
+			}
 			Content={
 				<div className="gap-sm flex flex-col">
 					<User user={{...data.currentUser, state: "active", bot: false}} />

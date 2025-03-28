@@ -1,6 +1,14 @@
-import {mocks, storeInit} from "./mocks"
+import {fakeDBInit} from "./fakes/db"
 import type {Fetcher} from "./web"
-import type {UserCoreConnection} from "@/graphql/graphql"
+import type {
+	CurrentUser,
+	Scalars,
+	UserCore,
+	UserCoreConnection,
+} from "@/graphql/graphql"
+import schemaJson from "@/graphql/schema.json"
+import {wait} from "@/lib/duration"
+import {faker} from "@faker-js/faker"
 import {
 	addMocksToSchema,
 	relayStylePaginationMock,
@@ -9,35 +17,60 @@ import {
 import {makeExecutableSchema} from "@graphql-tools/schema"
 import {graphql, buildClientSchema} from "graphql"
 
-export async function createFetcher(): Promise<Fetcher> {
-	// biome-ignore lint/suspicious/noExplicitAny: codegen
-	const {default: schemaJson}: any = await import("../../graphql/schema.json")
+type Mock<T> = {[K in keyof T]: () => Partial<T[K]>}
+type Mocks<T> = {[K in keyof T]: () => Partial<Mock<T[K]>>}
+type ScalarsMap = {[K in keyof Scalars]: () => Scalars[K]["output"]}
 
+const scalars: Partial<ScalarsMap> = {
+	UserID: () => {
+		// in theory this should never be used because we add users in the store
+		// however it is still called, and I'm not yet sure why
+		return faker.string.uuid()
+	},
+}
+
+const objects: Mocks<{
+	UserCore: UserCore
+	CurrentUser: CurrentUser
+}> = {
+	UserCore: () => ({
+		avatarUrl: () => "https://placecats.com/300/300",
+		webUrl: () => "https://gitlab.com",
+	}),
+	CurrentUser: () => ({
+		avatarUrl: () => "https://placecats.com/200/200",
+		webUrl: () => "https://gitlab.com",
+	}),
+}
+
+const mocks = {...scalars, ...objects}
+
+export async function createFetcher(): Promise<Fetcher> {
 	const schema = makeExecutableSchema({
-		typeDefs: buildClientSchema(schemaJson.data),
+		typeDefs: buildClientSchema((schemaJson as ANY_GEN).data),
 	})
 
-	const st = await storeInit()
+	const db = await fakeDBInit()
 
 	const mockedSchema = addMocksToSchema({
 		schema,
-		// store,
 		mocks,
 		resolvers: (store) => ({
 			Query: {
 				users: (_: null, params: RelayPaginationParams): UserCoreConnection => {
+					const DEFAULT_PAGE_SIZE = 100 // for GitLab
 					const {after, first} = params
 
 					if (params.last || params.before) throw new Error("no mock setup")
 
-					const allUsers = st.getUsers()
-					const users = allUsers.slice(Number.parseInt(after || "0", 10), first)
+					const allUsers = db.getUsers()
+					const idx = Number.parseInt(after || "0", 10)
+					const users = allUsers.slice(idx, (first || DEFAULT_PAGE_SIZE) + idx)
 					const lastUser = users.at(-1)
 
 					return {
 						count: allUsers.length,
-						// biome-ignore lint/suspicious/noExplicitAny: <explanation>
-						nodes: users as any,
+						nodes: users as ANY_RESOLVER,
 						pageInfo: {
 							hasNextPage: lastUser?.id < allUsers.length,
 							endCursor: lastUser?.id || after,
@@ -47,7 +80,7 @@ export async function createFetcher(): Promise<Fetcher> {
 				},
 			},
 			CurrentUser: {
-				...mapToResolver(st.getUser("1") || {}),
+				...mapToResolver(db.getUsers().findLast((u) => u.active) || {}),
 				projectMemberships: relayStylePaginationMock(store),
 				groupMemberships: relayStylePaginationMock(store),
 				contributedProjects: relayStylePaginationMock(store),
@@ -62,6 +95,7 @@ export async function createFetcher(): Promise<Fetcher> {
 			variableValues,
 			source,
 		})
+		await wait(faker.number.int({min: 500, max: 1500}))
 
 		const queryLine = source.slice(0, source.indexOf("\n", 1))
 		console.groupCollapsed(`🚀 GRAPHQL ${queryLine}`)
@@ -72,8 +106,7 @@ export async function createFetcher(): Promise<Fetcher> {
 		console.log(data)
 		console.groupEnd()
 
-		// biome-ignore lint/suspicious/noExplicitAny: codegen
-		return data as any
+		return data as ANY_GEN
 	}
 }
 
@@ -98,3 +131,8 @@ function mapToResolver<A extends object>(obj: A) {
 		Object.entries(obj).map(([k, v]) => [k, () => v]),
 	) as {[Key in keyof A]: () => A[Key]}
 }
+
+/**
+ * biome-ignore lint/suspicious/noExplicitAny: Could fix with resolver types from codgen but seems overkill at this point
+ */
+type ANY_RESOLVER = any

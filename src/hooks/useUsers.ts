@@ -56,8 +56,8 @@ export const useUsersQuery = () => {
 		const fetched = data?.pages
 			.map((p) => p.users?.nodes?.length ?? 0)
 			.reduce((a, b) => a + b)
-		const progress = fetched ? fetched / count : 0
-		const allFetched = progress === 1
+		const progress = (fetched ? fetched / count : 0) * 100
+		const allFetched = progress === 100
 		const users =
 			data && allFetched
 				? data.pages.flatMap((p) => p.users?.nodes).filter(Boolean)
