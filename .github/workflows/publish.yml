@@ -51,6 +51,7 @@ jobs:
     if: github.ref == 'refs/heads/main'
     permissions:
       pages: write # to deploy to Pages
+      contents: write
       id-token: write # to verify the deployment originates from an appropriate source
     steps:
       - name: Download artifact
