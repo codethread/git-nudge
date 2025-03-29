@@ -30,6 +30,8 @@ jobs:
 
       - name: build
         run: pnpm build
+      - name: Verify dist directory
+        run: ls -la ./dist
 
       - name: Upload production-ready build files
         uses: actions/upload-artifact@v3
