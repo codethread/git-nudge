@@ -16,6 +16,7 @@ export default defineConfig((opts) => {
 
 	return {
 		plugins: [react(), tailwindcss()],
+		base: "/git-nudge",
 		define: {
 			__HASH__: JSON.stringify(isProdLike ? process.env.BUILD_HASH : ""),
 			__FAKE_FETCHER__: !isProdLike,
