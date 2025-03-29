@@ -3,30 +3,24 @@ import react from "@vitejs/plugin-react"
 import {readFileSync} from "node:fs"
 import os from "node:os"
 import path from "node:path"
+import {match} from "ts-pattern"
 import {defineConfig} from "vite"
 
 const host = process.env.TAURI_DEV_HOST
 
 // https://vitejs.dev/config/
-export default defineConfig(({command}) => {
-	const FAKE_NETRC = (() => {
-		try {
-			return command === "serve"
-				? readFileSync(path.join(os.homedir(), ".netrc"), "utf8")
-				: ""
-		} catch (e) {
-			return ""
-		}
-	})()
+export default defineConfig((opts) => {
+	const isProdLike = match(opts)
+		.with({isPreview: true}, {command: "build"}, () => true)
+		.otherwise(() => false)
 
 	return {
-		logLevel: "warn",
 		plugins: [react(), tailwindcss()],
 		define: {
-			// TODO: get from build
-			__HASH__: process.env.BUILD_HASH,
-			__FAKE_FETCHER__: command === "serve",
-			__FAKE_NETRC__: JSON.stringify(FAKE_NETRC),
+			__HASH__: JSON.stringify(isProdLike ? process.env.BUILD_HASH : ""),
+			__FAKE_FETCHER__: !isProdLike,
+			__IS_DEV__: !isProdLike,
+			__FAKE_NETRC__: JSON.stringify(!isProdLike ? getNetrc() : ""),
 		},
 		resolve: {
 			alias: {
@@ -53,3 +47,11 @@ export default defineConfig(({command}) => {
 		},
 	}
 })
+
+function getNetrc() {
+	try {
+		return readFileSync(path.join(os.homedir(), ".netrc"), "utf8")
+	} catch (e) {
+		return ""
+	}
+}

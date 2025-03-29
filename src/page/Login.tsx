@@ -3,11 +3,12 @@ import {Button} from "@/components/ui/button"
 import {Lead} from "@/components/ui/text"
 import {useAppConfigAction} from "@/hooks/config/useAppConfig"
 import {useBridge} from "@/hooks/useBridge"
+import {useNavigation} from "@/hooks/useNav"
 import {parseNetrc, type Netrc} from "@/lib/netrc"
 import {useQuery} from "@tanstack/react-query"
 import {match, P} from "ts-pattern"
 
-export function Login() {
+export default function Login() {
 	const {setLogin} = useAppConfigAction()
 	const {readNetrc} = useBridge()
 	const {data, isFetching, refetch} = useQuery({
@@ -38,6 +39,7 @@ export function Login() {
 
 function NoNetrc({onRetry}: {onRetry: () => void}) {
 	const {toggleFakeLab} = useAppConfigAction()
+	const {nav} = useNavigation()
 	return (
 		<div className="flex flex-1 justify-center">
 			<div className="flex flex-col">
@@ -67,13 +69,16 @@ function NoNetrc({onRetry}: {onRetry: () => void}) {
 					</p>
 					<div className="flex justify-around">
 						<div className="gap-md flex">
-							<Button className="min-w-[150px]" onClick={() => onRetry()}>
+							<Button size="lg" onClick={() => onRetry()}>
 								Retry
 							</Button>
 							<Button
 								variant="outline"
-								className="min-w-[150px]"
-								onClick={toggleFakeLab}
+								size="lg"
+								onClick={() => {
+									toggleFakeLab()
+									nav("welcome")
+								}}
 							>
 								Use FakeLab
 							</Button>

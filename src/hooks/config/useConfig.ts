@@ -31,8 +31,10 @@ export function createConfigStore(appConfigStore: IAppConfigStore) {
 				},
 			}))
 			.with({gitlab: {state: "init"}}, () => {
-				// could make a static check by syncing state rather than deriving, will see how it goes
-				throw new Error("config store should be created when ready")
+				// NOTE: could make a static check by syncing state rather than deriving, will see how it goes
+				//
+				// should be protected by Providers
+				throw new Error("ConfigStore expected to be given an initialsed config")
 			})
 			.exhaustive()
 	})

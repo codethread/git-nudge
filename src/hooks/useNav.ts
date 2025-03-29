@@ -1,14 +1,20 @@
 import {create} from "zustand"
 
-type Page = "login" | "setup" | "dashboard" | "fakelab"
+export const Pages = {
+	LOGIN: "login",
+	WELCOME: "welcome",
+	DASHBOARD: "dashboard",
+} as const
+
+export type Page = (typeof Pages)[keyof typeof Pages]
 
 interface Nav {
 	page: Page
 	nav(page: Page): void
 }
 
-export const useNav = create<Nav>()((set) => ({
-	page: "setup",
+export const useNavigation = create<Nav>()((set) => ({
+	page: Pages.WELCOME,
 	nav: (page) => {
 		set({page})
 	},

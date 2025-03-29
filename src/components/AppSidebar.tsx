@@ -16,37 +16,51 @@ import {
 import {
 	useAppConfigAction,
 	useAppConfigSelector,
+	useIsDev,
 } from "@/hooks/config/useAppConfig"
+import {useNavigation} from "@/hooks/useNav"
 import {pick} from "@/lib/utils"
-import {Home, Settings, Trash2} from "lucide-react"
-
-const items = [
-	{
-		title: "Home",
-		url: "#",
-		icon: Home,
-	},
-	{
-		title: "Settings",
-		url: "#",
-		icon: Settings,
-	},
-]
+import {Hand, Home, Settings, Trash2} from "lucide-react"
 
 export function AppSidebar() {
+	const isDev = useIsDev()
+	const {nav, page} = useNavigation()
 	const isFake = useAppConfigSelector((s) => s.fakeLab)
 	const viewer = useAppConfigSelector((s) =>
 		s.gitlab.state === "ready" ? pick(s.gitlab, ["user", "domain"]) : undefined,
 	)
 	const {clearClientCache, toggleFakeLab} = useAppConfigAction()
 
+	const items = [
+		{
+			enabled: true,
+			title: "Home",
+			action: () => nav("dashboard"),
+			icon: Home,
+		},
+		{
+			enabled: true,
+			title: "Settings",
+			action: () => nav("welcome"),
+			icon: Settings,
+		},
+		{
+			enabled: isDev,
+			title: "Welcome",
+			action: () => nav("welcome"),
+			icon: Hand,
+		},
+	]
+
 	const actions = [
 		{
+			enabled: true,
 			title: "Clear Cache",
 			action: clearClientCache,
 			icon: Trash2,
 		},
 		{
+			enabled: true,
 			title: isFake ? "Use GitLab" : "Use FakeLab",
 			action: toggleFakeLab,
 			icon: () => (
@@ -70,16 +84,22 @@ export function AppSidebar() {
 					<SidebarGroupLabel>Application</SidebarGroupLabel>
 					<SidebarGroupContent>
 						<SidebarMenu>
-							{items.map((item) => (
-								<SidebarMenuItem key={item.title}>
-									<SidebarMenuButton asChild>
-										<a href={item.url}>
-											<item.icon />
-											<span>{item.title}</span>
-										</a>
-									</SidebarMenuButton>
-								</SidebarMenuItem>
-							))}
+							{items
+								.filter((i) => i.enabled)
+								.map((item) => (
+									<SidebarMenuItem key={item.title}>
+										<SidebarMenuButton
+											asChild
+											className="cursor-pointer"
+											onClick={item.action}
+										>
+											<div>
+												<item.icon />
+												<span>{item.title}</span>
+											</div>
+										</SidebarMenuButton>
+									</SidebarMenuItem>
+								))}
 						</SidebarMenu>
 					</SidebarGroupContent>
 				</SidebarGroup>
@@ -89,20 +109,22 @@ export function AppSidebar() {
 				<SidebarGroupLabel>Actions</SidebarGroupLabel>
 				<SidebarGroupContent>
 					<SidebarMenu>
-						{actions.map((item) => (
-							<SidebarMenuItem key={item.title}>
-								<SidebarMenuButton
-									asChild
-									className="cursor-pointer"
-									onClick={item.action}
-								>
-									<div>
-										<item.icon />
-										<span>{item.title}</span>
-									</div>
-								</SidebarMenuButton>
-							</SidebarMenuItem>
-						))}
+						{actions
+							.filter((i) => i.enabled)
+							.map((item) => (
+								<SidebarMenuItem key={item.title}>
+									<SidebarMenuButton
+										asChild
+										className="cursor-pointer"
+										onClick={item.action}
+									>
+										<div>
+											<item.icon />
+											<span>{item.title}</span>
+										</div>
+									</SidebarMenuButton>
+								</SidebarMenuItem>
+							))}
 					</SidebarMenu>
 				</SidebarGroupContent>
 				<SidebarTrigger />

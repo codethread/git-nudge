@@ -44,6 +44,8 @@ interface IAppConfigState extends IStorageConfig {
 
 	gitlab: GitLabInit
 
+	dev?: {enabled: boolean}
+
 	registered: {
 		clearCache?: () => void
 	}
@@ -95,6 +97,11 @@ export function createAppConfigStore(init: InitAppConfigStore) {
 			const {logger, persistHash, stored, isFakeLab, initial} = init
 			logger.debug("createAppConfigStore", init)
 			const state: IAppConfigState = {
+				dev: __IS_DEV__
+					? {
+							enabled: true,
+						}
+					: undefined,
 				fakeLab: isFakeLab,
 				global: {
 					requestTimeoutMillis: stored.global.requestTimeoutMillis,
@@ -188,6 +195,10 @@ export function useAppConfigAction() {
 			return actions
 		}),
 	)
+}
+
+export function useIsDev() {
+	return useAppConfigSelector((s) => s.dev?.enabled)
 }
 
 /**

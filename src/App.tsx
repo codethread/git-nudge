@@ -1,4 +1,4 @@
-import {PageManager} from "@/components/PageManager"
+import Layout from "@/components/Layout"
 import {ReactQueryProvider} from "@/components/QueryProvider"
 import {LoaderPage} from "@/components/ui/Loader"
 import {
@@ -7,7 +7,7 @@ import {
 	type IAppConfigStore,
 } from "@/hooks/config/useAppConfig"
 import {bridgeContext, createBridge, type IBridge} from "@/hooks/useBridge"
-import Layout from "@/page/Layout"
+import {PageManager} from "@/page/PageManager"
 import {useEffect, useState} from "react"
 
 const search = window.location.search
