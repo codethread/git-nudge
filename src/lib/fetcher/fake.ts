@@ -96,7 +96,7 @@ export async function createFetcher(): Promise<Fetcher> {
 				},
 			},
 			CurrentUser: {
-				...mapToResolver(db.getUsers().findLast((u) => u.active) || {}),
+				...mapToResolver(db.getUsers().find((u) => u.active) || {}),
 				projectMemberships: paginated(fakeInt(0, 3)),
 				groupMemberships: paginated(fakeInt(1, 8)),
 				contributedProjects: paginated(fakeInt(4, 9)),
@@ -131,9 +131,9 @@ export async function createFetcher(): Promise<Fetcher> {
 type Resolver = ReturnType<typeof relayStylePaginationMock>
 
 function paginated(count: number): Resolver {
-	return (_, params) => {
+	return (_, params, __, g) => {
 		const DEFAULT_PAGE_SIZE = 100 // for GitLab
-		const EMPTY_NODE = {} // tells mocking system to create all missing properties
+		const EMPTY_NODE = (id: number) => ({id: id.toString()}) // tells mocking system to create all missing properties
 		const {after, first} = params
 
 		if (params.last || params.before) throw new Error("no mock setup")
@@ -143,12 +143,13 @@ function paginated(count: number): Resolver {
 		const slice = list.slice(idx, (first || DEFAULT_PAGE_SIZE) + idx)
 		const lastIdx = slice.at(-1)
 
+		console.log("codethread", params, slice)
 		return {
 			count,
-			nodes: slice.map((_) => EMPTY_NODE),
+			nodes: slice.map((i) => EMPTY_NODE(i)),
 			edges: slice.map((i) => ({
 				cursor: i,
-				node: EMPTY_NODE,
+				node: EMPTY_NODE(i),
 			})),
 			pageInfo: {
 				hasNextPage: lastIdx && lastIdx < count,

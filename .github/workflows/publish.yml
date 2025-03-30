@@ -26,16 +26,11 @@ jobs:
           node-version: 22
           cache: "pnpm"
 
-      - name: install deps
+      - name: Install deps
         run: pnpm install
-      - name: get schema
-        run: pnpm getSchema
-      - name: get fakes
-        run: pnpm fake
-      - name: gen types
-        run: pnpm gen
-
-      - name: build
+      - name: Create build files
+        run: pnpm boot
+      - name: Build
         run: pnpm build
 
       - name: Upload production-ready build files

@@ -24,7 +24,7 @@ export default defineConfig((opts) => {
 				{
 					name: "gen",
 					watch: path.resolve(CODEGEN_DOCS),
-					run: "pnpm run types",
+					run: "pnpm run types:client",
 				},
 			]),
 		],

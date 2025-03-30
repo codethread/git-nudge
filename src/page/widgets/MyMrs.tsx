@@ -18,9 +18,8 @@ export function MyMrs() {
 
 	if (!data?.currentUser) return null
 	const {assignedMergeRequests, authoredMergeRequests} = data.currentUser
-	const mrs = authoredMergeRequests?.edges
-		?.concat(assignedMergeRequests?.edges)
-		.map((e) => e?.node)
+	const mrs = authoredMergeRequests?.nodes
+		?.concat(assignedMergeRequests?.nodes)
 		.filter(Boolean)
 
 	return (

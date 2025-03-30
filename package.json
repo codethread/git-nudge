@@ -4,10 +4,10 @@
 	"version": "0.1.0",
 	"type": "module",
 	"scripts": {
+		"boot": "pnpm schema && pnpm types && pnpm fakes && echo \"Ready, run 'pnpm dev' or 'pnpm app'\"",
 		"---------------------dev---------------------------": "---",
 		"dev": "vite",
 		"app": "tauri dev",
-		"boot": "pnpm schema && pnpm types && pnpm fakes && echo \"Ready, run 'pnpm dev' or 'pnpm app'\"",
 		"---------------------checks------------------------": "---",
 		"ts": "tsc --watch",
 		"lint": "biome lint --write src scripts vite.config.ts",
@@ -17,7 +17,9 @@
 		"preview": "pnpm build && vite preview",
 		"---------------------helpers-----------------------": "---",
 		"tauri": "tauri",
-		"types": "graphql-codegen --config scripts/codegen.ts",
+		"types": "pnpm types:client && pnpm types:lsp",
+		"types:lsp": "node --experimental-strip-types --no-warnings ./scripts/codegen-lsp.ts",
+		"types:client": "graphql-codegen --config ./scripts/codegen.ts",
 		"fakes": "node --experimental-strip-types --no-warnings ./scripts/get-fake-characters.bin.ts",
 		"schema": "node --experimental-strip-types --no-warnings ./scripts/download-schema.bin.ts"
 	},
