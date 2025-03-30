@@ -1,25 +1,13 @@
-import minimist from "minimist"
+import {SCHEMA_PATH} from "./constants.ts"
 import fs from "node:fs"
 import https from "node:https"
 import os from "node:os"
 import path from "node:path"
 import {match, P} from "ts-pattern"
 import unzipper from "unzipper"
-import {z, ZodError} from "zod"
-import {fromError} from "zod-validation-error"
+import {z} from "zod"
 
-process.on("uncaughtException", (e) => {
-	if (e instanceof ZodError) {
-		console.log(fromError(e).toString())
-	} else {
-		console.error(e)
-	}
-	process.exit(1)
-})
-
-const defaultUrl = "https://gitlab.com/gitlab-org/gitlab/-/jobs/9488927001"
-
-const argv = minimist(process.argv.slice(2))
+const DEFAULT_URL = "https://gitlab.com/gitlab-org/gitlab/-/jobs/9488927001"
 
 const UrlSchema = z
 	.string({message: "expected a url string as argument"})
@@ -31,32 +19,42 @@ const DomainSchema = z
 	.url({message: "domain param should be a valid url"})
 	.optional()
 
-const args = z
-	.object({
-		help: z.boolean().default(false),
-		url: UrlSchema,
-		domain: DomainSchema,
-	})
-	.parse(argv)
+export const ArgSchema = z.object({
+	help: z.boolean().default(false),
+	url: UrlSchema,
+	domain: DomainSchema,
+})
 
-const envs = z
-	.object({
-		GITLAB_SCHEMA_DOMAIN: UrlSchema,
-		GITLAB_SCHEMA_URL: DomainSchema,
-	})
-	.parse(process.env)
+type Args = z.TypeOf<typeof ArgSchema>
 
-match({...args, ...envs})
-	.with({help: true}, printHelp)
-	.with({domain: P.nonNullable}, (url) => fetchGraph(url.domain))
-	.with({url: P.nonNullable}, (url) => downloadSchema(url.url))
-	.with({GITLAB_SCHEMA_DOMAIN: P.nonNullable}, (url) =>
-		fetchGraph(url.GITLAB_SCHEMA_DOMAIN),
-	)
-	.with({GITLAB_SCHEMA_URL: P.nonNullable}, (url) =>
-		downloadSchema(url.GITLAB_SCHEMA_URL),
-	)
-	.otherwise(() => downloadSchema(defaultUrl))
+export const EnvSchema = z.object({
+	GITLAB_SCHEMA_DOMAIN: UrlSchema,
+	GITLAB_SCHEMA_URL: DomainSchema,
+})
+
+type Envs = z.TypeOf<typeof EnvSchema>
+
+export async function main(args: Args, envs: Envs) {
+	if (args.help) {
+		return printHelp()
+	}
+
+	console.log("DownloadSchema with", {args, envs})
+	fs.mkdirSync("src/graphql", {recursive: true})
+
+	await match({...args, ...envs})
+		.with({domain: P.nonNullable}, (url) => fetchGraph(url.domain))
+		.with({url: P.nonNullable}, (url) => downloadSchema(url.url))
+		.with({GITLAB_SCHEMA_DOMAIN: P.nonNullable}, (url) =>
+			fetchGraph(url.GITLAB_SCHEMA_DOMAIN),
+		)
+		.with({GITLAB_SCHEMA_URL: P.nonNullable}, (url) =>
+			downloadSchema(url.GITLAB_SCHEMA_URL),
+		)
+		.otherwise(() => downloadSchema(DEFAULT_URL))
+
+	console.log(`Downloaded to ${SCHEMA_PATH}`)
+}
 
 function printHelp() {
 	console.log(`
@@ -72,7 +70,7 @@ OPTIONS:
 
   --url              The URL from which to download the schema from. 
                      Needs to be a job url which includes a schema.json download link
-                     [Default]: '${defaultUrl}'
+                     [Default]: '${DEFAULT_URL}'
 
   --domain           Provide a domain to a hosted gitlab instance that will accept a
                      graphql introspection query.
@@ -87,10 +85,10 @@ ENVS:
 }
 
 async function fetchGraph(url: string) {
-	fs.mkdirSync("src/graphql", {recursive: true})
-
 	const final = `${url}/api/graphql`
+
 	console.log(`Introspecting ${final}`)
+
 	const schema = await fetch(final, {
 		headers: {
 			accept: "*/*",
@@ -108,14 +106,16 @@ async function fetchGraph(url: string) {
 		return r.json()
 	})
 
-	fs.writeFileSync("src/graphql/schema.json", JSON.stringify(schema))
-	console.log("Schema written")
+	console.log("Fetch success")
+
+	fs.writeFileSync(SCHEMA_PATH, JSON.stringify(schema))
 }
 
 async function downloadSchema(jobUrl: string) {
-	fs.mkdirSync("src/graphql", {recursive: true})
 	const targetDirectory = path.join(os.tmpdir(), "git-nudge")
-	const zipUrl = await fetch(jobUrl.concat("/artifacts/download"), {
+	const artifactUrl = jobUrl.concat("/artifacts/download")
+	console.log(`Getting download url via: ${artifactUrl}`)
+	const zipUrl = await fetch(artifactUrl, {
 		redirect: "follow",
 	}).then((res) => {
 		if (res.ok) {
@@ -128,7 +128,7 @@ async function downloadSchema(jobUrl: string) {
 	await downloadAndExtractZip(zipUrl, targetDirectory)
 	fs.renameSync(
 		path.join(targetDirectory, "tmp", "tests", "graphql", "gitlab_schema.json"),
-		"src/graphql/schema.json",
+		SCHEMA_PATH,
 	)
 }
 
@@ -137,23 +137,25 @@ async function downloadAndExtractZip(
 	outputDir: string,
 ): Promise<void> {
 	const zipFilePath = path.join(outputDir, "temp.zip")
-
 	if (!fs.existsSync(outputDir)) {
 		fs.mkdirSync(outputDir, {recursive: true})
 	}
 
 	try {
+		console.log(`Downloading zip at:\n${url}\n`)
+
 		await downloadFile(url, zipFilePath)
+
+		console.log(`Extracting from ${zipFilePath}`)
 
 		await fs
 			.createReadStream(zipFilePath)
 			.pipe(unzipper.Extract({path: outputDir}))
 			.promise()
-
-		console.log(`Extracted to ${outputDir}`)
 	} catch (error) {
 		console.error("Error downloading or extracting zip:", error)
 	} finally {
+		console.log("Cleaning temp zip")
 		if (fs.existsSync(zipFilePath)) {
 			fs.unlink(zipFilePath, (err) => {
 				if (err) console.error("Error removing the temp zip file:", err)
@@ -163,7 +165,7 @@ async function downloadAndExtractZip(
 }
 
 function downloadFile(url: string, dest: string): Promise<void> {
-	return new Promise((resolve, reject) => {
+	return new Promise<undefined>((resolve, reject) => {
 		const file = fs.createWriteStream(dest)
 		https
 			.get(url, (response) => {
@@ -175,8 +177,7 @@ function downloadFile(url: string, dest: string): Promise<void> {
 				response.pipe(file)
 
 				file.on("finish", () => {
-					// biome-ignore lint/suspicious/noExplicitAny: <explanation>
-					file.close(resolve as any)
+					file.close(() => resolve(undefined))
 				})
 
 				file.on("error", (err) => {

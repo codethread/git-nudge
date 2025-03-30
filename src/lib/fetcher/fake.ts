@@ -3,6 +3,7 @@ import type {Fetcher} from "./web"
 import type {
 	CurrentUser,
 	Group,
+	MergeRequest,
 	Project,
 	Scalars,
 	UserCore,
@@ -37,6 +38,7 @@ const objects: Mocks<{
 	CurrentUser: CurrentUser
 	Project: Project
 	Group: Group
+	MergeRequest: MergeRequest
 }> = {
 	UserCore: () => ({
 		avatarUrl: () => "https://placecats.com/300/300",
@@ -51,6 +53,9 @@ const objects: Mocks<{
 	}),
 	Group: () => ({
 		name: () => faker.commerce.department(),
+	}),
+	MergeRequest: () => ({
+		title: () => faker.commerce.productDescription(),
 	}),
 }
 
@@ -95,6 +100,8 @@ export async function createFetcher(): Promise<Fetcher> {
 				projectMemberships: paginated(fakeInt(0, 3)),
 				groupMemberships: paginated(fakeInt(1, 8)),
 				contributedProjects: paginated(fakeInt(4, 9)),
+				assignedMergeRequests: paginated(fakeInt(2, 8)),
+				authoredMergeRequests: paginated(fakeInt(0, 3)),
 			},
 		}),
 	})

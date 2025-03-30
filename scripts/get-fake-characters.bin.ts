@@ -1,7 +1,6 @@
-import {exec} from "node:child_process"
+import {FIXTURE_FILE} from "./constants.ts"
+import {run} from "./run.ts"
 import fs from "node:fs/promises"
-
-const fixtureFile = "src/lib/fetcher/fixtureData.json"
 
 interface User {
 	name: string
@@ -61,17 +60,6 @@ async function getUsers(page?: number) {
 	}
 }
 
-function run(cmd: string) {
-	return new Promise((res, rej) => {
-		exec(cmd)
-			.on("error", rej)
-			.on("exit", (status) => {
-				if (status === 0) res(undefined)
-				else rej(`FAILED: ${cmd}`)
-			})
-	})
-}
-
 const gql = plainString
 
 function plainString(str: TemplateStringsArray, ...strs: string[]) {
@@ -80,7 +68,7 @@ function plainString(str: TemplateStringsArray, ...strs: string[]) {
 
 ;(async () => {
 	const users = await getAllUsers()
-	await fs.writeFile(fixtureFile, JSON.stringify({users}, null, 2), "utf-8")
+	await fs.writeFile(FIXTURE_FILE, JSON.stringify({users}, null, 2), "utf-8")
 
-	await run(`pnpm exec prettier --write ${fixtureFile}`)
+	await run(`pnpm exec prettier --ignore-file='' --write ${FIXTURE_FILE}`)
 })()

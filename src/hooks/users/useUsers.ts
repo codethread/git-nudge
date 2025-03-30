@@ -1,31 +1,9 @@
-import {useFetcher} from "./fetcher/useFetcher"
-import {graphql} from "@/graphql"
+import {UsersQuery} from "./users.gql"
 import type {GetUsersQuery} from "@/graphql/graphql"
+import {useFetcher} from "@/hooks/fetcher/useFetcher"
 import {duration} from "@/lib/duration"
 import {useInfiniteQuery} from "@tanstack/react-query"
 import {useEffect, useMemo} from "react"
-
-// TODO: right now a blunt hammer, can offer more control if needed
-const UsersQuery = graphql(`
-	query GetUsers($cursor: String) {
-		users(first: 100, after: $cursor) {
-			count
-			pageInfo {
-				hasNextPage
-				endCursor
-			}
-			nodes {
-				id
-				avatarUrl
-				state
-				name
-				username
-				bot
-				webUrl
-			}
-		}
-	}
-`)
 
 export type IUser = MaybeNot<
 	NN<NN<NN<GetUsersQuery["users"]>["nodes"]>[number]>

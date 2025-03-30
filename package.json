@@ -4,16 +4,22 @@
 	"version": "0.1.0",
 	"type": "module",
 	"scripts": {
-		"gen": "graphql-codegen --config scripts/codegen.ts",
+		"---------------------dev---------------------------": "---",
 		"dev": "vite",
-		"fake": "node --experimental-strip-types --no-warnings ./scripts/getFakeCharacters.ts",
+		"app": "tauri dev",
+		"boot": "pnpm schema && pnpm types && pnpm fakes && echo \"Ready, run 'pnpm dev' or 'pnpm app'\"",
+		"---------------------checks------------------------": "---",
 		"ts": "tsc --watch",
-		"lint": "biome lint --write src vite.config.ts",
-		"format": "prettier --write \"src/**/*.{ts,tsx}\" --ignore-path .gitignore",
+		"lint": "biome lint --write src scripts vite.config.ts",
+		"format": "prettier --write \"{src,scripts}/**/*.{ts,tsx}\"",
+		"---------------------build-------------------------": "---",
 		"build": "BUILD_HASH=$(git rev-parse --short HEAD) vite build",
 		"preview": "pnpm build && vite preview",
+		"---------------------helpers-----------------------": "---",
 		"tauri": "tauri",
-		"getSchema": "node --experimental-strip-types --no-warnings ./scripts/downloadSchema.ts"
+		"types": "graphql-codegen --config scripts/codegen.ts",
+		"fakes": "node --experimental-strip-types --no-warnings ./scripts/get-fake-characters.bin.ts",
+		"schema": "node --experimental-strip-types --no-warnings ./scripts/download-schema.bin.ts"
 	},
 	"dependencies": {
 		"@apollo/server": "^4.11.3",
@@ -66,6 +72,7 @@
 		"@tauri-apps/cli": "^2",
 		"@total-typescript/ts-reset": "^0.6.1",
 		"@trivago/prettier-plugin-sort-imports": "^5.2.2",
+		"@types/node": "22.x.x",
 		"@types/react": "^18.3.1",
 		"@types/react-dom": "^18.3.1",
 		"@vitejs/plugin-react": "^4.3.4",
@@ -75,7 +82,8 @@
 		"type-fest": "^4.38.0",
 		"typescript": "~5.6.3",
 		"unzipper": "^0.12.3",
-		"vite": "^6.0.3"
+		"vite": "^6.0.3",
+		"vite-plugin-watch-and-run": "^1.7.4"
 	},
 	"volta": {
 		"node": "22.14.0",

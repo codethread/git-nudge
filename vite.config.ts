@@ -1,3 +1,4 @@
+import {CODEGEN_DOCS} from "./scripts/constants"
 import tailwindcss from "@tailwindcss/vite"
 import react from "@vitejs/plugin-react"
 import {readFileSync} from "node:fs"
@@ -5,6 +6,7 @@ import os from "node:os"
 import path from "node:path"
 import {match} from "ts-pattern"
 import {defineConfig} from "vite"
+import {watchAndRun} from "vite-plugin-watch-and-run"
 
 const host = process.env.TAURI_DEV_HOST
 
@@ -15,7 +17,17 @@ export default defineConfig((opts) => {
 		.otherwise(() => false)
 
 	return {
-		plugins: [react(), tailwindcss()],
+		plugins: [
+			react(),
+			tailwindcss(),
+			watchAndRun([
+				{
+					name: "gen",
+					watch: path.resolve(CODEGEN_DOCS),
+					run: "pnpm run types",
+				},
+			]),
+		],
 		base: "/git-nudge",
 		define: {
 			__HASH__: JSON.stringify(isProdLike ? process.env.BUILD_HASH : ""),

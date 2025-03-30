@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/table"
 import {Text, TextSkeleton} from "@/components/ui/text"
 import {useConfigSelector} from "@/hooks/config/useConfig"
-import {type IUser, useUsersQuery} from "@/hooks/useUsers"
+import {type IUser, useUsersQuery} from "@/hooks/users/useUsers"
 import {cn} from "@/lib/utils"
 import {P, match} from "ts-pattern"
 

@@ -18,6 +18,7 @@ export function parseNetrc(netrcStr?: string): ParsedConfig {
 	if (!netrcStr) return {tag: "missing"}
 
 	let net: unknown = null
+
 	try {
 		net = netrc.parse(netrcStr)
 	} catch (e) {
