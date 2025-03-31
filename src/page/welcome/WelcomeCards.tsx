@@ -128,7 +128,9 @@ export function MyCard({onSuccess}: ReadyProps) {
 	})
 
 	useEffect(() => {
-		if (isSuccess) onSuccess()
+		if (isSuccess) {
+			onSuccess()
+		}
 	}, [isSuccess, onSuccess])
 
 	if (error) {
@@ -144,6 +146,15 @@ export function MyCard({onSuccess}: ReadyProps) {
 
 	const groups = data.currentUser.groupMemberships?.nodes
 	const projects = data.currentUser.projectMemberships?.nodes
+	// console.log("currentUser", data.currentUser)
+	// console.log(
+	// 	"currentUser.projectMemberships",
+	// 	data.currentUser?.projectMemberships,
+	// )
+	// console.log(
+	// 	"currentUser.contributedProjects",
+	// 	data.currentUser?.contributedProjects,
+	// )
 
 	return (
 		<PreviewCard

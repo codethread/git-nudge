@@ -44,6 +44,17 @@ const _ = graphql(`
 export const GetMyMrs = graphql(`
 	query GetMyMrs($draft: Boolean) {
 		currentUser {
+			id
+			name
+			projectMemberships(first: 100) {
+				nodes {
+					project {
+						id
+						name
+						webUrl
+					}
+				}
+			}
 			assignedMergeRequests(first: 100, draft: $draft, state: opened) {
 				count
 				pageInfo {

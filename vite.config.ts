@@ -6,6 +6,7 @@ import os from "node:os"
 import path from "node:path"
 import {match} from "ts-pattern"
 import {defineConfig} from "vite"
+import FullReload from "vite-plugin-full-reload"
 import {watchAndRun} from "vite-plugin-watch-and-run"
 
 const host = process.env.TAURI_DEV_HOST
@@ -27,6 +28,7 @@ export default defineConfig((opts) => {
 					run: "pnpm run types:client",
 				},
 			]),
+			FullReload(["src/lib/fetcher/**/*"]),
 		],
 		base: "/git-nudge",
 		define: {

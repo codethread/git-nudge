@@ -14,6 +14,9 @@ export const MyBioQuery = graphql(`
 						id
 						name
 						webUrl
+						detailedImportStatus {
+							status
+						}
 					}
 				}
 			}
@@ -28,12 +31,16 @@ export const MyBioQuery = graphql(`
 			}
 			contributedProjects(first: 100) {
 				count
-				nodes {
-					id
-					name
-					webUrl
-				}
+				...Foo
 			}
+		}
+	}
+
+	fragment Foo on ProjectConnection {
+		nodes {
+			id
+			name
+			webUrl
 		}
 	}
 `)

@@ -6,6 +6,7 @@ import {useBridge} from "@/hooks/useBridge"
 import {asyncStorage} from "@/lib/storage"
 import {createAsyncStoragePersister} from "@tanstack/query-async-storage-persister"
 import {QueryClient} from "@tanstack/react-query"
+import {ReactQueryDevtools} from "@tanstack/react-query-devtools"
 import {PersistQueryClientProvider} from "@tanstack/react-query-persist-client"
 import {useRef, useEffect, useMemo} from "react"
 
@@ -46,6 +47,7 @@ export function ReactQueryProvider({children}: IChildren) {
 				buster: persistHash,
 			}}
 		>
+			<ReactQueryDevtools initialIsOpen={false} />
 			{children}
 		</PersistQueryClientProvider>
 	)

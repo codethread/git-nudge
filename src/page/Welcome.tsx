@@ -1,6 +1,5 @@
-
 import {Button} from "@/components/ui/button"
-import {Lead, } from "@/components/ui/text"
+import {Lead} from "@/components/ui/text"
 import {Pages, useNavigation} from "@/hooks/useNav"
 import {MyCard, ReposCard, UsersCard} from "@/page/welcome/WelcomeCards"
 import {useState, useCallback} from "react"

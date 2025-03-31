@@ -58,3 +58,13 @@ export function pick<T extends object, K extends keyof T>(
 	})
 	return result
 }
+
+export function repeat<A>(i: number, cb: (i: number) => A): A[] {
+	const res = [] as A[]
+	let idx = 0
+	while (idx < i) {
+		res.push(cb(idx))
+		idx++
+	}
+	return res
+}
