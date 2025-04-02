@@ -1,0 +1,1 @@
+function t(r){return r==null||Number.isNaN(r)?0:r}function n(...r){return r.reduce((e,u)=>e+t(u),0)}function i(...r){return t(r.reduce((e,u)=>e?e-t(u):u))}function f(...r){for(let e=0;e<r.length-1;e++)if(t(r[e])<=t(r[e+1]))return!1;return!0}function o(...r){return Math.min(...r.map(t))}export{n as a,f as g,o as m,i as s};
