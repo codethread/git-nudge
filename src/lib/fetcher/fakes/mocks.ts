@@ -13,9 +13,7 @@ export const mocks: IMocks<Resolvers> = {
 	Boolean: () => fakeTrue(50),
 	Int: () => faker.number.int(),
 	String: () => faker.word.words({count: faker.number.int({min: 3, max: 9})}),
-	Time: () => {
-		return faker.date.anytime()
-	},
+	Time: () => faker.date.anytime(),
 	ID: () => {
 		// in theory this should never be used because we add users in the store
 		// however it is still called, and I'm not yet sure why

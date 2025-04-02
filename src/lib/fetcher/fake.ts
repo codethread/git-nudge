@@ -39,29 +39,7 @@ export async function createFetcher(
 		const variableValues = variables ?? {}
 		const source = query.toString().trim()
 
-		const ast = gql.parse(source, {noLocation: true})
-
-		const ti = new gql.TypeInfo(schema)
-		gql.visit(
-			ast,
-			gql.visitWithTypeInfo(ti, {
-				Field() {
-					const type = ti.getType()
-					if (type && "ofType" in type) {
-						const subType = type.ofType
-						const isLeaf = gql.isLeafType(subType)
-						if (isLeaf) {
-							const name = subType.name
-							debugger
-							const mocked = mocks[name]
-							if (!mocked) {
-								throw new Error(`Scalar field not mocked: ${name}`)
-							}
-						}
-					}
-				},
-			}),
-		)
+		failIfMissingScalarMock(schema, source)
 
 		const {data} = await gql.graphql({
 			schema: mockedSchema,
@@ -114,4 +92,38 @@ function traverse<T = ANY_GEN>(obj: T, callback: Callback<T>): void {
 			traverse(value, callback)
 		}
 	}
+}
+
+/**
+ * The graph-mock lib is great for lazily mocking types, but if a Scalar mock
+ * isn't defined it fails silently and `null`s the whole object. This
+ * validation fn will parse a query and visit all fields, if any are known to
+ * be Scalar types, `mocks` will be checked for the existence of _something_
+ * (specifics are not checked at this time).
+ */
+function failIfMissingScalarMock(schema: gql.GraphQLSchema, query: string) {
+	const ast = gql.parse(query, {noLocation: true})
+	const typeInfo = new gql.TypeInfo(schema)
+	gql.visit(
+		ast,
+		gql.visitWithTypeInfo(typeInfo, {
+			Field() {
+				// probably smarter ways to do this but hacked around in the
+				// debugger and this seems consistent
+				// it will also flag builtins like String, Int etc, but I'm fine with that
+				const type = typeInfo.getType()
+				if (type && "ofType" in type) {
+					const subType = type.ofType
+					const isLeaf = gql.isLeafType(subType)
+					if (isLeaf) {
+						const name = subType.name
+						const mocked = mocks[name]
+						if (!mocked) {
+							throw new Error(`Scalar field not mocked: ${name}`)
+						}
+					}
+				}
+			},
+		}),
+	)
 }
