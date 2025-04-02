@@ -33,7 +33,7 @@ export function ReposCard({onSuccess}: ReadyProps) {
 		return (
 			<PreviewCard
 				heading="Fetching contributions"
-				content={<UsersPreview loading />}
+				content={<UsersPreview />}
 			/>
 		)
 
@@ -59,7 +59,7 @@ export function ReposCard({onSuccess}: ReadyProps) {
 }
 
 export function UsersCard({onSuccess}: ReadyProps) {
-	const {error, users, allFetched, progress} = useUsersQuery()
+	const {error, users, allUsers, allFetched, progress} = useUsersQuery()
 
 	useEffect(() => {
 		if (allFetched) onSuccess()
@@ -79,27 +79,27 @@ export function UsersCard({onSuccess}: ReadyProps) {
 						</span>
 					</span>
 				}
-				content={<UsersPreview loading />}
+				content={<UsersPreview />}
 			/>
 		)
 
 	return (
 		<PreviewCard
 			heading="Colleagues"
-			content={<UsersPreview loading={!allFetched} users={users} />}
+			content={<UsersPreview users={allUsers} />}
 		/>
 	)
 }
 
-function UsersPreview(props: {loading: boolean; users?: IUser[]}) {
+function UsersPreview({users}: {users?: IUser[]}) {
 	const listLength = 3
-	const users: (IUser | undefined)[] = (
-		props.users || Array(listLength).fill(undefined)
-	).slice(0, listLength)
+	const activeUsers =
+		users?.filter((u) => !u.bot && u.state === "active") ||
+		Array<undefined>(listLength).fill(undefined)
 
 	return (
 		<ul className="border-muted-foreground divide-y">
-			{users.map((user, i) => (
+			{activeUsers.slice(0, listLength).map((user, i) => (
 				<li
 					key={user ? user.username : i.toString()}
 					className={user && "animate-fade-up"}
@@ -107,10 +107,10 @@ function UsersPreview(props: {loading: boolean; users?: IUser[]}) {
 					<User user={user} className="my-md" loading={!user} />
 				</li>
 			))}
-			{gt(props?.users?.length, listLength) && (
+			{gt(users?.length, listLength) && (
 				<li className="animate-fade-up mt-6">
 					<Text className="text-muted-foreground text-right">
-						and {sub(props?.users?.length, listLength)} others
+						and {sub(users?.length, listLength)} others
 					</Text>
 				</li>
 			)}

@@ -1,10 +1,14 @@
 import {GetMyMrs} from "./mrs.gql"
+import {ErrorComp} from "@/components/ErrorBoundary"
+import {Loader} from "@/components/ui/Loader"
 import {Card, CardHeader, CardTitle, CardContent} from "@/components/ui/card"
 import {Separator} from "@/components/ui/separator"
 import {Lead} from "@/components/ui/text"
+import type {MergeRequest} from "@/graphql/graphql"
 import {useConfigSelector} from "@/hooks/config/useConfig"
 import {useFetcher} from "@/hooks/fetcher/useFetcher"
 import {add} from "@/lib/maths"
+import {uniqueBy} from "@/lib/utils"
 import {useQuery} from "@tanstack/react-query"
 
 export function MyMrs() {
@@ -16,11 +20,21 @@ export function MyMrs() {
 		queryFn: () => fetcher(GetMyMrs, {draft: true}),
 	})
 
-	if (!data?.currentUser) return null
+	if (error) return <ErrorComp error={error} />
+	if (isSuccess && !data.currentUser) return <ErrorComp error="missing user" />
+	if (!isSuccess) return <Loader />
+
 	const {assignedMergeRequests, authoredMergeRequests} = data.currentUser
 	const mrs = authoredMergeRequests?.nodes
 		?.concat(assignedMergeRequests?.nodes)
 		.filter(Boolean)
+		.filter(uniqueBy("id"))
+
+	console.log(
+		"codethread authored",
+		authoredMergeRequests?.nodes?.map((n) => Object.keys(n || {}).length),
+		Object.keys(authoredMergeRequests?.nodes?.at(0) || {}).join("|"),
+	)
 
 	return (
 		<div className="@container w-[100%] flex-1">
@@ -28,13 +42,7 @@ export function MyMrs() {
 				<Card className="max-w-[350px] flex-1 basis-[280px]">
 					<CardHeader>
 						<CardTitle>
-							<Lead>
-								total{" "}
-								{add(
-									assignedMergeRequests?.count,
-									authoredMergeRequests?.count,
-								)}
-							</Lead>
+							<Lead>total {mrs?.length}</Lead>
 						</CardTitle>
 					</CardHeader>
 					<CardContent>
@@ -49,41 +57,41 @@ export function MyMrs() {
 							</a>
 						</p>
 						<Separator />
-						<ul style={{display: "flex", flexDirection: "column", gap: "8px"}}>
-							{mrs?.map((mr) => (
-								<li key={mr?.id}>
-									<div
-										style={{
-											border: "solid thin coral",
-											borderRadius: "8px",
-											padding: "8px",
-										}}
-									>
-										<p>
-											{mr?.webUrl && (
-												<a href={mr?.webUrl} target="_blank" rel="noreferrer">
-													{mr?.title}
-												</a>
-											)}
-											{mr?.mergeable ? <span> √ mergeable</span> : null}
-										</p>
-										{mr?.mergeable ? null : (
-											<ul>
-												{mr?.conflicts ? <li>❌ conflicts</li> : null}
-												{mr?.headPipeline?.status ? (
-													<li>Pipeline: {mr.headPipeline.status}</li>
-												) : null}
-												{mr?.approved ? <li>√ approved</li> : null}
-												{mr?.approvalState.invalidApproversRules
-													?.filter((r) => !r.allowMergeWhenInvalid)
-													.map((r) => r.name)
-													.join(" ") ?? null}
-											</ul>
-										)}
-									</div>
-								</li>
-							))}
-						</ul>
+						{/* <ul style={{display: "flex", flexDirection: "column", gap: "8px"}}> */}
+						{/* 	{mrs?.map((mr) => ( */}
+						{/* 		<li key={mr?.id}> */}
+						{/* 			<div */}
+						{/* 				style={{ */}
+						{/* 					border: "solid thin coral", */}
+						{/* 					borderRadius: "8px", */}
+						{/* 					padding: "8px", */}
+						{/* 				}} */}
+						{/* 			> */}
+						{/* 				<p> */}
+						{/* 					{mr?.webUrl && ( */}
+						{/* 						<a href={mr?.webUrl} target="_blank" rel="noreferrer"> */}
+						{/* 							{mr?.title} */}
+						{/* 						</a> */}
+						{/* 					)} */}
+						{/* 					{mr?.mergeable ? <span> √ mergeable</span> : null} */}
+						{/* 				</p> */}
+						{/* 				{mr?.mergeable ? null : ( */}
+						{/* 					<ul> */}
+						{/* 						{mr?.conflicts ? <li>❌ conflicts</li> : null} */}
+						{/* 						{mr?.headPipeline?.status ? ( */}
+						{/* 							<li>Pipeline: {mr.headPipeline.status}</li> */}
+						{/* 						) : null} */}
+						{/* 						{mr?.approved ? <li>√ approved</li> : null} */}
+						{/* 						{mr?.approvalState.invalidApproversRules */}
+						{/* 							?.filter((r) => !r.allowMergeWhenInvalid) */}
+						{/* 							.map((r) => r.name) */}
+						{/* 							.join(" ") ?? null} */}
+						{/* 					</ul> */}
+						{/* 				)} */}
+						{/* 			</div> */}
+						{/* 		</li> */}
+						{/* 	))} */}
+						{/* </ul> */}
 					</CardContent>
 				</Card>
 			</div>

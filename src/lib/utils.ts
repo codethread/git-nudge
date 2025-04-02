@@ -68,3 +68,16 @@ export function repeat<A>(i: number, cb: (i: number) => A): A[] {
 	}
 	return res
 }
+
+export function uniqueBy<A extends Record<string, unknown>>(
+	key: keyof A,
+): (arr: A) => boolean {
+	const seenKey = new Set()
+	return (item) => {
+		if (!seenKey.has(item[key])) {
+			seenKey.add(item[key])
+			return true
+		}
+		return false
+	}
+}

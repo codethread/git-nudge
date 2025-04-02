@@ -3,6 +3,7 @@ import {duration} from "@/lib/duration"
 import type {SlimLogger} from "@/lib/logger"
 import {pick, useNeededContext} from "@/lib/utils"
 import type {QueryClientConfig} from "@tanstack/react-query"
+import {produce} from "immer"
 import React from "react"
 import {createStore, useStore} from "zustand"
 import {immer} from "zustand/middleware/immer"
@@ -51,6 +52,20 @@ interface IAppConfigState extends IStorageConfig {
 	}
 }
 
+const initialQueryConfig: QueryConfig["options"] = {
+	queries: {
+		refetchIntervalInBackground: true,
+		staleTime: 0,
+		gcTime: duration(1, "days"),
+		retry: 3,
+	},
+}
+
+const initialFakeQueryConfig = produce(initialQueryConfig, (c) => {
+	c.queries ??= {}
+	c.queries.retry = false
+})
+
 // #endregion
 
 // #endregion
@@ -96,7 +111,7 @@ export function createAppConfigStore(init: InitAppConfigStore) {
 		immer((set, get) => {
 			const {logger, persistHash, stored, isFakeLab, initial} = init
 			logger.debug("createAppConfigStore", init)
-			const state: IAppConfigState = {
+			const initialState: IAppConfigState = {
 				dev: __IS_DEV__
 					? {
 							enabled: true,
@@ -108,13 +123,7 @@ export function createAppConfigStore(init: InitAppConfigStore) {
 				},
 				query: {
 					persistHash,
-					options: {
-						queries: {
-							refetchIntervalInBackground: true,
-							staleTime: 0,
-							gcTime: duration(1, "days"),
-						},
-					},
+					options: isFakeLab ? initialFakeQueryConfig : initialQueryConfig,
 				},
 				gitlab: {state: "init"},
 				registered: {},
@@ -122,7 +131,7 @@ export function createAppConfigStore(init: InitAppConfigStore) {
 				...initial,
 			}
 
-			logger.debug("initialState", state)
+			logger.debug("initialState", initialState)
 
 			const actions: IAppConfigActions = {
 				setLogin: (conf) => {
@@ -149,7 +158,13 @@ export function createAppConfigStore(init: InitAppConfigStore) {
 
 				toggleFakeLab: () => {
 					const {fakeLab, clearClientCache} = get()
-					set({fakeLab: !fakeLab})
+					const isFakeLab = !fakeLab
+					set((s) => {
+						s.fakeLab = isFakeLab
+						s.query.options = isFakeLab
+							? initialFakeQueryConfig
+							: initialQueryConfig
+					})
 					clearClientCache()
 				},
 
@@ -159,7 +174,7 @@ export function createAppConfigStore(init: InitAppConfigStore) {
 					})
 				},
 			}
-			return {...state, ...actions}
+			return {...initialState, ...actions}
 		}),
 	)
 }

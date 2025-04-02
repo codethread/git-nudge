@@ -1,4 +1,5 @@
-import {fetcherContext} from "./useFetcher"
+import {fetcherContext, useFakeConfig} from "./useFetcher"
+import {FakeSettings} from "@/components/FakeOptions"
 import {LoaderPage} from "@/components/ui/Loader"
 import type {RequestConfig} from "@/lib/fetcher/web"
 import {useQuery} from "@tanstack/react-query"
@@ -12,18 +13,19 @@ interface Props extends IChildren {
 export function FetcherProvider({children, withFake, reqConf}: Props) {
 	// if using fakes, we want to rebuild the fetcher in order to rebuild the fake database
 	const fakeKey = useMemo(() => (withFake ? Math.random() : false), [withFake])
+	const {users, setUsers} = useFakeConfig()
 
 	const {data, error, isPending, isSuccess} = useQuery({
 		retry: withFake ? 0 : 3,
 		refetchOnMount: false,
 		refetchInterval: Number.POSITIVE_INFINITY,
-		queryKey: ["fetcher", fakeKey, reqConf] as const,
-		queryFn: async ({queryKey: [_, withFake, c]}) => {
+		queryKey: ["fetcher", fakeKey, reqConf, users] as const,
+		queryFn: async ({queryKey: [_, withFake, c, users]}) => {
 			const {createFetcher} = await (withFake
 				? import("@/lib/fetcher/fake")
 				: import("@/lib/fetcher/web"))
 			// await new Promise(() => {})
-			return createFetcher(c)
+			return createFetcher(c, {dbConfig: {users}})
 		},
 	})
 

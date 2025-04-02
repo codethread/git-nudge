@@ -1,4 +1,5 @@
 import {Lead} from "./ui/text"
+import {FakeSettings} from "@/components/FakeOptions"
 import {Gitlab} from "@/components/icons/Gitlab"
 import {
 	Sidebar,
@@ -20,7 +21,7 @@ import {
 } from "@/hooks/config/useAppConfig"
 import {useNavigation} from "@/hooks/useNav"
 import {pick} from "@/lib/utils"
-import {Hand, Home, Settings, Trash2} from "lucide-react"
+import {Hand, Home, Settings, Settings2, Trash2} from "lucide-react"
 
 export function AppSidebar() {
 	const isDev = useIsDev()
@@ -106,7 +107,7 @@ export function AppSidebar() {
 			</SidebarContent>
 
 			<SidebarFooter>
-				<SidebarGroupLabel>Actions</SidebarGroupLabel>
+				<SidebarGroupLabel>Debug</SidebarGroupLabel>
 				<SidebarGroupContent>
 					<SidebarMenu>
 						{actions
@@ -125,6 +126,19 @@ export function AppSidebar() {
 									</SidebarMenuButton>
 								</SidebarMenuItem>
 							))}
+
+						{isFake ? (
+							<FakeSettings>
+								<SidebarMenuItem>
+									<SidebarMenuButton asChild className="cursor-pointer">
+										<div>
+											<Settings2 />
+											<span>Fake settings</span>
+										</div>
+									</SidebarMenuButton>
+								</SidebarMenuItem>
+							</FakeSettings>
+						) : null}
 					</SidebarMenu>
 				</SidebarGroupContent>
 				<SidebarTrigger />

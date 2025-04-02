@@ -14,7 +14,7 @@ export function ErrorBoundary({children}: IChildren) {
 	)
 }
 
-function ErrorComp({error}: FallbackProps) {
+export function ErrorComp({error}: Pick<FallbackProps, "error">) {
 	const info = parseError(error)
 	return (
 		<div className="m-md">

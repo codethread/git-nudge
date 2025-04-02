@@ -18,11 +18,12 @@ const config = {
 			preset: "client",
 			presetConfig: {
 				fragmentMasking: false,
+				nonOptionalTypename: true,
 			},
 			config: {
 				useTypeImports: true,
-				skipTypename: true,
 				enumsAsTypes: true,
+				// nonOptionalTypename: true,
 				arrayInputCoercion: false,
 				// avoidOptionals: true, // use non null type helper instead
 				documentMode: "string",

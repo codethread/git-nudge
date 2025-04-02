@@ -1,4 +1,5 @@
 import fixture from "./fixtureData.json"
+import {add} from "@/lib/maths"
 import {faker} from "@faker-js/faker"
 
 export function fakeInt(min: number, max?: number) {
@@ -14,25 +15,33 @@ export function getFakeUserFactory() {
 	}
 }
 
-export function fakeChoice<A>(items: A[]) {
+export function fakeOption<A>(items: A[]) {
 	return items.at(faker.number.int({min: 1, max: items.length}))
 }
 
 export function fakeTrue(n: number) {
-	return fakeChoiceWeight(
-		new Map([
-			[true, n],
-			[false, null],
-		]),
-	)
+	return fakeChoiceWeight([true, n], [false])
 }
 
-function fakeChoiceWeight<A>(items: Map<A, number | null>) {
+/**
+ * randomly choose an item from variadic tuple args
+ * Each tuple is a value: percentage pair
+ * The percentage can be omitted and it will use an even split of the remainder
+ *
+ * @example
+ * The following are equivalent
+ * ```ts
+ * fakeChoiceWeight(["cat", 80], ["dog", 10], ["fish", 10])
+ * fakeChoiceWeight(["cat", 80], ["dog"], ["fish"])
+ * ```
+ */
+export function fakeChoiceWeight<A>(
+	...items: ([A | undefined] | [A | undefined, number])[]
+): A {
 	const max = 100
-	const entries = [...items.entries()] // can only iterate once it seems??
-	const [totalWeight, unweighted] = entries.reduce(
+	const [totalWeight, unweighted] = items.reduce(
 		([acc, unweighted], [_, weight]) => [
-			acc + (weight ?? 0),
+			add(acc, weight),
 			unweighted + (weight === null ? 1 : 0),
 		],
 		[0, 0],
@@ -43,7 +52,7 @@ function fakeChoiceWeight<A>(items: Map<A, number | null>) {
 		)
 
 	const defaultWeight = (max - totalWeight) / unweighted
-	const weights = entries.map(
+	const weights = items.map(
 		([item, weight]) => [item, weight ?? defaultWeight] as [A, number],
 	)
 

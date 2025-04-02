@@ -42,39 +42,50 @@ const _ = graphql(`
 	}
 `)
 export const GetMyMrs = graphql(`
-	query GetMyMrs($draft: Boolean) {
+	query GetMyMrs {
 		currentUser {
 			id
 			name
-			projectMemberships(first: 100) {
-				nodes {
-					project {
-						id
-						name
-						webUrl
-					}
-				}
-			}
-			assignedMergeRequests(first: 100, draft: $draft, state: opened) {
+			# projectMemberships(first: 100) {
+			# 	nodes {
+			# 		project {
+			# 			id
+			# 			name
+			# 			webUrl
+			# 		}
+			# 	}
+			# }
+			# assignedMergeRequests(first: 100, draft: $draft, state: opened) {
+			# 	count
+			# 	pageInfo {
+			# 		hasNextPage
+			# 		endCursor
+			# 	}
+			# 	# nodes {
+			# 	# 	# ...MrFragment
+			# 	# }
+			# }
+			authoredMergeRequests(first: 100) {
 				count
 				pageInfo {
 					hasNextPage
 					endCursor
 				}
 				nodes {
-					...MrFragment
-				}
-			}
-			authoredMergeRequests {
-				count
-				pageInfo {
-					hasNextPage
-					endCursor
-				}
-				nodes {
-					...MrFragment
+					...MRSmall
 				}
 			}
 		}
+	}
+
+	fragment MRSmall on MergeRequest {
+		id
+		title
+		createdAt
+		# draft
+		# mergeable
+		# conflicts
+		# userDiscussionsCount
+		# userNotesCount
 	}
 `)

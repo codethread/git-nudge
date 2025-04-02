@@ -6,7 +6,7 @@ interface UserRepo {
 	create(): Partial<UserCore> | undefined
 }
 
-interface Config {
+export interface FakeDbConfig {
 	users: number
 }
 
@@ -20,7 +20,7 @@ interface Config {
 export class Db {
 	constructor(
 		public store: IMockStore,
-		private config: Config,
+		private config: FakeDbConfig,
 		private userRepo: UserRepo,
 	) {
 		this.seed()
@@ -70,17 +70,35 @@ export class Db {
 		store.set("Project", "1", {name: "Bigger Project"})
 		store.set("Project", "2", {name: "Big Project"})
 
+		store.set("MergeRequest", "1", {id: "1", title: "mergy 1"})
+		store.set("MergeRequest", "2", {id: "2", title: "mergy 2"})
+		store.set("MergeRequest", "3", {id: "3", title: "mergy 3"})
+
 		store.set("ProjectConnection", "1", {
 			edges: [
 				{node: store.get("Project", "1")},
 				{node: store.get("Project", "2")},
 			],
 		})
+		store.set("MergeRequestConnection", "1", {
+			edges: [
+				{node: store.get("MergeRequest", "1")},
+				{node: store.get("MergeRequest", "2")},
+			],
+		})
+		// store.set("MergeRequestConnection", "2", {
+		// 	edges: [
+		// 		{node: store.get("MergeRequest", "1")},
+		// 		{node: store.get("MergeRequest", "3")},
+		// 	],
+		// })
 
 		store.set("Query", "ROOT", {
 			currentUser: {
 				...this.userRepo.create(),
 				contributedProjects: store.get("ProjectConnection", "1"),
+				assignedMergeRequests: store.get("MergeRequestConnection", "1"),
+				authoredMergeRequests: store.get("MergeRequestConnection", "1"),
 			},
 			// important to start with an empty list, else when creating edges, users get created
 			// TODO: fix this with a nicer api
@@ -88,7 +106,5 @@ export class Db {
 		})
 
 		repeat(this.config.users, () => this.addUser())
-
-		//
 	}
 }

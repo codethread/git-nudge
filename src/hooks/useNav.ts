@@ -14,7 +14,7 @@ interface Nav {
 }
 
 export const useNavigation = create<Nav>()((set) => ({
-	page: Pages.WELCOME,
+	page: Pages.DASHBOARD,
 	nav: (page) => {
 		set({page})
 	},
