@@ -4,13 +4,19 @@ import type {Resolvers} from "@/graphql/server"
 import {wait} from "@/lib/duration"
 import {Db, type FakeDbConfig} from "@/lib/fetcher/fakes/db"
 import {getFakeUserFactory} from "@/lib/fetcher/fakes/fakers"
-import {createMockedSchema, mocks} from "@/lib/fetcher/fakes/mocks"
+import {
+	createMockedSchema,
+	mocks,
+	resolverImplemntationMap,
+	resolvers,
+} from "@/lib/fetcher/fakes/mocks"
 import {scalars} from "@/lib/fetcher/fakes/scalars"
+import {assert} from "@/lib/utils"
 import {faker} from "@faker-js/faker"
 import {createMockStore} from "@graphql-tools/mock"
 import {makeExecutableSchema} from "@graphql-tools/schema"
+import {error} from "console"
 import * as gql from "graphql"
-import {match, P} from "ts-pattern"
 
 interface FakeConfig {
 	dbConfig: FakeDbConfig
@@ -21,7 +27,6 @@ export async function createFetcher(
 ): Promise<Fetcher> {
 	const schema = makeExecutableSchema<Resolvers>({
 		typeDefs: gql.buildClientSchema((schemaJson as ANY_GEN).data),
-		resolvers: scalars,
 	})
 
 	const mockStore = createMockStore({
@@ -38,84 +43,99 @@ export async function createFetcher(
 	return async (query, ...[variables]) => {
 		const variableValues = variables ?? {}
 		const source = query.toString().trim()
+		const queryLine = source.slice(0, source.indexOf("\n", 1))
 
-		failIfMissingScalarMock(schema, source)
+		// try {
+		// 	failIfMissingMocks(schema, source, {
+		// 		paginationPredicate: (_, type) => type.name.endsWith("Connection"),
+		// 		ignoreMissingScalars: ["Int", "Float", "Boolean"],
+		// 	})
+		// } catch (e) {
+		// 	console.error(e)
+		// 	throw e
+		// }
 
-		const {data} = await gql.graphql({
+		const {data, errors} = await gql.graphql({
 			schema: mockedSchema,
 			variableValues,
 			source,
 		})
+		if (errors) {
+			errors.forEach((e) => console.error(e))
+			throw new Error(errors.at(0)?.message)
+		}
 
-		const queryLine = source.slice(0, source.indexOf("\n", 1))
 		console.groupCollapsed(`🚀 GRAPHQL ${queryLine}`)
 		console.groupCollapsed("query")
 		console.log(source)
 		console.groupEnd()
 		console.log("vars", variableValues)
+
 		console.log(data)
 		console.groupEnd()
-
-		// XXX: validate as best as possible that all mocks were implemented
-		// typically this fails when a Scalar is missing, and the mock store
-		// will fail silently and return `null` for a given node
-		traverse(data, (item) => {
-			match(item)
-				.with(
-					{nodes: P.array(P.nullish)},
-					{edges: P.array({edge: P.nullish})},
-					() => {
-						throw new Error(
-							`missing mock for paginated item "${item?.__typename}.nodes":\n${JSON.stringify(item)}`,
-						)
-					},
-				)
-				.otherwise(() => {})
-		})
 
 		await wait(faker.number.int({min: 200, max: 800}))
 		return data as ANY_GEN
 	}
 }
 
-type Callback<T> = (value: T, key?: string | number) => void
-
-function traverse<T = ANY_GEN>(obj: T, callback: Callback<T>): void {
-	if (Array.isArray(obj)) {
-		for (const item of obj as T[]) {
-			callback(item)
-			traverse(item, callback)
-		}
-	} else if (obj !== null && typeof obj === "object") {
-		for (const [key, value] of Object.entries(obj)) {
-			callback(value, key)
-			traverse(value, callback)
-		}
-	}
-}
-
 /**
- * The graph-mock lib is great for lazily mocking types, but if a Scalar mock
- * isn't defined it fails silently and `null`s the whole object. This
- * validation fn will parse a query and visit all fields, if any are known to
- * be Scalar types, `mocks` will be checked for the existence of _something_
- * (specifics are not checked at this time).
+ * The graph-mock lib is great for lazily mocking types, but...
+ *
+ * Scalars:
+ * if a Scalar mock isn't defined it fails silently and `null`s the whole
+ * object. This validation fn will parse a query and visit all fields, if any
+ * are known to be Scalar types, `mocks` will be checked for the existence of
+ * _something_ (specifics are not checked at this time).
+ *
+ * Pagination:
+ * if using something more complex than a list, i.e relay style pagination, the
+ * mocks will be weird. The mock lib provides `relayStylePaginationMock`, but
+ * this needs to be set explicitly, so this function will try to spot missing
+ * pagination mocks (indicated by <Type>Connection schema types, which is the
+ * relay convention
  */
-function failIfMissingScalarMock(schema: gql.GraphQLSchema, query: string) {
+function failIfMissingMocks(
+	schema: gql.GraphQLSchema,
+	query: string,
+	opts: {
+		paginationPredicate: (
+			field: gql.FieldNode,
+			type: gql.GraphQLObjectType,
+		) => boolean
+		ignoreMissingScalars: string[]
+	},
+) {
 	const ast = gql.parse(query, {noLocation: true})
 	const typeInfo = new gql.TypeInfo(schema)
 	gql.visit(
 		ast,
 		gql.visitWithTypeInfo(typeInfo, {
-			Field() {
+			Field(field) {
+				const type = typeInfo.getType()
+
+				// validate pagination is present
+				if (gql.isObjectType(type) && opts.paginationPredicate(field, type)) {
+					const parent = typeInfo.getParentType()?.name
+					const name = field.name.value
+					assert(parent, "should be a parent here")
+					const found = resolverImplemntationMap[parent][name]
+					debugger
+					if (!found)
+						throw new Error(`Pagination not set up for ${parent}.${name}`)
+					assert(found, `Pagination not set up for ${parent}.${name}`)
+				}
+
+				// validate scalar is present
 				// probably smarter ways to do this but hacked around in the
 				// debugger and this seems consistent
 				// it will also flag builtins like String, Int etc, but I'm fine with that
-				const type = typeInfo.getType()
 				if (type && "ofType" in type) {
 					const subType = type.ofType
-					const isLeaf = gql.isLeafType(subType)
-					if (isLeaf) {
+					if (
+						gql.isScalarType(subType) &&
+						!opts.ignoreMissingScalars.includes(subType.name)
+					) {
 						const name = subType.name
 						const mocked = mocks[name]
 						if (!mocked) {

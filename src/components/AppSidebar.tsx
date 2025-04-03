@@ -127,18 +127,18 @@ export function AppSidebar() {
 								</SidebarMenuItem>
 							))}
 
-						{isFake ? (
-							<FakeSettings>
-								<SidebarMenuItem>
-									<SidebarMenuButton asChild className="cursor-pointer">
-										<div>
-											<Settings2 />
-											<span>Fake settings</span>
-										</div>
-									</SidebarMenuButton>
-								</SidebarMenuItem>
-							</FakeSettings>
-						) : null}
+						{/* {isFake ? ( */}
+						{/* 	<FakeSettings> */}
+						{/* 		<SidebarMenuItem> */}
+						{/* 			<SidebarMenuButton asChild className="cursor-pointer"> */}
+						{/* 				<div> */}
+						{/* 					<Settings2 /> */}
+						{/* 					<span>Fake settings</span> */}
+						{/* 				</div> */}
+						{/* 			</SidebarMenuButton> */}
+						{/* 		</SidebarMenuItem> */}
+						{/* 	</FakeSettings> */}
+						{/* ) : null} */}
 					</SidebarMenu>
 				</SidebarGroupContent>
 				<SidebarTrigger />

@@ -2,28 +2,28 @@ import type {UserState} from "@/graphql/graphql"
 import type {Resolvers, Scalars} from "@/graphql/server"
 import {fakeChoiceWeight, fakeTrue} from "@/lib/fetcher/fakes/fakers"
 import {scalars} from "@/lib/fetcher/fakes/scalars"
+import type {ANY_RESOLVER} from "@/lib/fetcher/fakes/utils"
 import {faker} from "@faker-js/faker"
 import {
 	addMocksToSchema,
 	relayStylePaginationMock,
 	type IMocks,
+	type IMockStore,
 } from "@graphql-tools/mock"
 
+const uuidFn = faker.string.uuid
 export const mocks: IMocks<Resolvers> = {
-	Boolean: () => fakeTrue(50),
-	Int: () => faker.number.int(),
 	String: () => faker.word.words({count: faker.number.int({min: 3, max: 9})}),
-	Time: () => faker.date.anytime(),
-	ID: () => {
-		// in theory this should never be used because we add users in the store
-		// however it is still called, and I'm not yet sure why
-		return faker.string.uuid()
-	},
-	UserID: () => {
-		// in theory this should never be used because we add users in the store
-		// however it is still called, and I'm not yet sure why
-		return faker.string.uuid()
-	},
+	ID: uuidFn,
+
+	// Time: () =>
+	// 	faker.date.past({refDate: "2020-01-01T00:00:00.000Z"}).toISOString(),
+
+	GlobalID: uuidFn,
+	NoteID: uuidFn,
+	UserID: uuidFn,
+	ProjectImportStateID: uuidFn,
+
 	UserCore: () => ({
 		state: () => fakeChoiceWeight<UserState>(["active", 70], [undefined]),
 		bot: () => fakeTrue(20),
@@ -50,7 +50,38 @@ export const mocks: IMocks<Resolvers> = {
 	}),
 }
 
-type IMockOptions = Parameters<typeof addMocksToSchema>[0]
+const resolvers: (store: IMockStore) => Partial<Resolvers> = (store) => ({
+	// ...scalars,
+	Query: {
+		users: paginatedRelay(relayStylePaginationMock(store)),
+	},
+	UserCore: {
+		username: (r) =>
+			(store.get(r, "name") as string).toLowerCase().replaceAll(/\s/g, "."),
+		// assignedMergeRequests: paginatedRelay(relayStylePaginationMock(store)),
+		// authoredMergeRequests: paginatedRelay(relayStylePaginationMock(store)),
+	},
+	CurrentUser: {
+		username: (r) =>
+			(store.get(r, "name") as string).toLowerCase().replaceAll(/\s/g, "."),
+		contributedProjects: paginatedRelay(relayStylePaginationMock(store)),
+
+		projectMemberships: paginatedRelay(relayStylePaginationMock(store)),
+		assignedMergeRequests: paginatedRelay(relayStylePaginationMock(store)),
+		authoredMergeRequests: paginatedRelay(relayStylePaginationMock(store)),
+	},
+	// Project: {
+	// 	detailedImportStatus: () => {
+	// 		return {
+	// 			status: "mockes",
+	// 		}
+	// 	},
+	// },
+})
+
+export const resolverImplemntationMap = resolvers({} as ANY_TRUST_ME)
+
+type IMockOptions = Parameters<typeof addMocksToSchema<Resolvers>>[0]
 
 export function createMockedSchema({
 	schema,
@@ -59,32 +90,7 @@ export function createMockedSchema({
 	return addMocksToSchema<Resolvers>({
 		schema,
 		store: mockStore,
-		resolvers: (store) => ({
-			// ...scalars,
-			Query: {
-				users: paginatedRelay(relayStylePaginationMock(store)),
-			},
-			UserCore: {
-				username: (r) =>
-					(store.get(r, "name") as string).toLowerCase().replaceAll(/\s/g, "."),
-			},
-			CurrentUser: {
-				username: (r) =>
-					(store.get(r, "name") as string).toLowerCase().replaceAll(/\s/g, "."),
-				contributedProjects: paginatedRelay(relayStylePaginationMock(store)),
-
-				projectMemberships: paginatedRelay(relayStylePaginationMock(store)),
-				assignedMergeRequests: paginatedRelay(relayStylePaginationMock(store)),
-				authoredMergeRequests: paginatedRelay(relayStylePaginationMock(store)),
-			},
-			// Project: {
-			// 	detailedImportStatus: () => {
-			// 		return {
-			// 			status: "mockes",
-			// 		}
-			// 	},
-			// },
-		}),
+		resolvers,
 	})
 }
 
@@ -92,7 +98,7 @@ type Resolver = ReturnType<typeof relayStylePaginationMock>
 /**
  * GitLab doesn't quite follow relay, so we adapt
  */
-function paginatedRelay(fn: Resolver) {
+function paginatedRelay(fn: Resolver): ANY_RESOLVER {
 	const cb: Resolver = (...args) => {
 		const page = fn(...args)
 		return {

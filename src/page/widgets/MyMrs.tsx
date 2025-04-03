@@ -10,12 +10,13 @@ import {useFetcher} from "@/hooks/fetcher/useFetcher"
 import {add} from "@/lib/maths"
 import {uniqueBy} from "@/lib/utils"
 import {useQuery} from "@tanstack/react-query"
+import {Check} from "lucide-react"
 
 export function MyMrs() {
 	const fetcher = useFetcher()
 	const {domain, user} = useConfigSelector((s) => s.gitlab)
 	const {isSuccess, isFetching, error, data, refetch} = useQuery({
-		queryKey: ["me"],
+		queryKey: ["myMrs"],
 		refetchInterval: 60 * 1000,
 		queryFn: () => fetcher(GetMyMrs, {draft: true}),
 	})
@@ -24,17 +25,11 @@ export function MyMrs() {
 	if (isSuccess && !data.currentUser) return <ErrorComp error="missing user" />
 	if (!isSuccess) return <Loader />
 
-	const {assignedMergeRequests, authoredMergeRequests} = data.currentUser
+	const {assignedMergeRequests, authoredMergeRequests} = data.currentUser!
 	const mrs = authoredMergeRequests?.nodes
 		?.concat(assignedMergeRequests?.nodes)
 		.filter(Boolean)
 		.filter(uniqueBy("id"))
-
-	console.log(
-		"codethread authored",
-		authoredMergeRequests?.nodes?.map((n) => Object.keys(n || {}).length),
-		Object.keys(authoredMergeRequests?.nodes?.at(0) || {}).join("|"),
-	)
 
 	return (
 		<div className="@container w-[100%] flex-1">
@@ -57,41 +52,39 @@ export function MyMrs() {
 							</a>
 						</p>
 						<Separator />
-						{/* <ul style={{display: "flex", flexDirection: "column", gap: "8px"}}> */}
-						{/* 	{mrs?.map((mr) => ( */}
-						{/* 		<li key={mr?.id}> */}
-						{/* 			<div */}
-						{/* 				style={{ */}
-						{/* 					border: "solid thin coral", */}
-						{/* 					borderRadius: "8px", */}
-						{/* 					padding: "8px", */}
-						{/* 				}} */}
-						{/* 			> */}
-						{/* 				<p> */}
-						{/* 					{mr?.webUrl && ( */}
-						{/* 						<a href={mr?.webUrl} target="_blank" rel="noreferrer"> */}
-						{/* 							{mr?.title} */}
-						{/* 						</a> */}
-						{/* 					)} */}
-						{/* 					{mr?.mergeable ? <span> √ mergeable</span> : null} */}
-						{/* 				</p> */}
-						{/* 				{mr?.mergeable ? null : ( */}
-						{/* 					<ul> */}
-						{/* 						{mr?.conflicts ? <li>❌ conflicts</li> : null} */}
-						{/* 						{mr?.headPipeline?.status ? ( */}
-						{/* 							<li>Pipeline: {mr.headPipeline.status}</li> */}
-						{/* 						) : null} */}
-						{/* 						{mr?.approved ? <li>√ approved</li> : null} */}
-						{/* 						{mr?.approvalState.invalidApproversRules */}
-						{/* 							?.filter((r) => !r.allowMergeWhenInvalid) */}
-						{/* 							.map((r) => r.name) */}
-						{/* 							.join(" ") ?? null} */}
-						{/* 					</ul> */}
-						{/* 				)} */}
-						{/* 			</div> */}
-						{/* 		</li> */}
-						{/* 	))} */}
-						{/* </ul> */}
+						<ul>
+							{mrs?.map((mr) => (
+								<li key={mr?.id}>
+									<div>
+										<p>
+											{mr?.webUrl && (
+												<a href={mr?.webUrl} target="_blank" rel="noreferrer">
+													{mr?.title}
+												</a>
+											)}
+											{mr?.mergeable ? (
+												<span>
+													<Check color="green" /> mergeable
+												</span>
+											) : null}
+										</p>
+										{mr?.mergeable ? null : (
+											<ul>
+												{mr?.conflicts ? <li>❌ conflicts</li> : null}
+												{mr?.headPipeline?.status ? (
+													<li>Pipeline: {mr.headPipeline.status}</li>
+												) : null}
+												{mr?.approved ? <li>√ approved</li> : null}
+												{mr?.approvalState.invalidApproversRules
+													?.filter((r) => !r.allowMergeWhenInvalid)
+													.map((r) => r.name)
+													.join(" ") ?? null}
+											</ul>
+										)}
+									</div>
+								</li>
+							))}
+						</ul>
 					</CardContent>
 				</Card>
 			</div>

@@ -1,6 +1,6 @@
 import {graphql} from "@/graphql"
 
-const _ = graphql(`
+graphql(`
 	fragment MrFragment on MergeRequest {
 		id
 		title
@@ -41,29 +41,45 @@ const _ = graphql(`
 		}
 	}
 `)
+
+graphql(`
+	fragment assigned on UserCore {
+		assignedMergeRequests(first: 100, draft: $draft, state: opened) {
+			count
+			pageInfo {
+				hasNextPage
+				endCursor
+			}
+			nodes {
+				...MrFragment
+			}
+		}
+	}
+`)
 export const GetMyMrs = graphql(`
-	query GetMyMrs {
+	query GetMyMrs($draft: Boolean) {
 		currentUser {
 			id
 			name
-			# projectMemberships(first: 100) {
-			# 	nodes {
-			# 		project {
-			# 			id
-			# 			name
-			# 			webUrl
-			# 		}
-			# 	}
-			# }
+			projectMemberships(first: 100) {
+				nodes {
+					project {
+						id
+						name
+						webUrl
+					}
+				}
+			}
+			# ...assigned
 			# assignedMergeRequests(first: 100, draft: $draft, state: opened) {
 			# 	count
 			# 	pageInfo {
 			# 		hasNextPage
 			# 		endCursor
 			# 	}
-			# 	# nodes {
-			# 	# 	# ...MrFragment
-			# 	# }
+			# 	nodes {
+			# 		...MrFragment
+			# 	}
 			# }
 			authoredMergeRequests(first: 100) {
 				count
@@ -72,20 +88,9 @@ export const GetMyMrs = graphql(`
 					endCursor
 				}
 				nodes {
-					...MRSmall
+					...MrFragment
 				}
 			}
 		}
-	}
-
-	fragment MRSmall on MergeRequest {
-		id
-		title
-		createdAt
-		# draft
-		# mergeable
-		# conflicts
-		# userDiscussionsCount
-		# userNotesCount
 	}
 `)

@@ -40,6 +40,12 @@ export const useUsersQuery = () => {
 			data && allFetched
 				? data.pages.flatMap((p) => p.users?.nodes).filter(Boolean)
 				: []
+		console.log(
+			"codethread assigned",
+			users.at(0)?.name,
+			users.at(0)?.assignedMergeRequests,
+			users.at(0)?.assignedMergeRequests?.nodes,
+		)
 		return {
 			error,
 			progress,

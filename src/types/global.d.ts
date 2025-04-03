@@ -34,3 +34,5 @@ type MaybeNot<T> = T extends null
  * biome-ignore lint/suspicious/noExplicitAny: needs must
  */
 type ANY_GEN = any
+/* biome-ignore lint/suspicious/noExplicitAny: trust-me™ */
+type ANY_TRUST_ME = any
