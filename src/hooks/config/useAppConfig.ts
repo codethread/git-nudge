@@ -1,6 +1,6 @@
 import type {IStorageConfig} from "@/hooks/useBridge"
 import {duration} from "@/lib/duration"
-import type {SlimLogger} from "@/lib/logger"
+import type {Logger, } from "@/lib/logger"
 import {pick, useNeededContext} from "@/lib/utils"
 import type {QueryClientConfig} from "@tanstack/react-query"
 import {produce} from "immer"
@@ -99,7 +99,7 @@ type IAppConfig = IAppConfigState & IAppConfigActions
 
 export type IAppConfigStore = ReturnType<typeof createAppConfigStore>
 interface InitAppConfigStore {
-	logger: SlimLogger
+	logger: Logger
 	persistHash: string
 	isFakeLab: boolean
 	stored: IStorageConfig
@@ -161,6 +161,7 @@ export function createAppConfigStore(init: InitAppConfigStore) {
 					const isFakeLab = !fakeLab
 					set((s) => {
 						s.fakeLab = isFakeLab
+						// @ts-expect-error writable store going into a readonly type
 						s.query.options = isFakeLab
 							? initialFakeQueryConfig
 							: initialQueryConfig

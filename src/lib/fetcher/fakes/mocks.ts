@@ -5,6 +5,7 @@ import type {ANY_RESOLVER} from "@/lib/fetcher/fakes/utils"
 import {faker} from "@faker-js/faker"
 import {
 	addMocksToSchema,
+	assertIsRef,
 	relayStylePaginationMock,
 	type IMocks,
 	type IMockStore,
@@ -15,8 +16,8 @@ export const mocks: IMocks<Resolvers> = {
 	String: () => faker.word.words({count: faker.number.int({min: 3, max: 9})}),
 	ID: uuidFn,
 
-	// Time: () =>
-	// 	faker.date.past({refDate: "2020-01-01T00:00:00.000Z"}).toISOString(),
+	Time: () =>
+		faker.date.past({refDate: "2020-01-01T00:00:00.000Z"}).toISOString(),
 
 	GlobalID: uuidFn,
 	NoteID: uuidFn,
@@ -56,15 +57,26 @@ const resolvers: (store: IMockStore) => Partial<Resolvers> = (store) => {
 		Query: {
 			users: paginate,
 		},
+		MergeRequest: {
+			approvedBy: paginate,
+		},
 		UserCore: {
-			username: (r) =>
-				(store.get(r, "name") as string).toLowerCase().replaceAll(/\s/g, "."),
+			username: (r) => {
+				assertIsRef(r)
+				return (store.get(r, "name") as string)
+					.toLowerCase()
+					.replaceAll(/\s/g, ".")
+			},
 			// assignedMergeRequests: paginatedRelay(relayStylePaginationMock(store)),
 			// authoredMergeRequests: paginatedRelay(relayStylePaginationMock(store)),
 		},
 		CurrentUser: {
-			username: (r) =>
-				(store.get(r, "name") as string).toLowerCase().replaceAll(/\s/g, "."),
+			username: (r) => {
+				assertIsRef(r)
+				return (store.get(r, "name") as string)
+					.toLowerCase()
+					.replaceAll(/\s/g, ".")
+			},
 			contributedProjects: paginate,
 			projectMemberships: paginate,
 			assignedMergeRequests: paginate,

@@ -1,7 +1,7 @@
 import {duration} from "@/lib/duration"
-import {slimLogger} from "@/lib/logger"
+import {logger} from "@/lib/logger"
 import {asyncStorage} from "@/lib/storage"
-import {parseError, } from "@/lib/utils"
+import {parseError} from "@/lib/utils"
 import React from "react"
 import {z} from "zod"
 
@@ -93,7 +93,7 @@ async function createFakeBridge() {
 		setStoredConfig,
 		readNetrc: async () => __FAKE_NETRC__,
 		notify,
-		logger: slimLogger,
+		logger,
 	}
 }
 
@@ -125,11 +125,11 @@ async function createTauriBridge() {
 			invoke("read_netrc")
 				.then((n) => z.string().parse(n))
 				.catch((e) => {
-					slimLogger.error("error reading netrc from tauri", parseError(e))
+					logger.error("error reading netrc from tauri", parseError(e))
 					return undefined
 				}),
 		notify,
-		logger: slimLogger,
+		logger: logger,
 	}
 	return api
 }
@@ -141,8 +141,8 @@ async function readStoredConfig({notify}: Notifier) {
 		return storageConfigSchema.parse(JSON.parse(stored ?? "{}"))
 	} catch (e) {
 		notify("Error reading config, data reset")
-		slimLogger.warn("Invalid config")
-		slimLogger.info({stored, errorMsg: parseError(e), error: e})
+		logger.warn("Invalid config")
+		logger.info({stored, errorMsg: parseError(e), error: e})
 
 		asyncStorage.removeItem(STORAGE_KEY)
 		// default config should be set for all values

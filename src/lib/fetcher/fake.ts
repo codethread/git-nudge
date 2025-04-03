@@ -1,4 +1,4 @@
-import type {Fetcher} from "./web"
+import type {Fetcher, RequestConfig} from "./web"
 import schemaJson from "@/graphql/schema.json"
 import type {Resolvers} from "@/graphql/server"
 import {wait} from "@/lib/duration"
@@ -19,9 +19,11 @@ interface FakeConfig {
 	dbConfig: FakeDbConfig
 }
 export async function createFetcher(
-	_: unknown,
+	{logger: loggerFact}: RequestConfig,
 	{dbConfig}: FakeConfig,
 ): Promise<Fetcher> {
+	const logger = loggerFact.context("fetch")
+	logger.debug("creating fake fetcher")
 	const schema = makeExecutableSchema<Resolvers>({
 		typeDefs: gql.buildClientSchema((schemaJson as ANY_GEN).data),
 	})
@@ -31,7 +33,12 @@ export async function createFetcher(
 		mocks,
 	})
 
-	const db = new Db(mockStore, dbConfig, {create: getFakeUserFactory()})
+	const db = new Db(
+		mockStore,
+		dbConfig,
+		{create: getFakeUserFactory()},
+		loggerFact.context("DB"),
+	)
 
 	const mockedSchema = createMockedSchema({schema, store: db.store})
 	// @ts-expect-error meh

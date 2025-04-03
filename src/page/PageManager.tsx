@@ -5,6 +5,7 @@ import {
 	useAppConfigStore,
 } from "@/hooks/config/useAppConfig"
 import {FetcherProvider} from "@/hooks/fetcher/FetcherProvider"
+import {useBridge} from "@/hooks/useBridge"
 import {Pages, useNavigation, type Page} from "@/hooks/useNav"
 import React, {Suspense} from "react"
 import {useEffect} from "react"
@@ -44,6 +45,7 @@ function Providers({children}: IChildren) {
 	const isFakeLab = useAppConfigSelector((s) => s.fakeLab)
 	const gitlabConf = useAppConfigSelector((s) => s.gitlab)
 	const timeout = useAppConfigSelector((s) => s.global.requestTimeoutMillis)
+	const logger = useBridge().logger
 
 	return match({isFakeLab, gitlabConf})
 		.with({isFakeLab: false, gitlabConf: {state: "init"}}, () => (
@@ -56,7 +58,7 @@ function Providers({children}: IChildren) {
 			{isFakeLab: false, gitlabConf: {state: "ready"}},
 			({gitlabConf: {domain, token}}) => (
 				<ConfigProvider appConfigStore={appConfigStore}>
-					<FetcherProvider reqConf={{domain, token, timeout}}>
+					<FetcherProvider reqConf={{domain, token, timeout, logger}}>
 						{children}
 					</FetcherProvider>
 				</ConfigProvider>
@@ -64,7 +66,10 @@ function Providers({children}: IChildren) {
 		)
 		.with({isFakeLab: true}, () => (
 			<ConfigProvider appConfigStore={appConfigStore}>
-				<FetcherProvider withFake reqConf={{domain: "", token: "", timeout}}>
+				<FetcherProvider
+					withFake
+					reqConf={{domain: "", token: "", timeout, logger}}
+				>
 					{children}
 				</FetcherProvider>
 			</ConfigProvider>

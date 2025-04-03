@@ -1,6 +1,8 @@
 import type {TypedDocumentString} from "../../graphql/graphql"
+import type {Logger, } from "@/lib/logger"
 
 export interface RequestConfig {
+	logger: Logger
 	domain: string
 	token: string
 	timeout: number

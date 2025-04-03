@@ -6,6 +6,5 @@
 		"moduleResolution": "nodenext",
 		"noEmit": true,
 		"allowImportingTsExtensions": true
-	},
-	"include": ["scripts"]
+	}
 }

@@ -12,6 +12,9 @@ const config: CodegenConfig = {
 				skipTypename: true,
 				enumsAsTypes: true,
 				arrayInputCoercion: false,
+
+				customResolverFn:
+					"(parent: TParent | Ref, args: TArgs, context: TContext, info: GraphQLResolveInfo) => Promise<TResult> | TResult",
 				// avoidOptionals: true, // use non null type helper instead
 				documentMode: "string",
 				// mappers: {
@@ -19,7 +22,15 @@ const config: CodegenConfig = {
 				// 	Book: "./my-models#Collections",
 				// },
 			},
-			plugins: ["typescript", "typescript-resolvers"],
+			plugins: [
+				{
+					add: {
+						content: "import type {Ref} from '@graphql-tools/mock'\n",
+					},
+				},
+				"typescript",
+				"typescript-resolvers",
+			],
 		},
 	},
 }

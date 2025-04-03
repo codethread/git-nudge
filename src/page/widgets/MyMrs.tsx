@@ -20,10 +20,10 @@ export function MyMrs() {
 	})
 
 	if (error) return <ErrorComp error={error} />
-	if (isSuccess && !data.currentUser) return <ErrorComp error="missing user" />
 	if (!isSuccess) return <Loader />
+	if (!data.currentUser) return <ErrorComp error="missing user" />
 
-	const {assignedMergeRequests, authoredMergeRequests} = data.currentUser!
+	const {assignedMergeRequests, authoredMergeRequests} = data.currentUser
 	const mrs = authoredMergeRequests?.nodes
 		?.concat(assignedMergeRequests?.nodes)
 		.filter(Boolean)

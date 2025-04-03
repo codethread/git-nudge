@@ -11,7 +11,7 @@ graphql(`
 		conflicts
 		userDiscussionsCount
 		userNotesCount
-		notes(filter: ONLY_COMMENTS) {
+		notes(first: 100, filter: ONLY_COMMENTS) {
 			nodes {
 				id
 				authorIsContributor
@@ -33,7 +33,7 @@ graphql(`
 			}
 		}
 		approved
-		approvedBy {
+		approvedBy(first: 100) {
 			nodes {
 				name
 				avatarUrl
