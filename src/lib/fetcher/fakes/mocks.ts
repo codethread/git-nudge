@@ -1,7 +1,6 @@
 import type {UserState} from "@/graphql/graphql"
-import type {Resolvers, Scalars} from "@/graphql/server"
+import type {Resolvers} from "@/graphql/server"
 import {fakeChoiceWeight, fakeTrue} from "@/lib/fetcher/fakes/fakers"
-import {scalars} from "@/lib/fetcher/fakes/scalars"
 import type {ANY_RESOLVER} from "@/lib/fetcher/fakes/utils"
 import {faker} from "@faker-js/faker"
 import {
@@ -50,34 +49,37 @@ export const mocks: IMocks<Resolvers> = {
 	}),
 }
 
-const resolvers: (store: IMockStore) => Partial<Resolvers> = (store) => ({
-	// ...scalars,
-	Query: {
-		users: paginatedRelay(relayStylePaginationMock(store)),
-	},
-	UserCore: {
-		username: (r) =>
-			(store.get(r, "name") as string).toLowerCase().replaceAll(/\s/g, "."),
-		// assignedMergeRequests: paginatedRelay(relayStylePaginationMock(store)),
-		// authoredMergeRequests: paginatedRelay(relayStylePaginationMock(store)),
-	},
-	CurrentUser: {
-		username: (r) =>
-			(store.get(r, "name") as string).toLowerCase().replaceAll(/\s/g, "."),
-		contributedProjects: paginatedRelay(relayStylePaginationMock(store)),
-
-		projectMemberships: paginatedRelay(relayStylePaginationMock(store)),
-		assignedMergeRequests: paginatedRelay(relayStylePaginationMock(store)),
-		authoredMergeRequests: paginatedRelay(relayStylePaginationMock(store)),
-	},
-	// Project: {
-	// 	detailedImportStatus: () => {
-	// 		return {
-	// 			status: "mockes",
-	// 		}
-	// 	},
-	// },
-})
+const resolvers: (store: IMockStore) => Partial<Resolvers> = (store) => {
+	const paginate = paginatedRelay(relayStylePaginationMock(store))
+	return {
+		// ...scalars,
+		Query: {
+			users: paginate,
+		},
+		UserCore: {
+			username: (r) =>
+				(store.get(r, "name") as string).toLowerCase().replaceAll(/\s/g, "."),
+			// assignedMergeRequests: paginatedRelay(relayStylePaginationMock(store)),
+			// authoredMergeRequests: paginatedRelay(relayStylePaginationMock(store)),
+		},
+		CurrentUser: {
+			username: (r) =>
+				(store.get(r, "name") as string).toLowerCase().replaceAll(/\s/g, "."),
+			contributedProjects: paginate,
+			projectMemberships: paginate,
+			assignedMergeRequests: paginate,
+			authoredMergeRequests: paginate,
+			groupMemberships: paginate,
+		},
+		// Project: {
+		// 	detailedImportStatus: () => {
+		// 		return {
+		// 			status: "mockes",
+		// 		}
+		// 	},
+		// },
+	}
+}
 
 export const resolverImplemntationMap = resolvers({} as ANY_TRUST_ME)
 

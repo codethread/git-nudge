@@ -1,5 +1,4 @@
 import {AppSidebar} from "@/components/AppSidebar"
-import {FakeSettings} from "@/components/FakeOptions"
 import {SidebarProvider} from "@/components/ui/sidebar"
 
 export default function Layout({children}: {children: React.ReactNode}) {

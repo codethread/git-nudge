@@ -2,7 +2,7 @@ import {graphql} from "@/graphql"
 
 // TODO: right now a blunt hammer, can offer more control if needed
 export const UsersQuery = graphql(`
-	query GetUsers($cursor: String, $draft: Boolean) {
+	query GetUsers($cursor: String) {
 		users(first: 100, after: $cursor) {
 			count
 			pageInfo {
@@ -17,7 +17,6 @@ export const UsersQuery = graphql(`
 				username
 				bot
 				webUrl
-				...assigned
 			}
 		}
 	}

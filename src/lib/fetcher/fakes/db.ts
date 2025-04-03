@@ -2,7 +2,6 @@ import type {User, UserCore, MergeRequest} from "@/graphql/graphql"
 import {assert, repeat} from "@/lib/utils"
 import {faker} from "@faker-js/faker"
 import type {IMockStore, Ref} from "@graphql-tools/mock"
-import {match, P} from "ts-pattern"
 
 interface UserRepo {
 	create(): Partial<UserCore> | undefined

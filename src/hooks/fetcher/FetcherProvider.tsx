@@ -1,5 +1,4 @@
 import {fetcherContext, useFakeConfig} from "./useFetcher"
-import {FakeSettings} from "@/components/FakeOptions"
 import {LoaderPage} from "@/components/ui/Loader"
 import type {RequestConfig} from "@/lib/fetcher/web"
 import {useQuery} from "@tanstack/react-query"

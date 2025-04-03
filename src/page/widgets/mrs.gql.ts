@@ -42,20 +42,6 @@ graphql(`
 	}
 `)
 
-graphql(`
-	fragment assigned on UserCore {
-		assignedMergeRequests(first: 100, draft: $draft, state: opened) {
-			count
-			pageInfo {
-				hasNextPage
-				endCursor
-			}
-			nodes {
-				...MrFragment
-			}
-		}
-	}
-`)
 export const GetMyMrs = graphql(`
 	query GetMyMrs($draft: Boolean) {
 		currentUser {
@@ -70,17 +56,16 @@ export const GetMyMrs = graphql(`
 					}
 				}
 			}
-			# ...assigned
-			# assignedMergeRequests(first: 100, draft: $draft, state: opened) {
-			# 	count
-			# 	pageInfo {
-			# 		hasNextPage
-			# 		endCursor
-			# 	}
-			# 	nodes {
-			# 		...MrFragment
-			# 	}
-			# }
+			assignedMergeRequests(first: 100, draft: $draft, state: opened) {
+				count
+				pageInfo {
+					hasNextPage
+					endCursor
+				}
+				nodes {
+					...MrFragment
+				}
+			}
 			authoredMergeRequests(first: 100) {
 				count
 				pageInfo {

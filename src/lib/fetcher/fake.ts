@@ -8,14 +8,11 @@ import {
 	createMockedSchema,
 	mocks,
 	resolverImplemntationMap,
-	resolvers,
 } from "@/lib/fetcher/fakes/mocks"
-import {scalars} from "@/lib/fetcher/fakes/scalars"
 import {assert} from "@/lib/utils"
 import {faker} from "@faker-js/faker"
 import {createMockStore} from "@graphql-tools/mock"
 import {makeExecutableSchema} from "@graphql-tools/schema"
-import {error} from "console"
 import * as gql from "graphql"
 
 interface FakeConfig {
@@ -45,15 +42,14 @@ export async function createFetcher(
 		const source = query.toString().trim()
 		const queryLine = source.slice(0, source.indexOf("\n", 1))
 
-		// try {
-		// 	failIfMissingMocks(schema, source, {
-		// 		paginationPredicate: (_, type) => type.name.endsWith("Connection"),
-		// 		ignoreMissingScalars: ["Int", "Float", "Boolean"],
-		// 	})
-		// } catch (e) {
-		// 	console.error(e)
-		// 	throw e
-		// }
+		try {
+			failIfMissingMocks(schema, source, {
+				paginationPredicate: (_, type) => type.name.endsWith("Connection"),
+			})
+		} catch (e) {
+			console.error(e)
+			throw e
+		}
 
 		const {data, errors} = await gql.graphql({
 			schema: mockedSchema,
@@ -82,12 +78,6 @@ export async function createFetcher(
 /**
  * The graph-mock lib is great for lazily mocking types, but...
  *
- * Scalars:
- * if a Scalar mock isn't defined it fails silently and `null`s the whole
- * object. This validation fn will parse a query and visit all fields, if any
- * are known to be Scalar types, `mocks` will be checked for the existence of
- * _something_ (specifics are not checked at this time).
- *
  * Pagination:
  * if using something more complex than a list, i.e relay style pagination, the
  * mocks will be weird. The mock lib provides `relayStylePaginationMock`, but
@@ -103,7 +93,6 @@ function failIfMissingMocks(
 			field: gql.FieldNode,
 			type: gql.GraphQLObjectType,
 		) => boolean
-		ignoreMissingScalars: string[]
 	},
 ) {
 	const ast = gql.parse(query, {noLocation: true})
@@ -119,29 +108,10 @@ function failIfMissingMocks(
 					const parent = typeInfo.getParentType()?.name
 					const name = field.name.value
 					assert(parent, "should be a parent here")
-					const found = resolverImplemntationMap[parent][name]
-					debugger
-					if (!found)
-						throw new Error(`Pagination not set up for ${parent}.${name}`)
-					assert(found, `Pagination not set up for ${parent}.${name}`)
-				}
-
-				// validate scalar is present
-				// probably smarter ways to do this but hacked around in the
-				// debugger and this seems consistent
-				// it will also flag builtins like String, Int etc, but I'm fine with that
-				if (type && "ofType" in type) {
-					const subType = type.ofType
-					if (
-						gql.isScalarType(subType) &&
-						!opts.ignoreMissingScalars.includes(subType.name)
-					) {
-						const name = subType.name
-						const mocked = mocks[name]
-						if (!mocked) {
-							throw new Error(`Scalar field not mocked: ${name}`)
-						}
-					}
+					assert(
+						resolverImplemntationMap[parent]?.[name],
+						`Pagination not set up for ${parent}.${name}`,
+					)
 				}
 			},
 		}),

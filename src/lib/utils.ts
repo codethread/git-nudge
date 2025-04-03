@@ -84,7 +84,6 @@ export function uniqueBy<A extends Record<string, unknown>>(
 
 export function assert(condition: unknown, msg?: string): asserts condition {
 	if (!condition) {
-		debugger
 		throw new Error(msg)
 	}
 }

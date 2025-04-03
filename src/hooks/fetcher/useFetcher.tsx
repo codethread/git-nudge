@@ -11,7 +11,7 @@ export function useFetcher() {
 	return f
 }
 export const useFakeConfig = create(
-	combine({users: 1}, (set) => ({
+	combine({users: 37}, (set) => ({
 		setUsers: (count: number) => set({users: count}),
 	})),
 )
