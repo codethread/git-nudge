@@ -22,7 +22,7 @@ export async function createFetcher(
 	{logger: loggerFact}: RequestConfig,
 	{dbConfig}: FakeConfig,
 ): Promise<Fetcher> {
-	const logger = loggerFact.context("fetch")
+	const logger = loggerFact.context("🐶 fetch")
 	logger.debug("creating fake fetcher")
 	const schema = makeExecutableSchema<Resolvers>({
 		typeDefs: gql.buildClientSchema((schemaJson as ANY_GEN).data),
@@ -37,7 +37,7 @@ export async function createFetcher(
 		mockStore,
 		dbConfig,
 		{create: getFakeUserFactory()},
-		loggerFact.context("DB"),
+		loggerFact.context("👻 mocks"),
 	)
 
 	const mockedSchema = createMockedSchema({schema, store: db.store})

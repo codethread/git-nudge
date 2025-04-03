@@ -1,4 +1,5 @@
 import {type ClassValue, clsx} from "clsx"
+import equal from "fast-deep-equal"
 import React from "react"
 import {twMerge} from "tailwind-merge"
 import {match, P} from "ts-pattern"
@@ -84,6 +85,20 @@ export function uniqueBy<A extends Record<string, unknown>>(
 
 export function assert(condition: unknown, msg?: string): asserts condition {
 	if (!condition) {
-		throw new Error(msg)
+		throw new Error(msg || "Something went wrong")
+	}
+}
+
+export function assertEq<A>(
+	items: (A | unknown)[],
+	msg?: string,
+): asserts items is A[] {
+	const mismatch = items.find((item, i) => {
+		if (i + 1 === items.length) return false
+		return !equal(item, items[i + 1])
+	})
+	if (mismatch) {
+		console.error(items)
+		throw new Error(msg ?? "objects not equal")
 	}
 }

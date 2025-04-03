@@ -54,31 +54,31 @@ export function MyMrs() {
 							{mrs?.map((mr) => (
 								<li key={mr?.id}>
 									<div>
-										<p>
+										<p className="truncate">
 											{mr?.webUrl && (
 												<a href={mr?.webUrl} target="_blank" rel="noreferrer">
 													{mr?.title}
 												</a>
 											)}
-											{mr?.mergeable ? (
-												<span>
-													<Check color="green" /> mergeable
-												</span>
-											) : null}
+											{/* {mr?.mergeable ? ( */}
+											{/* 	<span> */}
+											{/* 		<Check color="green" /> mergeable */}
+											{/* 	</span> */}
+											{/* ) : null} */}
 										</p>
-										{mr?.mergeable ? null : (
-											<ul>
-												{mr?.conflicts ? <li>❌ conflicts</li> : null}
-												{mr?.headPipeline?.status ? (
-													<li>Pipeline: {mr.headPipeline.status}</li>
-												) : null}
-												{mr?.approved ? <li>√ approved</li> : null}
-												{mr?.approvalState.invalidApproversRules
-													?.filter((r) => !r.allowMergeWhenInvalid)
-													.map((r) => r.name)
-													.join(" ") ?? null}
-											</ul>
-										)}
+										{/* {mr?.mergeable ? null : ( */}
+										{/* 	<ul> */}
+										{/* 		{mr?.conflicts ? <li>❌ conflicts</li> : null} */}
+										{/* 		{mr?.headPipeline?.status ? ( */}
+										{/* 			<li>Pipeline: {mr.headPipeline.status}</li> */}
+										{/* 		) : null} */}
+										{/* 		{mr?.approved ? <li>√ approved</li> : null} */}
+										{/* 		{mr?.approvalState.invalidApproversRules */}
+										{/* 			?.filter((r) => !r.allowMergeWhenInvalid) */}
+										{/* 			.map((r) => r.name) */}
+										{/* 			.join(" ") ?? null} */}
+										{/* 	</ul> */}
+										{/* )} */}
 									</div>
 								</li>
 							))}

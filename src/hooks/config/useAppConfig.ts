@@ -1,6 +1,6 @@
 import type {IStorageConfig} from "@/hooks/useBridge"
 import {duration} from "@/lib/duration"
-import type {Logger, } from "@/lib/logger"
+import type {Logger} from "@/lib/logger"
 import {pick, useNeededContext} from "@/lib/utils"
 import type {QueryClientConfig} from "@tanstack/react-query"
 import {produce} from "immer"
@@ -109,7 +109,8 @@ interface InitAppConfigStore {
 export function createAppConfigStore(init: InitAppConfigStore) {
 	return createStore<IAppConfig>()(
 		immer((set, get) => {
-			const {logger, persistHash, stored, isFakeLab, initial} = init
+			const {logger: loggerFact, persistHash, stored, isFakeLab, initial} = init
+			const logger = loggerFact.context("🍁 app config")
 			logger.debug("createAppConfigStore", init)
 			const initialState: IAppConfigState = {
 				dev: __IS_DEV__

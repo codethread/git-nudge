@@ -14,19 +14,25 @@ const slimLogger = pick(console, [
 	"groupEnd",
 ])
 
-export const logger = {
-	...slimLogger,
-	context(name: string) {
-		return {
-			...slimLogger,
-			...Object.fromEntries(
-				Object.entries(pick(slimLogger, ["debug", "info", "warn"])).map(
-					([meth, fn]: [string, (...args: ANY_TRUST_ME[]) => void]) => [
-						meth,
-						(...args: ANY_TRUST_ME[]) => fn(name, ...args),
-					],
-				),
+function createContextLogger(name: string) {
+	const prefix = `[${name.toUpperCase()}]`
+	return {
+		...slimLogger,
+		...Object.fromEntries(
+			Object.entries(pick(slimLogger, ["debug", "info", "warn"])).map(
+				([meth, fn]: [string, (...args: unknown[]) => void]) => [
+					meth,
+					(...args: unknown[]) => fn(prefix, ...args),
+				],
 			),
-		}
-	},
+		),
+		groupCollapsed(...data: unknown[]) {
+			console.groupCollapsed(prefix, ...data)
+		},
+	}
+}
+
+export const logger = {
+	...createContextLogger("📙 global"),
+	context: createContextLogger,
 }

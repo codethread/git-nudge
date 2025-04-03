@@ -56,12 +56,18 @@ const resolvers: (store: IMockStore) => Partial<Resolvers> = (store) => {
 		// ...scalars,
 		Query: {
 			users: paginate,
+			currentUser: () => {
+				const u = store.get("UserCore", "0")
+				debugger
+				return u
+			},
 		},
 		MergeRequest: {
 			approvedBy: paginate,
 		},
 		UserCore: {
 			username: (r) => {
+				console.log("codethread", "hit")
 				assertIsRef(r)
 				return (store.get(r, "name") as string)
 					.toLowerCase()
@@ -71,25 +77,26 @@ const resolvers: (store: IMockStore) => Partial<Resolvers> = (store) => {
 			// authoredMergeRequests: paginatedRelay(relayStylePaginationMock(store)),
 		},
 		CurrentUser: {
-			username: (r) => {
-				assertIsRef(r)
-				return (store.get(r, "name") as string)
-					.toLowerCase()
-					.replaceAll(/\s/g, ".")
-			},
+			// username: (r) => {
+			// 	console.log("codethread", "hit")
+			// 	assertIsRef(r)
+			// 	return (store.get(r, "name") as string)
+			// 		.toLowerCase()
+			// 		.replaceAll(/\s/g, ".")
+			// },
 			contributedProjects: paginate,
 			projectMemberships: paginate,
 			assignedMergeRequests: paginate,
 			authoredMergeRequests: paginate,
 			groupMemberships: paginate,
+			// },
+			// Project: {
+			// 	detailedImportStatus: () => {
+			// 		return {
+			// 			status: "mockes",
+			// 		}
+			// 	},
 		},
-		// Project: {
-		// 	detailedImportStatus: () => {
-		// 		return {
-		// 			status: "mockes",
-		// 		}
-		// 	},
-		// },
 	}
 }
 
