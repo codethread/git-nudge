@@ -6,3 +6,4 @@ export const FIXTURE_FILE = path.join(
 	process.cwd(),
 	"src/lib/fetcher/fakes/fixtureData.json",
 )
+export const MAX_FAKE_USERS = 250

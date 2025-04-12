@@ -1,4 +1,5 @@
 import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar"
+import {Button} from "@/components/ui/button"
 import {Skeleton} from "@/components/ui/skeleton"
 import {
 	Table,
@@ -14,6 +15,7 @@ import {Text, TextSkeleton} from "@/components/ui/text"
 import {useConfigSelector} from "@/hooks/config/useConfig"
 import {type IUser, useUsersQuery} from "@/hooks/users/useUsers"
 import {cn} from "@/lib/utils"
+import {RefreshCw} from "lucide-react"
 import {P, match} from "ts-pattern"
 
 interface UserProps {
@@ -65,7 +67,7 @@ export function User(props: UserProps) {
 }
 
 export function Users() {
-	const {isFetching, error, users} = useUsersQuery()
+	const {isFetching, error, allUsers, refetch} = useUsersQuery()
 
 	if (error) {
 		return <div>{error.message}</div>
@@ -76,14 +78,23 @@ export function Users() {
 			<TableCaption>Users in this GitLab instance</TableCaption>
 			<TableHeader>
 				<TableRow>
+					<TableHead>Avatar</TableHead>
 					<TableHead className="w-[100px]">Name</TableHead>
 					<TableHead>Status</TableHead>
 					<TableHead>Username</TableHead>
 				</TableRow>
 			</TableHeader>
 			<TableBody>
-				{users.map((user) => (
+				{allUsers.map((user) => (
 					<TableRow key={user.username}>
+						<TableCell>
+							<Avatar className="h-6 w-6 outline outline-offset-1">
+								<AvatarImage src={user.avatarUrl} />
+								<AvatarFallback className="text-xl">
+									{user.username.slice(0, 2)}
+								</AvatarFallback>
+							</Avatar>
+						</TableCell>
 						<TableCell className="font-medium">
 							<a
 								className="text-blue-400 underline"
@@ -102,8 +113,12 @@ export function Users() {
 			<TableFooter>
 				<TableRow>
 					<TableCell>Total</TableCell>
-					<TableCell>{isFetching ? "fetching..." : ""}</TableCell>
-					<TableCell className="text-right">{users.length}</TableCell>
+					<TableCell>
+						<Button variant={"outline"} size="iconSm" onClick={() => refetch()}>
+							<RefreshCw className={isFetching ? "animate-spin" : ""} />
+						</Button>
+					</TableCell>
+					<TableCell className="text-right">{allUsers.length}</TableCell>
 				</TableRow>
 			</TableFooter>
 		</Table>

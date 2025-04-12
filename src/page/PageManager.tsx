@@ -14,6 +14,7 @@ import {match} from "ts-pattern"
 const DashboardPage = React.lazy(() => import("@/page/Dashboard"))
 const LoginPage = React.lazy(() => import("@/page/Login"))
 const WelcomePage = React.lazy(() => import("@/page/Welcome"))
+const UsersPage = React.lazy(() => import("@/page/Users"))
 
 export function PageManager() {
 	const {page} = useNavigation()
@@ -34,6 +35,13 @@ export function PageManager() {
 			<Providers>
 				<Suspense fallback={<LoaderPage />}>
 					<WelcomePage />
+				</Suspense>
+			</Providers>
+		))
+		.with(Pages.USERS, () => (
+			<Providers>
+				<Suspense fallback={<LoaderPage />}>
+					<UsersPage />
 				</Suspense>
 			</Providers>
 		))

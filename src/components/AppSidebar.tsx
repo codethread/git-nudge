@@ -20,7 +20,7 @@ import {
 } from "@/hooks/config/useAppConfig"
 import {useNavigation} from "@/hooks/useNav"
 import {pick} from "@/lib/utils"
-import {Hand, Home, Settings, Trash2} from "lucide-react"
+import {Hand, Home, Settings, Trash2, Users} from "lucide-react"
 
 export function AppSidebar() {
 	const isDev = useIsDev()
@@ -37,6 +37,12 @@ export function AppSidebar() {
 			title: "Home",
 			action: () => nav("dashboard"),
 			icon: Home,
+		},
+		{
+			enabled: true,
+			title: "Users",
+			action: () => nav("users"),
+			icon: Users,
 		},
 		{
 			enabled: true,

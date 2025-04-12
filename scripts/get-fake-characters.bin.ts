@@ -1,4 +1,4 @@
-import {FIXTURE_FILE} from "./constants.ts"
+import {FIXTURE_FILE, MAX_FAKE_USERS} from "./constants.ts"
 import {run} from "./run.ts"
 import fs from "node:fs/promises"
 
@@ -15,7 +15,7 @@ async function getAllUsers() {
 		const {info, results} = await getUsers(nextPage)
 		nextPage = info.next
 		users.push(...results)
-	} while (users.length < 150 && nextPage)
+	} while (users.length < MAX_FAKE_USERS && nextPage)
 
 	return users.map((user) => ({
 		name: user.name,

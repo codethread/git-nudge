@@ -61,7 +61,7 @@ export function ReposCard({onSuccess}: ReadyProps) {
 }
 
 export function UsersCard({onSuccess}: ReadyProps) {
-	const {error, users, allUsers, allFetched, progress, refetch} =
+	const {error, allUsers, isFetching, allFetched, progress, refetch} =
 		useUsersQuery()
 
 	useEffect(() => {
@@ -90,6 +90,7 @@ export function UsersCard({onSuccess}: ReadyProps) {
 		<PreviewCard
 			heading="Colleagues"
 			onRefresh={() => void refetch()}
+			refreshing={isFetching}
 			content={<UsersPreview users={allUsers} />}
 		/>
 	)
@@ -236,6 +237,7 @@ function PreviewCard({
 	heading,
 	content,
 	onRefresh,
+	refreshing,
 }: IChildrens<"heading" | "content"> & {
 	onRefresh?: IAction
 	refreshing?: boolean
@@ -249,7 +251,7 @@ function PreviewCard({
 					</CardTitle>
 					{onRefresh && (
 						<Button variant={"outline"} size="iconSm" onClick={onRefresh}>
-							<RefreshCw />
+							<RefreshCw className={refreshing ? "animate-spin" : ""} />
 						</Button>
 					)}
 				</div>

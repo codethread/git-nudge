@@ -20,7 +20,7 @@ export function MyMrs() {
 	})
 
 	if (error) return <ErrorComp error={error} />
-	if (!isSuccess) return <Loader />
+	if (!isSuccess) return <Loader variant={"page"} />
 	if (!data.currentUser) return <ErrorComp error="missing user" />
 
 	const {assignedMergeRequests, authoredMergeRequests} = data.currentUser

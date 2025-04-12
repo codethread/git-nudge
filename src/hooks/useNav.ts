@@ -4,6 +4,7 @@ export const Pages = {
 	LOGIN: "login",
 	WELCOME: "welcome",
 	DASHBOARD: "dashboard",
+	USERS: "users",
 } as const
 
 export type Page = (typeof Pages)[keyof typeof Pages]
