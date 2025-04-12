@@ -12,7 +12,7 @@ export function useFetcher() {
 }
 
 export const fakeConfigStore = createStore(
-	combine({users: 2}, (set) => ({
+	combine({users: 37}, (set) => ({
 		setUsers: (count: number) => set({users: count}),
 	})),
 )

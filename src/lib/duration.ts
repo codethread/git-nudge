@@ -5,11 +5,13 @@ const units = {
 	hours: 1000 * 60 * 60,
 	days: 1000 * 60 * 60 * 24,
 } as const
+type Unit = keyof typeof units
 
-export function duration(amount: number, unit: keyof typeof units) {
+export type IDuration = {amount: number; unit: Unit}
+export function duration(amount: number, unit: Unit) {
 	return units[unit] * amount
 }
 
-export function wait(amount: number, unit: keyof typeof units = "ms") {
+export function wait(amount: number, unit: Unit = "ms") {
 	return new Promise((res) => setTimeout(res, duration(amount, unit)))
 }

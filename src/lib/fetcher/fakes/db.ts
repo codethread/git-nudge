@@ -3,7 +3,7 @@ import {fakeInt} from "@/lib/fetcher/fakes/fakers"
 import type {SlimLogger} from "@/lib/logger"
 import {assert, assertEq, repeat} from "@/lib/utils"
 import {faker} from "@faker-js/faker"
-import type {IMockStore, Ref} from "@graphql-tools/mock"
+import {assertIsRef, type IMockStore, type Ref} from "@graphql-tools/mock"
 import {consola, createConsola} from "consola"
 
 interface UserRepo {
@@ -128,7 +128,14 @@ export class Db {
 			Number.parseInt(id) <= this.userIdx,
 			`User not created yet ${id}, current userIdx ${this.userIdx}`,
 		)
-		return this.store.get("UserCore", id) as Ref
+		const ref = this.store.get("UserCore", id)
+		assertIsRef(ref)
+		return ref
+	}
+
+	addMrToUser(id = "0") {
+		const userRef = this.getUser(id)
+		this.addMergeRequest(userRef, {connection: ["assignedMergeRequests"]})
 	}
 
 	/**
@@ -153,7 +160,7 @@ export class Db {
 		return node
 	}
 
-	private createAltCurrentUser() {
+	private createCurrentUser() {
 		const store = this.store
 		const id = "0"
 		this.logger.info("creating currentUser")
@@ -186,43 +193,6 @@ export class Db {
 		)
 		repeat(fakeInt(2, 4), () => this.addMergeRequest(userRef))
 	}
-	private createCurrentUser() {
-		const store = this.store
-		const id = (++this.userIdx).toString()
-		const me = this.userRepo.create()
-		assert(me, "first user creation should not fail, maybe no fake data?")
-		me.id = id
-
-		store.set("Project", "1", {name: "Bigger Project"})
-		store.set("Project", "2", {name: "Big Project"})
-
-		store.set("ProjectConnection", "1", {
-			edges: [
-				{node: store.get("Project", "1")},
-				{node: store.get("Project", "2")},
-			],
-		})
-
-		store.set("Query", "ROOT", {
-			currentUser: {
-				...me,
-				contributedProjects: store.get("ProjectConnection", "1"),
-			},
-		})
-		this.addListEdge(
-			store.get("Query", "ROOT", "users") as Ref,
-			store.get("Query", "ROOT", "currentUser") as Ref,
-			// store.get("UserCore", id) as Ref,
-		)
-		// add some MRs
-		repeat(fakeInt(4, 8), () =>
-			this.addMergeRequest(me.id, {connection: ["authoredMergeRequests"]}),
-		)
-		repeat(fakeInt(5, 9), () =>
-			this.addMergeRequest(me.id, {connection: ["assignedMergeRequests"]}),
-		)
-		repeat(fakeInt(2, 4), () => this.addMergeRequest(me.id))
-	}
 
 	private seed() {
 		// important to start with an empty list, else when creating edges, users get created
@@ -231,7 +201,7 @@ export class Db {
 		this.store.set("Query", "ROOT", {users: {edges: []}})
 		// this.createCurrentUser()
 		repeat(this.config.users, () => this.addUser())
-		this.createAltCurrentUser()
+		this.createCurrentUser()
 		l.groupEnd()
 	}
 }
