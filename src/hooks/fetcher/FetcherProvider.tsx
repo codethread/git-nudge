@@ -16,6 +16,7 @@ export function FetcherProvider({children, withFake, reqConf}: Props) {
 
 	const {data, error, isPending, isSuccess} = useQuery({
 		retry: withFake ? 0 : 3,
+		staleTime: Number.POSITIVE_INFINITY,
 		refetchOnMount: false,
 		refetchInterval: Number.POSITIVE_INFINITY,
 		queryKey: ["fetcher", fakeKey, reqConf, users] as const,

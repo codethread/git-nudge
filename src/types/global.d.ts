@@ -9,6 +9,9 @@ interface IChildren {
 
 type IChildrens<Key extends string> = Record<Key, React.ReactNode>
 
+/** callback handed to components, e.g onRefresh, onClick etc */
+type IAction = () => void | (() => Promise<void>)
+
 type NN<T> = NonNullable<T>
 
 type Prettify<T> = {

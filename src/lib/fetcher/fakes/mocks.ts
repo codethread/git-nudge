@@ -1,4 +1,4 @@
-import type {UserState} from "@/graphql/graphql"
+import type {UserCore, UserState} from "@/graphql/graphql"
 import type {Resolvers} from "@/graphql/server"
 import {fakeChoiceWeight, fakeTrue} from "@/lib/fetcher/fakes/fakers"
 import type {ANY_RESOLVER} from "@/lib/fetcher/fakes/utils"
@@ -9,16 +9,15 @@ import {
 	relayStylePaginationMock,
 	type IMocks,
 	type IMockStore,
+	type Ref,
 } from "@graphql-tools/mock"
 
 const uuidFn = faker.string.uuid
 export const mocks: IMocks<Resolvers> = {
 	String: () => faker.word.words({count: faker.number.int({min: 3, max: 9})}),
 	ID: uuidFn,
-
 	Time: () =>
 		faker.date.past({refDate: "2020-01-01T00:00:00.000Z"}).toISOString(),
-
 	GlobalID: uuidFn,
 	NoteID: uuidFn,
 	UserID: uuidFn,
@@ -35,12 +34,7 @@ export const mocks: IMocks<Resolvers> = {
 		webUrl: () => "https://gitlab.com",
 	}),
 	Project: () => ({
-		name: () => {
-			return faker.commerce.productName()
-		},
-		detailedImportStatus: () => {
-			return {status: "some import "}
-		},
+		name: () => faker.commerce.productName(),
 	}),
 	Group: () => ({
 		name: () => faker.commerce.department(),
@@ -56,46 +50,33 @@ const resolvers: (store: IMockStore) => Partial<Resolvers> = (store) => {
 		// ...scalars,
 		Query: {
 			users: paginate,
-			currentUser: () => {
-				const u = store.get("UserCore", "0")
-				debugger
-				return u
-			},
+			currentUser: () => store.get("UserCore", "0") as Ref,
 		},
 		MergeRequest: {
 			approvedBy: paginate,
 		},
 		UserCore: {
 			username: (r) => {
-				console.log("codethread", "hit")
 				assertIsRef(r)
 				return (store.get(r, "name") as string)
 					.toLowerCase()
 					.replaceAll(/\s/g, ".")
 			},
-			// assignedMergeRequests: paginatedRelay(relayStylePaginationMock(store)),
-			// authoredMergeRequests: paginatedRelay(relayStylePaginationMock(store)),
+			assignedMergeRequests: paginate,
+			authoredMergeRequests: paginate,
 		},
 		CurrentUser: {
-			// username: (r) => {
-			// 	console.log("codethread", "hit")
-			// 	assertIsRef(r)
-			// 	return (store.get(r, "name") as string)
-			// 		.toLowerCase()
-			// 		.replaceAll(/\s/g, ".")
-			// },
+			username: (r) => {
+				assertIsRef(r)
+				return (store.get(r, "name") as string)
+					.toLowerCase()
+					.replaceAll(/\s/g, ".")
+			},
 			contributedProjects: paginate,
 			projectMemberships: paginate,
 			assignedMergeRequests: paginate,
 			authoredMergeRequests: paginate,
 			groupMemberships: paginate,
-			// },
-			// Project: {
-			// 	detailedImportStatus: () => {
-			// 		return {
-			// 			status: "mockes",
-			// 		}
-			// 	},
 		},
 	}
 }

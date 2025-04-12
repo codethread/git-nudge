@@ -17,10 +17,11 @@ const config: CodegenConfig = {
 					"(parent: TParent | Ref, args: TArgs, context: TContext, info: GraphQLResolveInfo) => Promise<TResult> | TResult",
 				// avoidOptionals: true, // use non null type helper instead
 				documentMode: "string",
-				// mappers: {
-				// 	User: "./my-models#UserDbObject",
-				// 	Book: "./my-models#Collections",
-				// },
+				mappers: {
+					CurrentUser: "Ref",
+					// User: "./my-models#UserDbObject",
+					// Book: "./my-models#Collections",
+				},
 			},
 			plugins: [
 				{

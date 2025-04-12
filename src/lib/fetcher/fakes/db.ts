@@ -4,6 +4,7 @@ import type {SlimLogger} from "@/lib/logger"
 import {assert, assertEq, repeat} from "@/lib/utils"
 import {faker} from "@faker-js/faker"
 import type {IMockStore, Ref} from "@graphql-tools/mock"
+import {consola, createConsola} from "consola"
 
 interface UserRepo {
 	create(): Partial<UserCore> | undefined
@@ -37,7 +38,7 @@ export class Db {
 		private userRepo: UserRepo,
 		private logger: SlimLogger,
 	) {
-		this.logger.info("init")
+		this.logger.info("init", config)
 		this.seed()
 	}
 
@@ -117,7 +118,6 @@ export class Db {
 
 		options.connection.forEach((mrConnection) => {
 			const connection = store.get(userRef, mrConnection) as Ref
-			debugger
 			this.logger.debug("merge connection", connection)
 			this.addListEdge(connection, store.get("MergeRequest", id) as Ref)
 		})
@@ -230,8 +230,7 @@ export class Db {
 		l.group("seed")
 		this.store.set("Query", "ROOT", {users: {edges: []}})
 		// this.createCurrentUser()
-		// repeat(this.config.users, () => this.addUser())
-		repeat(2, () => this.addUser())
+		repeat(this.config.users, () => this.addUser())
 		this.createAltCurrentUser()
 		l.groupEnd()
 	}

@@ -52,6 +52,7 @@ export const useUsersQuery = () => {
 			isFetching,
 			allFetched,
 			allUsers: users,
+			refetch: queryData.refetch,
 			users: users.filter((u) => !u.bot && u.state === "active"),
 		}
 	}, [queryData])

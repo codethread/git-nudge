@@ -23,7 +23,7 @@ export async function createFetcher(
 	{dbConfig}: FakeConfig,
 ): Promise<Fetcher> {
 	const logger = loggerFact.context("🐶 fetch")
-	logger.debug("creating fake fetcher")
+	logger.info("creating fake fetcher")
 	const schema = makeExecutableSchema<Resolvers>({
 		typeDefs: gql.buildClientSchema((schemaJson as ANY_GEN).data),
 	})

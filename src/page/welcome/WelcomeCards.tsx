@@ -1,3 +1,4 @@
+import {Button} from "@/components/ui/button"
 import {Card, CardHeader, CardTitle, CardContent} from "@/components/ui/card"
 import {Lead, Text} from "@/components/ui/text"
 import {useFetcher} from "@/hooks/fetcher/useFetcher"
@@ -7,6 +8,7 @@ import {MyBioQuery} from "@/page/welcome/welcome.gql"
 import {User} from "@/page/widgets/Users"
 import {Progress} from "@radix-ui/react-progress"
 import {useQuery} from "@tanstack/react-query"
+import {RefreshCw} from "lucide-react"
 import {useEffect} from "react"
 
 interface ReadyProps {
@@ -59,7 +61,8 @@ export function ReposCard({onSuccess}: ReadyProps) {
 }
 
 export function UsersCard({onSuccess}: ReadyProps) {
-	const {error, users, allUsers, allFetched, progress} = useUsersQuery()
+	const {error, users, allUsers, allFetched, progress, refetch} =
+		useUsersQuery()
 
 	useEffect(() => {
 		if (allFetched) onSuccess()
@@ -86,6 +89,7 @@ export function UsersCard({onSuccess}: ReadyProps) {
 	return (
 		<PreviewCard
 			heading="Colleagues"
+			onRefresh={() => void refetch()}
 			content={<UsersPreview users={allUsers} />}
 		/>
 	)
@@ -159,12 +163,12 @@ export function MyCard({onSuccess}: ReadyProps) {
 	return (
 		<PreviewCard
 			heading={
-				<span>
+				<Lead>
 					Welcome{" "}
 					<span className="text-accent-foreground text-nowrap">
 						{data.currentUser.name || data.currentUser.username}
 					</span>
-				</span>
+				</Lead>
 			}
 			content={
 				<div className="gap-sm flex flex-col">
@@ -228,13 +232,27 @@ function MyLists({
 	)
 }
 
-function PreviewCard({heading, content}: IChildrens<"heading" | "content">) {
+function PreviewCard({
+	heading,
+	content,
+	onRefresh,
+}: IChildrens<"heading" | "content"> & {
+	onRefresh?: IAction
+	refreshing?: boolean
+}) {
 	return (
 		<Card className="max-w-[350px] flex-1 basis-[280px]">
 			<CardHeader>
-				<CardTitle>
-					{typeof heading === "string" ? <Lead>{heading}</Lead> : heading}
-				</CardTitle>
+				<div className="flex justify-between">
+					<CardTitle>
+						{typeof heading === "string" ? <Lead>{heading}</Lead> : heading}
+					</CardTitle>
+					{onRefresh && (
+						<Button variant={"outline"} size="iconSm" onClick={onRefresh}>
+							<RefreshCw />
+						</Button>
+					)}
+				</div>
 			</CardHeader>
 			<CardContent>{content}</CardContent>
 		</Card>
