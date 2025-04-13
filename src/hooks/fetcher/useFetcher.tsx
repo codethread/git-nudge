@@ -1,6 +1,6 @@
 import type {Fetcher} from "@/lib/fetcher/web"
 import React from "react"
-import {create, createStore, useStore} from "zustand"
+import {createStore, useStore} from "zustand"
 import {combine} from "zustand/middleware"
 
 export const fetcherContext = React.createContext<null | Fetcher>(null)
@@ -17,12 +17,3 @@ export const fakeConfigStore = createStore(
 	})),
 )
 export const useFakeConfig = () => useStore(fakeConfigStore)
-
-const fakeConf = {
-	addUser() {
-		window.__db.addUser()
-		fakeConfigStore.setState((s) => ({users: s.users++}))
-	},
-}
-
-window.__fake = fakeConf

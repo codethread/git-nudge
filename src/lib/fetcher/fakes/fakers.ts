@@ -15,8 +15,9 @@ export function getFakeUserFactory() {
 	}
 }
 
-export function fakeOption<A>(items: A[]) {
-	return items.at(faker.number.int({min: 1, max: items.length}))
+export function fakeOption<A>(items: A[]): A {
+	// biome-ignore lint/style/noNonNullAssertion: <explanation>
+	return items.at(faker.number.int({min: 0, max: items.length - 1}))!
 }
 
 export function fakeTrue(n: number) {

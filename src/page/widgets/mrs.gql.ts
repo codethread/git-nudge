@@ -1,9 +1,15 @@
 import {graphql} from "@/graphql"
+import type {GetMyMrsQuery, MrFragmentFragment} from "@/graphql/graphql"
+
+export type MyMrs = MaybeNot<GetMyMrsQuery>
+export type MyCurrentUser = NN<MaybeNot<GetMyMrsQuery>["currentUser"]>
+export type MyMr = MaybeNot<MrFragmentFragment>
 
 graphql(`
 	fragment MrFragment on MergeRequest {
 		id
 		title
+		description
 		webUrl
 		createdAt
 		draft
@@ -11,9 +17,17 @@ graphql(`
 		conflicts
 		userDiscussionsCount
 		userNotesCount
-		notes(first: 100, filter: ONLY_COMMENTS) {
+		notes(last: 100, filter: ONLY_COMMENTS) {
+			count
 			nodes {
 				id
+				createdAt
+				url
+				body
+				author {
+					name
+					avatarUrl
+				}
 				authorIsContributor
 				resolved
 			}

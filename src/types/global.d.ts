@@ -9,9 +9,10 @@ interface IChildren {
 
 type IChildrens<Key extends string> = Record<Key, React.ReactNode>
 
-/** callback handed to components, e.g onRefresh, onClick etc */
-type IAction = () => void | (() => Promise<void>)
+/** callback handed to components used purely for it's effect, e.g onRefresh, onClick etc */
+type IAction = (...ignored: ANY_TRUST_ME[]) => ANY_TRUST_ME
 
+// TODO make deep get helper for this
 type NN<T> = NonNullable<T>
 
 type Prettify<T> = {

@@ -1,10 +1,9 @@
-import type {User, UserCore, MergeRequest} from "@/graphql/graphql"
+import type {User, UserCore, MergeRequest, Note} from "@/graphql/graphql"
 import {fakeInt} from "@/lib/fetcher/fakes/fakers"
 import type {SlimLogger} from "@/lib/logger"
 import {assert, assertEq, repeat} from "@/lib/utils"
 import {faker} from "@faker-js/faker"
 import {assertIsRef, type IMockStore, type Ref} from "@graphql-tools/mock"
-import {consola, createConsola} from "consola"
 
 interface UserRepo {
 	create(): Partial<UserCore> | undefined
@@ -138,6 +137,20 @@ export class Db {
 		this.addMergeRequest(userRef, {connection: ["assignedMergeRequests"]})
 	}
 
+	getRandomUser() {
+		return this.getUser(fakeInt(0, this.userIdx).toString())
+	}
+
+	createNotes(authorRef?: Ref, mrRef?: Ref) {
+		this.logger.info("adding notes")
+		// this.store.set("NoteConnection")
+		repeat(100, (i) => {
+			const author = authorRef ?? this.getRandomUser()
+			this.logger.debug(i, "author", this.store.get(author, "name"))
+			this.store.set("Note", i.toString(), {author})
+		})
+	}
+
 	/**
 	 * credit:
 	 * - https://github.com/woocoos/adminx-ui/blob/20155c0e42e7aa61c5d6d22f6e54040fca008658/mock/graphql/adminx/store.ts#L29C29-L29C70
@@ -202,6 +215,7 @@ export class Db {
 		// this.createCurrentUser()
 		repeat(this.config.users, () => this.addUser())
 		this.createCurrentUser()
+		this.createNotes()
 		l.groupEnd()
 	}
 }

@@ -1,5 +1,5 @@
 import type {IAppConfigStore, IGitLab} from "@/hooks/config/useAppConfig"
-import {duration, type IDuration} from "@/lib/duration"
+import type {IDuration} from "@/lib/duration"
 import {useNeededContext} from "@/lib/utils"
 import {derive} from "derive-zustand"
 import React from "react"

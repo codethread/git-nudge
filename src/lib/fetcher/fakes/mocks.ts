@@ -1,7 +1,13 @@
-import type {UserCore, UserState} from "@/graphql/graphql"
+import type {Note, UserState} from "@/graphql/graphql"
 import type {Resolvers} from "@/graphql/server"
-import {fakeChoiceWeight, fakeTrue} from "@/lib/fetcher/fakes/fakers"
+import {
+	fakeChoiceWeight,
+	fakeInt,
+	fakeOption,
+	fakeTrue,
+} from "@/lib/fetcher/fakes/fakers"
 import type {ANY_RESOLVER} from "@/lib/fetcher/fakes/utils"
+import {repeat} from "@/lib/utils"
 import {faker} from "@faker-js/faker"
 import {
 	addMocksToSchema,
@@ -40,12 +46,26 @@ export const mocks: IMocks<Resolvers> = {
 		name: () => faker.commerce.department(),
 	}),
 	MergeRequest: () => ({
-		title: () => faker.commerce.productDescription(),
+		title: () =>
+			`${fakeOption(["fix", "feat", "hotfix", "task"])}(${faker.hacker.noun()}): ${faker.git.commitMessage()}`,
+		description: () =>
+			repeat(fakeInt(1, 10), () => faker.commerce.productDescription()).join(
+				".\n\n",
+			),
+	}),
+	Note: (): Partial<Note> => ({
+		body: () =>
+			`${faker.word.interjection()}${faker.word.words({count: {min: 3, max: 200}})}`,
 	}),
 }
 
 const resolvers: (store: IMockStore) => Partial<Resolvers> = (store) => {
 	const paginate = paginatedRelay(relayStylePaginationMock(store))
+	const getUsers = () =>
+		(store.get("Query", "ROOT", ["users", "edges"]) as Ref[]).map((edge) =>
+			store.get(edge, "node"),
+		) as Ref[]
+
 	return {
 		// ...scalars,
 		Query: {
@@ -54,6 +74,7 @@ const resolvers: (store: IMockStore) => Partial<Resolvers> = (store) => {
 		},
 		MergeRequest: {
 			approvedBy: paginate,
+			notes: paginate,
 		},
 		UserCore: {
 			username: (r) => {
@@ -64,6 +85,9 @@ const resolvers: (store: IMockStore) => Partial<Resolvers> = (store) => {
 			},
 			assignedMergeRequests: paginate,
 			authoredMergeRequests: paginate,
+		},
+		Note: {
+			author: () => fakeOption(getUsers()),
 		},
 		CurrentUser: {
 			username: (r) => {
