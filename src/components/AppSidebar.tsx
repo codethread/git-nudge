@@ -16,6 +16,7 @@ import {
 import {
 	useAppConfigAction,
 	useAppConfigSelector,
+	useAppConfigShallowSelector,
 	useIsDev,
 } from "@/hooks/config/useAppConfig"
 import {useNavigation} from "@/hooks/useNav"
@@ -26,7 +27,7 @@ export function AppSidebar() {
 	const isDev = useIsDev()
 	const {nav, page} = useNavigation()
 	const isFake = useAppConfigSelector((s) => s.fakeLab)
-	const viewer = useAppConfigSelector((s) =>
+	const viewer = useAppConfigShallowSelector((s) =>
 		s.gitlab.state === "ready" ? pick(s.gitlab, ["user", "domain"]) : undefined,
 	)
 	const {clearClientCache, toggleFakeLab} = useAppConfigAction()

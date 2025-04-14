@@ -1,5 +1,5 @@
 import type {TypedDocumentString} from "../../graphql/graphql"
-import type {Logger, } from "@/lib/logger"
+import type {Logger} from "@/lib/logger"
 
 export interface RequestConfig {
 	logger: Logger
@@ -38,6 +38,13 @@ export async function createFetcher({token, domain, timeout}: RequestConfig) {
 		}
 
 		const json: ANY_GEN = await response.json()
-		return json.data
+
+		const {data, errors} = json
+		if (errors) {
+			errors.forEach((e: any) => console.error(e))
+			throw new Error(errors.at(0)?.message)
+		}
+
+		return data
 	}
 }

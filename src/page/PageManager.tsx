@@ -49,7 +49,6 @@ export function PageManager() {
 }
 
 function Providers({children}: IChildren) {
-	const appConfigStore = useAppConfigStore()
 	const isFakeLab = useAppConfigSelector((s) => s.fakeLab)
 	const gitlabConf = useAppConfigSelector((s) => s.gitlab)
 	const timeout = useAppConfigSelector((s) => s.global.requestTimeoutMillis)
@@ -65,7 +64,7 @@ function Providers({children}: IChildren) {
 		.with(
 			{isFakeLab: false, gitlabConf: {state: "ready"}},
 			({gitlabConf: {domain, token}}) => (
-				<ConfigProvider appConfigStore={appConfigStore}>
+				<ConfigProvider>
 					<FetcherProvider reqConf={{domain, token, timeout, logger}}>
 						{children}
 					</FetcherProvider>
@@ -73,7 +72,7 @@ function Providers({children}: IChildren) {
 			),
 		)
 		.with({isFakeLab: true}, () => (
-			<ConfigProvider appConfigStore={appConfigStore}>
+			<ConfigProvider>
 				<FetcherProvider
 					withFake
 					reqConf={{domain: "", token: "", timeout, logger}}
@@ -85,7 +84,7 @@ function Providers({children}: IChildren) {
 		.exhaustive()
 }
 
-function Redirect({page}: {page: Page}) {
+export function Redirect({page}: {page: Page}) {
 	const {nav} = useNavigation()
 
 	useEffect(() => nav(page), [page, nav])

@@ -5,6 +5,7 @@ import {pick, useNeededContext} from "@/lib/utils"
 import type {QueryClientConfig} from "@tanstack/react-query"
 import {produce} from "immer"
 import React from "react"
+import type {Primitive} from "type-fest"
 import {createStore, useStore} from "zustand"
 import {immer} from "zustand/middleware/immer"
 import {useShallow} from "zustand/react/shallow"
@@ -222,11 +223,18 @@ export function useIsDev() {
  * gives access to global config, usually only needed by setup providers,
  * favour `useConfigStore`
  */
-export function useAppConfigSelector<U>(
+export function useAppConfigSelector<U extends Primitive>(
 	selector: (state: IAppConfigState) => U,
 ): U {
 	const store = useAppConfigStore()
 	return useStore(store, selector)
+}
+
+export function useAppConfigShallowSelector<
+	U extends Record<string, unknown> | undefined | null,
+>(selector: (state: IAppConfigState) => U): U {
+	const store = useAppConfigStore()
+	return useStore(store, useShallow(selector))
 }
 
 // #endregion

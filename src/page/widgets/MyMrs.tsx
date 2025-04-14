@@ -1,6 +1,7 @@
 import {GetMyMrs, type MyCurrentUser, type MyMr} from "./mrs.gql"
 import {ErrorComp} from "@/components/ErrorBoundary"
 import {Loader} from "@/components/ui/Loader"
+import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar"
 import {Button} from "@/components/ui/button"
 import {
 	Card,
@@ -12,11 +13,12 @@ import {
 } from "@/components/ui/card"
 import {Separator} from "@/components/ui/separator"
 import {Lead} from "@/components/ui/text"
+import {useIsDev} from "@/hooks/config/useAppConfig"
 import {useConfigSelector} from "@/hooks/config/useConfig"
 import {useFetcher} from "@/hooks/fetcher/useFetcher"
 import {duration} from "@/lib/duration"
 import {add} from "@/lib/maths"
-import {uniqueBy} from "@/lib/utils"
+import {cn, uniqueBy} from "@/lib/utils"
 import {useQuery} from "@tanstack/react-query"
 import {format, formatRelative} from "date-fns"
 import {Check, RefreshCw} from "lucide-react"
@@ -31,7 +33,7 @@ export function MyMrs() {
 		{
 			queryKey: ["myMrs"],
 			refetchInterval: duration(amount, unit),
-			queryFn: () => fetcher(GetMyMrs, {draft: true}),
+			queryFn: () => fetcher(GetMyMrs, {draft: false}),
 		},
 	)
 
@@ -198,14 +200,31 @@ function Mr({mr}: {mr: MyMr}) {
 					<Separator orientation="vertical" />
 				</div>
 				<div className="mx-md flex-1 overflow-auto">
-					{mr.notes.nodes?.filter(Boolean).map((node) => (
-						<p key={node.id} className="truncate text-sm">
-							<span className="text-muted-foreground text-xs">
-								{format(node.createdAt, "dd/MM/yy hh:mm")}
-							</span>{" "}
-							{node.author?.name} | {node.body}
-						</p>
-					))}
+					{mr.notes.nodes
+						?.filter(Boolean)
+						// .filter((n) => !n.resolved)
+						.map((node) => (
+							<div key={node.id} className="inline-flex items-center">
+								<span className="text-muted-foreground flex-1 text-xs">
+									{format(node.createdAt, "dd/MM/yy hh:mm")}
+								</span>
+								<Avatar className="hover:outline-accent-foreground h-4 w-4 outline outline-offset-1 transition hover:outline-2">
+									<AvatarImage src={node.author?.avatarUrl} />
+									<AvatarFallback className="text-sm">
+										{node.author?.name.slice(0, 2)}
+									</AvatarFallback>
+								</Avatar>
+								<p
+									className={cn(
+										"truncate text-sm",
+										node.resolved && "line-through",
+									)}
+								>
+									{" "}
+									{node.body}{" "}
+								</p>
+							</div>
+						))}
 				</div>
 			</div>
 		</Card>

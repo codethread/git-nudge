@@ -22,7 +22,7 @@ export function parseError(e: unknown): string {
 		return fromError(e).toString()
 	}
 	if (e instanceof Error) {
-		return e?.stack || e.message
+		return `${e.message}\n${e?.stack || ""}`
 	}
 
 	return JSON.stringify(e)

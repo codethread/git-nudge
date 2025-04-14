@@ -21,8 +21,8 @@ export function createConfigStore(appConfigStore: IAppConfigStore) {
 		const conf = get(appConfigStore)
 		const other: Omit<IConfigState, "isFakeLab" | "gitlab"> = {
 			myMRsRefreshRate: {
-				amount: 10,
-				unit: "secs",
+				amount: 5,
+				unit: "mins",
 			},
 		}
 		return match(conf)

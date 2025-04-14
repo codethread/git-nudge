@@ -5,36 +5,41 @@ import {useAppConfigAction} from "@/hooks/config/useAppConfig"
 import {useBridge} from "@/hooks/useBridge"
 import {useNavigation} from "@/hooks/useNav"
 import {parseNetrc, type Netrc} from "@/lib/netrc"
+import {Redirect} from "@/page/PageManager"
 import {useQuery} from "@tanstack/react-query"
+import {useEffect} from "react"
 import {match, P} from "ts-pattern"
 
 export default function Login() {
-	const {setLogin} = useAppConfigAction()
 	const {readNetrc} = useBridge()
 	const {data, isFetching, refetch} = useQuery({
 		queryKey: ["netrc"],
 		queryFn: async () => {
+			console.log("codethread", "render netrc")
 			const netrc = await readNetrc()
-			const parsed = parseNetrc(netrc)
-			if (parsed.tag === "valid") {
-				const {
-					netrc: {user, domain, pass},
-				} = parsed
-				setLogin({domain, user, token: pass})
-				// leave it hanging but remove the union member
-				return new Promise(() => {}) as never
-			}
-			return parsed
+			return parseNetrc(netrc)
 		},
 	})
 
 	if (!data || isFetching) return <LoaderPage />
 
+	console.log("codethread", "render login data")
 	return match(data)
+		.with({tag: "valid"}, ({netrc}) => <C netrc={netrc} />)
 		.with({tag: "invalid", err: P.select()}, (err) => <p>{err}</p>)
 		.with({tag: "multiple"}, ({netrc}) => <ChooseNetrc netrc={netrc} />)
 		.with({tag: "missing"}, () => <NoNetrc onRetry={refetch} />)
 		.exhaustive()
+}
+const C = ({netrc}) => {
+	const {setLogin, setConfig} = useAppConfigAction()
+	useEffect(() => {
+		console.log("codethread", "update")
+		const {pass, domain, user} = netrc
+		setLogin({domain, token: pass, user})
+		// setConfig("fakeLab", false)
+	}, [netrc, setLogin])
+	return <Redirect page="welcome" />
 }
 
 function NoNetrc({onRetry}: {onRetry: () => void}) {

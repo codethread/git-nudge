@@ -17,7 +17,7 @@ graphql(`
 		conflicts
 		userDiscussionsCount
 		userNotesCount
-		notes(last: 100, filter: ONLY_COMMENTS) {
+		notes(last: 30, filter: ONLY_COMMENTS) {
 			count
 			nodes {
 				id
@@ -47,7 +47,7 @@ graphql(`
 			}
 		}
 		approved
-		approvedBy(first: 100) {
+		approvedBy(last: 10) {
 			nodes {
 				name
 				avatarUrl
@@ -61,16 +61,7 @@ export const GetMyMrs = graphql(`
 		currentUser {
 			id
 			name
-			projectMemberships(first: 100) {
-				nodes {
-					project {
-						id
-						name
-						webUrl
-					}
-				}
-			}
-			assignedMergeRequests(first: 100, draft: $draft, state: opened) {
+			assignedMergeRequests(first: 50, draft: $draft, state: opened) {
 				count
 				pageInfo {
 					hasNextPage
@@ -80,7 +71,7 @@ export const GetMyMrs = graphql(`
 					...MrFragment
 				}
 			}
-			authoredMergeRequests(first: 100) {
+			authoredMergeRequests(first: 50, draft: $draft, state: opened) {
 				count
 				pageInfo {
 					hasNextPage

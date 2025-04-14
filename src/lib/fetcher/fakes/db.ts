@@ -210,7 +210,7 @@ export class Db {
 	private seed() {
 		// important to start with an empty list, else when creating edges, users get created
 		const l = this.logger
-		l.group("seed")
+		l.groupCollapsed("seed")
 		this.store.set("Query", "ROOT", {users: {edges: []}})
 		// this.createCurrentUser()
 		repeat(this.config.users, () => this.addUser())
