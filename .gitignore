@@ -18,3 +18,4 @@ src/playground.ts
 *.njsproj
 *.sln
 *.sw?
+.cursorignore
