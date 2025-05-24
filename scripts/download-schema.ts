@@ -7,7 +7,7 @@ import {match, P} from "ts-pattern"
 import unzipper from "unzipper"
 import {z} from "zod"
 
-const DEFAULT_URL = "https://gitlab.com/gitlab-org/gitlab/-/jobs/9488927001"
+const DEFAULT_URL = "https://gitlab.com/gitlab-org/gitlab/-/jobs/10109370493"
 
 const UrlSchema = z
 	.string({message: "expected a url string as argument"})
