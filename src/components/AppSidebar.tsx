@@ -19,13 +19,13 @@ import {
 	useAppConfigShallowSelector,
 	useIsDev,
 } from "@/hooks/config/useAppConfig"
-import {useNavigation} from "@/hooks/useNav"
 import {pick} from "@/lib/utils"
+import {useNavigate} from "@tanstack/react-router"
 import {Hand, Home, Settings, Trash2, Users} from "lucide-react"
 
 export function AppSidebar() {
 	const isDev = useIsDev()
-	const {nav, page} = useNavigation()
+	const navigate = useNavigate()
 	const isFake = useAppConfigSelector((s) => s.fakeLab)
 	const viewer = useAppConfigShallowSelector((s) =>
 		s.gitlab.state === "ready" ? pick(s.gitlab, ["user", "domain"]) : undefined,
@@ -36,25 +36,25 @@ export function AppSidebar() {
 		{
 			enabled: true,
 			title: "Home",
-			action: () => nav("dashboard"),
+			action: () => navigate({to: "/"}),
 			icon: Home,
 		},
 		{
 			enabled: true,
 			title: "Users",
-			action: () => nav("users"),
+			action: () => navigate({to: "/users"}),
 			icon: Users,
 		},
 		{
 			enabled: true,
 			title: "Settings",
-			action: () => nav("welcome"),
+			action: () => navigate({to: "/welcome"}),
 			icon: Settings,
 		},
 		{
 			enabled: isDev,
 			title: "Welcome",
-			action: () => nav("welcome"),
+			action: () => navigate({to: "/welcome"}),
 			icon: Hand,
 		},
 	]

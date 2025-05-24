@@ -1,11 +1,11 @@
 import {Button} from "@/components/ui/button"
 import {Lead} from "@/components/ui/text"
-import {Pages, useNavigation} from "@/hooks/useNav"
 import {MyCard, ReposCard, UsersCard} from "@/page/welcome/WelcomeCards"
+import {useNavigate} from "@tanstack/react-router"
 import {useState, useCallback} from "react"
 
 export default function Welcome() {
-	const {nav} = useNavigation()
+	const navigate = useNavigate()
 	const [ready, setReady] = useState<boolean[]>([])
 	const allReady = ready.every(Boolean) && ready.length > 2
 	const onSuccess = useCallback(() => setReady((s) => s.concat(true)), [])
@@ -18,7 +18,7 @@ export default function Welcome() {
 							size="lg"
 							ping
 							variant="outline"
-							onClick={() => nav(Pages.DASHBOARD)}
+							onClick={() => navigate({to: "/"})}
 						>
 							Launch
 						</Button>

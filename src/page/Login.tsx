@@ -3,11 +3,10 @@ import {Button} from "@/components/ui/button"
 import {Lead} from "@/components/ui/text"
 import {useAppConfigAction} from "@/hooks/config/useAppConfig"
 import {useBridge} from "@/hooks/useBridge"
-import {useNavigation} from "@/hooks/useNav"
 import {parseNetrc, type Netrc} from "@/lib/netrc"
 import {Redirect} from "@/page/PageManager"
 import {useQuery} from "@tanstack/react-query"
-import {useEffect} from "react"
+import {useNavigate} from "@tanstack/react-router"
 import {match, P} from "ts-pattern"
 
 export default function Login() {
@@ -44,7 +43,7 @@ const C = ({netrc}) => {
 
 function NoNetrc({onRetry}: {onRetry: () => void}) {
 	const {toggleFakeLab} = useAppConfigAction()
-	const {nav} = useNavigation()
+	const navigate = useNavigate()
 	return (
 		<div className="flex flex-1 justify-center">
 			<div className="flex flex-col">
@@ -82,7 +81,7 @@ function NoNetrc({onRetry}: {onRetry: () => void}) {
 								size="lg"
 								onClick={() => {
 									toggleFakeLab()
-									nav("welcome")
+									navigate({to: "/welcome"})
 								}}
 							>
 								Use FakeLab

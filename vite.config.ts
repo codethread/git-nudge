@@ -1,5 +1,6 @@
 import {CODEGEN_DOCS} from "./scripts/constants"
 import tailwindcss from "@tailwindcss/vite"
+import {TanStackRouterVite} from "@tanstack/router-plugin/vite"
 import react from "@vitejs/plugin-react"
 import {readFileSync} from "node:fs"
 import os from "node:os"
@@ -19,6 +20,10 @@ export default defineConfig((opts) => {
 
 	return {
 		plugins: [
+			TanStackRouterVite({
+				routesDirectory: "./src/routes",
+				generatedRouteTree: "./src/routeTree.gen.ts",
+			}),
 			react(),
 			tailwindcss(),
 			watchAndRun([
@@ -30,7 +35,6 @@ export default defineConfig((opts) => {
 			]),
 			FullReload(["src/lib/fetcher/**/*"]),
 		],
-		base: "/git-nudge",
 		define: {
 			__HASH__: JSON.stringify(isProdLike ? process.env.BUILD_HASH : ""),
 			__FAKE_FETCHER__: !isProdLike,

@@ -7,12 +7,13 @@ import {
 	type IAppConfigStore,
 } from "@/hooks/config/useAppConfig"
 import {bridgeContext, createBridge, type IBridge} from "@/hooks/useBridge"
-import {PageManager} from "@/page/PageManager"
+import {createRootRoute, Outlet} from "@tanstack/react-router"
+import {TanStackRouterDevtools} from "@tanstack/react-router-devtools"
 import {useEffect, useState} from "react"
 
 const search = window.location.search
 
-export function App() {
+function RootComponent() {
 	const [bridge, setBridge] = useState<IBridge>()
 	const [config, setConfig] = useState<IAppConfigStore>()
 
@@ -42,10 +43,15 @@ export function App() {
 			<appConfigContext.Provider value={config}>
 				<ReactQueryProvider>
 					<Layout>
-						<PageManager />
+						<Outlet />
 					</Layout>
 				</ReactQueryProvider>
 			</appConfigContext.Provider>
+			<TanStackRouterDevtools />
 		</bridgeContext.Provider>
 	)
 }
+
+export const Route = createRootRoute({
+	component: RootComponent,
+})

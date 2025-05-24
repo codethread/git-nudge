@@ -1,6 +1,7 @@
 import {AppSidebar} from "@/components/AppSidebar"
 import {SidebarProvider, SidebarTrigger} from "@/components/ui/sidebar"
-import {useNavigation} from "@/hooks/useNav"
+import {useLocation, useMatch, useRouterState} from "@tanstack/react-router"
+import {titleCase} from "title-case"
 
 export default function Layout({children}: {children: React.ReactNode}) {
 	return (
@@ -15,12 +16,17 @@ export default function Layout({children}: {children: React.ReactNode}) {
 	)
 }
 
+const pageNames: Record<string, string> = {
+	"/": "/dashboard",
+}
+
 function Header() {
-	const {page} = useNavigation()
+	const currentPath = useLocation().pathname
+
 	return (
 		<header className="gap-sm flex items-center">
 			<SidebarTrigger />
-			<h2>{page}</h2>
+			<h2>{titleCase(pageNames[currentPath] ?? currentPath).slice(1)}</h2>
 		</header>
 	)
 }
