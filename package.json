@@ -13,7 +13,7 @@
 		"lint": "biome lint --write src scripts vite.config.ts",
 		"format": "prettier --write \"{src,scripts}/**/*.{ts,tsx}\"",
 		"---------------------build-------------------------": "---",
-		"build": "BUILD_HASH=$(git rev-parse --short HEAD) vite build --base=/git-nudge/",
+		"build": "BUILD_HASH=$(git rev-parse --short HEAD) vite build",
 		"preview": "pnpm build && vite preview",
 		"---------------------helpers-----------------------": "---",
 		"tauri": "tauri",

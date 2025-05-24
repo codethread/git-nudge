@@ -35,10 +35,10 @@ export default defineConfig((opts) => {
 			]),
 			FullReload(["src/lib/fetcher/**/*"]),
 		],
+		base: "/git-nudge",
 		define: {
 			__HASH__: JSON.stringify(isProdLike ? process.env.BUILD_HASH : ""),
 			__FAKE_FETCHER__: !isProdLike,
-
 			__IS_DEV__: !isProdLike,
 			__FAKE_NETRC__: JSON.stringify(!isProdLike ? getNetrc() : ""),
 		},
