@@ -1,3 +1,4 @@
+import {ErrorComp} from "@/components/ErrorBoundary"
 import Layout from "@/components/Layout"
 import {ReactQueryProvider} from "@/components/QueryProvider"
 import {LoaderPage} from "@/components/ui/Loader"
@@ -54,4 +55,5 @@ function RootComponent() {
 
 export const Route = createRootRoute({
 	component: RootComponent,
+	errorComponent: ErrorComp,
 })

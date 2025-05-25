@@ -19,3 +19,8 @@ src/playground.ts
 *.sln
 *.sw?
 .cursorignore
+
+# Playwright
+e2e/screenshots/
+e2e/reports/
+e2e/snapshots/ # this is temporary, but likely want to use docker if keeping this in CI

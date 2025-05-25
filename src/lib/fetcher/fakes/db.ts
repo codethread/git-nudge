@@ -1,4 +1,4 @@
-import type {User, UserCore, MergeRequest, Note} from "@/graphql/graphql"
+import type {User, UserCore, MergeRequest} from "@/graphql/graphql"
 import {fakeInt} from "@/lib/fetcher/fakes/fakers"
 import type {SlimLogger} from "@/lib/logger"
 import {assert, assertEq, repeat} from "@/lib/utils"
@@ -115,11 +115,11 @@ export class Db {
 		store.set("MergeRequest", id, mr)
 		this.logger.info("adding mr", id)
 
-		options.connection.forEach((mrConnection) => {
+		for (const mrConnection of options.connection) {
 			const connection = store.get(userRef, mrConnection) as Ref
 			this.logger.debug("merge connection", connection)
 			this.addListEdge(connection, store.get("MergeRequest", id) as Ref)
-		})
+		}
 	}
 
 	getUser(id: string) {

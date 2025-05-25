@@ -5,7 +5,8 @@ import {useAppConfigAction} from "@/hooks/config/useAppConfig"
 import {useBridge} from "@/hooks/useBridge"
 import {parseNetrc, type Netrc} from "@/lib/netrc"
 import {useQuery} from "@tanstack/react-query"
-import {useNavigate} from "@tanstack/react-router"
+import {useNavigate, Navigate} from "@tanstack/react-router"
+import {useEffect} from "react"
 import {match, P} from "ts-pattern"
 
 export default function Login() {
@@ -29,7 +30,7 @@ export default function Login() {
 		.with({tag: "missing"}, () => <NoNetrc onRetry={refetch} />)
 		.exhaustive()
 }
-const C = ({netrc}) => {
+const C = ({netrc}: {netrc: {domain: string; user: string; pass: string}}) => {
 	const {setLogin, setConfig} = useAppConfigAction()
 	useEffect(() => {
 		console.log("codethread", "update")
@@ -37,7 +38,7 @@ const C = ({netrc}) => {
 		setLogin({domain, token: pass, user})
 		// setConfig("fakeLab", false)
 	}, [netrc, setLogin])
-	return <Redirect page="welcome" />
+	return <Navigate to="/welcome" />
 }
 
 function NoNetrc({onRetry}: {onRetry: () => void}) {

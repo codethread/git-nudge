@@ -41,7 +41,9 @@ export async function createFetcher({token, domain, timeout}: RequestConfig) {
 
 		const {data, errors} = json
 		if (errors) {
-			errors.forEach((e: any) => console.error(e))
+			for (const e of errors) {
+				console.error(e)
+			}
 			throw new Error(errors.at(0)?.message)
 		}
 

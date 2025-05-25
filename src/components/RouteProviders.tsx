@@ -5,7 +5,7 @@ import {
 } from "@/hooks/config/useAppConfig"
 import {FetcherProvider} from "@/hooks/fetcher/FetcherProvider"
 import {useBridge} from "@/hooks/useBridge"
-import {Navigate, Redirect} from "@tanstack/react-router"
+import {Navigate, } from "@tanstack/react-router"
 import type {ReactNode} from "react"
 import {match} from "ts-pattern"
 

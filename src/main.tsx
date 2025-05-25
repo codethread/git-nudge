@@ -8,7 +8,10 @@ import React from "react"
 import ReactDOM from "react-dom/client"
 
 // Create a new router instance
-const router = createRouter({routeTree, basepath: "/git-nudge"})
+const router = createRouter({
+	routeTree,
+	basepath: "/git-nudge",
+})
 
 // Register the router instance for type safety
 declare module "@tanstack/react-router" {

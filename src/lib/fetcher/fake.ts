@@ -64,7 +64,9 @@ export async function createFetcher(
 			source,
 		})
 		if (errors) {
-			errors.forEach((e) => console.error(e))
+			for (const e of errors) {
+				console.error(e)
+			}
 			throw new Error(errors.at(0)?.message)
 		}
 
